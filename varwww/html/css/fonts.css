@@ -1,0 +1,33 @@
+/*
+ *  Custom fonts
+ */
+
+@font-face {
+    font-family: 'bitstream_vera_sans_monobold';
+    src: url('http://192.168.1.252/css/fonts/veramobd-webfont.woff2') format('woff2'),
+         url('http://192.168.1.252/css/fonts/veramobd-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'bitstream_vera_sans_monoBdOb';
+    src: url('http://192.168.1.252/css/fonts/veramobi-webfont.woff2') format('woff2'),
+         url('http://192.168.1.252/css/fonts/veramobi-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'bitstream_vera_sans_monoOb';
+    src: url('http://192.168.1.252/css/fonts/veramoit-webfont.woff2') format('woff2'),
+         url('http://192.168.1.252/css/fonts/veramoit-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'bitstream_vera_sans_mono';
+    src: url('http://192.168.1.252/css/fonts/veramono-webfont.woff2') format('woff2'),
+         url('http://192.168.1.252/css/fonts/veramono-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+

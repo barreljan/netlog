@@ -1,0 +1,130 @@
+/*
+ *  * Layout and base styling of Netlog
+ *   *
+ *    */
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 80px 100% 17px;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+    "header"
+    "results"
+    "footer";
+    border-width: 1px 1px 1px 1px;
+    border-spacing: 0px;
+    border-style: solid;
+    border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
+    border-collapse: collapse;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 70% 1fr 1fr;
+    grid-template-rows: 20px 1fr 1fr;
+    grid-auto-columns: 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-area: header;
+    border-width: 0px 0px 1px 0px;
+    border-spacing: 0px;
+    border-style: solid;
+    border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
+    border-collapse: collapse;
+    padding: 3px;
+}
+
+.header_title {
+    grid-area: 1 / 1 / 2 / 2;
+}
+
+.header_select {
+    grid-area: 1 / 2 / 2 / 4;
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+.header_nav {
+    grid-area: 1 / 3 / 2 / 4;
+    text-align: right;
+    font-size: 10px;
+}
+
+.header_paging {
+    grid-area: 2 / 2 / 4 / 3;
+    height: 100%;
+    font-weight: lighter;
+}
+
+.header_refresh {
+    grid-area: 2 / 3 / 3 / 4;
+    text-align: right;
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+.header_pagenr {
+    grid-area: 3 / 3 / 4 / 4;
+    text-align: right;
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+.header_device {
+    grid-area: 2 / 1 / 3 / 2;
+    width: 50%;
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+.header_search {
+    justify-self: end;
+    grid-area: 2 / 1 / 3 / 2;
+    width: 50%;
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+.header_sub {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-area: 3 / 1 / 4 / 2;
+}
+
+.header_lines {
+    grid-area: 1 / 1 / 2 / 3;
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+.header_filter {
+    grid-area: 1 / 2 / 2 / 3;
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+.header_blank {
+    grid-area: 1 / 3 / 2 / 4;
+}
+
+.results {
+    grid-area: results;
+    font-size: 10px;
+    font-weight: lighter;
+    border-width: 0px 0px 1px 0px;
+    border-spacing: 0px;
+    border-style: solid;
+    border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
+    border-collapse: collapse;
+}
+
+.footer {
+    grid-area: footer;
+    text-align: right;
+}
+
