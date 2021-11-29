@@ -1,20 +1,13 @@
 function checkEnter(e){
-  var characterCode
-
-  if(e && e.which){
-    e = e
-    characterCode = e.which
-  }
-  else {
-    e = event
+    let characterCode
     characterCode = e.keyCode
-  }
 
-  if(characterCode == 13){
-    document.forms[0].submit()
-    return false
-  }
-  else {
-    return true
-  }
+    if(characterCode === 13){
+        document.forms['settings'].submit();
+        return false
+    }
+    else {
+        return true
+    }
 }
+
