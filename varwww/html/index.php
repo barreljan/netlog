@@ -139,18 +139,9 @@ if (isset($_POST['type'])) {
             unset($_SESSION['showpage']);
         }
     }
-    // Compare refresh
-    if (isset($_POST['stoprefresh'])) {
-        $_SESSION['refresh'] = "off";
-    } else {
-        if (isset($_SESSION['refresh']) && isset($_POST['refresh'])) {
-            if ($_SESSION['refresh'] != $_POST['refresh']) {
-                $_SESSION['refresh'] = $_POST['refresh'];
-            }
-        } else {
-            $_SESSION['refresh'] = "off";
-        }
-    }
+    // Compare,set or stop refresh
+    $_SESSION['refresh'] = isset($_POST['stoprefresh']) ? 'off' : $_POST['refresh'];
+
     // Default back to page 1 after changes and detect page shift
     if (isset($_SESSION['showpage'])) {
         if ((isset($_POST['jumptopage'])) && ($_POST['jumptopage'] != "") && is_numeric($_POST['jumptopage'])) {
@@ -202,15 +193,10 @@ if (isset($_POST['type'])) {
 /*
  * Set defaults, common vars and figuring out existing settings from user
  */
-if (!isset($_SESSION['showlines'])) {
-    $_SESSION['showlines'] = $showlines_default;
-}
-if (!isset($_SESSION['showpage'])) {
-    $_SESSION['showpage'] = 1;
-}
-if (!isset($_SESSION['filter_LVL'])) {
-    $_SESSION['filter_LVL'] = "none";
-}
+$_SESSION['showlines'] = !isset($_SESSION['showlines']) ? $showlines_default : $_SESSION['showlines'];
+$_SESSION['showpage'] = !isset($_SESSION['showpage']) ? 1 : $_SESSION['showpage'];
+$_SESSION['filter_LVL'] = !isset($_SESSION['filter_LVL']) ? "none" : $_SESSION['filter_LVL'];
+
 if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
     switch ($_SESSION['filter_LVL']) {
         case "debug":
@@ -242,25 +228,19 @@ if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             $lvl_filter = "'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
     }
 }
+
 $ref = "";
 if ((isset($_SESSION['refresh'])) && ($_SESSION['refresh'] != "off")) {
     $ref = "    <meta http-equiv=\"refresh\" content=\"{$_SESSION['refresh']}\">";
 }
+
 if (isset($_SESSION['type'])) {
-    if (($_SESSION['type'] == "All") || ($_SESSION['type'] == "Unnamed")) {
-        $hosttypeselect = "%";
-    } else {
-        $hosttypeselect = $_SESSION['type'];
-    }
+    $hosttypeselect = ($_SESSION['type'] == "All" || $_SESSION['type'] == "Unnamed") ? "%" : $_SESSION['type'];
 } else {
     $_SESSION['type'] = $default_view;
     $hosttypeselect = $default_view;
 }
-if (isset($_SESSION['search'])) {
-    $searchstring = '%' . $_SESSION['search'] . '%';
-} else {
-    $searchstring = '%';
-}
+$searchstring = isset($_SESSION['search']) ? "%" . $_SESSION['search'] . "%" : "%";
 
 
 /*
@@ -310,7 +290,8 @@ while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
         foreach ($hostname as $hostselectip => $hostselectname) {
             if ($hostselectip == $ip) {
                 $addtolist = "skip";
-            }
+                break;
+            } 
         }
         if ($addtolist == "add") {
             $iplist[] = $ip;
@@ -319,6 +300,7 @@ while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
         foreach ($hostname as $hostselectip => $hostselectname) {
             if ($hostselectip == $ip) {
                 $iplist[] = $ip;
+                break;
             }
         }
     }
@@ -585,7 +567,7 @@ if (!$empty_iplist) {
                     echo "\n"; ?>
                     </select><?php
                 } else {
-                    echo "                    off";
+                    echo "                    <input type=\"hidden\" value=\"off\" name=\"refresh\">off";
                 }
                 echo "\n"; ?>
             </div>

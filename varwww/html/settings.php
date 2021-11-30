@@ -50,13 +50,21 @@ function gen_rows_hosts($input)
     foreach ($input as $ip) {
         $hostname = $_SESSION['config']["hostname-$ip"] ?? '';
         $hosttype = $_SESSION['config']["hosttype-$ip"] ?? '';
-        $lograte_checked = ($_SESSION['config']["lograte-$ip"] == 1 ? ' checked' : '');
-        $unused_disable = ($_SESSION['viewitem'] == "Unused" ? ' disabled' : ''); ?>
+        if (isset($_SESSION['config']["lograte-$ip"])) {
+            if ($_SESSION['config']["lograte-$ip"] == 1) {
+                $lograte_checked = ' checked';
+            } else {
+                $lograte_checked = '';
+            }
+        } else {
+            $lograte_checked = 'disabled';
+        }
+        $unused_disable = $_SESSION['viewitem'] == "Unused" ? ' disabled' : ''; ?>
         <tr>
             <td><?php echo $ip; ?></td>
-            <td style="width: 200px"><?php echo $hostname; ?></td>
+            <td><?php echo $hostname; ?></td>
             <td>
-                <input type="text" name="hostname-<?php echo $ip; ?>" title="A decent name"
+                <input id="settings_input_hostname" type="text" name="hostname-<?php echo $ip; ?>" title="A decent name"
                        value=<?php echo "\"" . $hostname . "\"" . $unused_disable; ?>>
             </td>
             <td>
@@ -71,13 +79,13 @@ function gen_rows_hosts($input)
                     echo "\n"; ?>
                 </select>
             </td>
-            <td style="text-align: center; width: 60px">
+            <td id="settings_checkbox">
                 <input type="hidden" value=0 name="lograte-<?php echo $ip; ?>">
                 <input type="checkbox" title="Disable lograte"
                        name=<?php echo "\"lograte-$ip\"" . $lograte_checked; ?>>
             </td>
             <?php if ($_SESSION['viewitem'] == "Unused") { ?>
-                <td style="text-align: center; width: 60px">
+                <td id="settings_checkbox">
                 <input type="hidden" value=0 name="delete-<?php echo $ip; ?>">
                 <input type="checkbox" title="Delete this entry" name="delete-<?php echo $ip; ?>">
                 </td><?php
@@ -130,20 +138,14 @@ if (isset($_POST)) {
         foreach ($_POST as $key => $value) {
             $seskey = str_replace('_', '.', $key);
 
-            // Existing host
             if (isset($_SESSION['config']["$seskey"])) {
+                // Existing host
                 if ($_POST["$key"] != $_SESSION['config']["$seskey"]) {
-                    //FIXME: '$readykey' not used?
                     $readkey = explode('-', $seskey);
                     $column = $readkey['0'];
                     $hostip = $readkey['1'];
 
-                    if ($column == "delete") {
-                        // Delete must be on top. Other updates will be futile
-                        $query = "DELETE
-                                    FROM netlogconfig.hostnames
-                                   WHERE hostip = '$hostip'";
-                    } elseif ($column == "hosttype") {
+                    if ($column == "hosttype") {
                         $query = "UPDATE netlogconfig.hostnames
                                      SET $column = '" . $_SESSION['typelist'][$value] . "'
                                    WHERE hostip = '$hostip'";
@@ -169,8 +171,8 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-                // New host
             } elseif (preg_match('/hostname-/', $key)) {
+                // New host
                 if ($value != "") {
                     $readkey = explode('-', $key);
                     $hostip = str_replace('_', '.', $readkey['1']);
@@ -181,6 +183,18 @@ if (isset($_POST)) {
                                    VALUES ('$hostip', ?, '$hosttype')";
                     $insertquery = $db_link->prepare($query);
                     $insertquery->bind_param('s', $value);
+                    $insertquery->execute();
+
+                    $_SESSION['updated'] = 'true';
+                }
+            } elseif (preg_match('/delete-/', $key)) {
+                // Deletion of (unused) configured host
+                if ($value == "on") {
+                    $lograte = 1;
+                    $query = "DELETE
+                                FROM netlogconfig.hostnames
+                               WHERE hostip = '$hostip'";
+                    $insertquery = $db_link->prepare($query);
                     $insertquery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -283,6 +297,29 @@ while ($types = $typeresult->fetch_assoc()) {
 }
 $typeresult->free();
 
+if ($_SESSION['view'] == "scavenger") {
+    // Get the scavenger keywords
+    $query = "SELECT * 
+                FROM netlogconfig.logscavenger
+                ORDER BY id";
+    $kwquery = $db_link->prepare($query);
+    $kwquery->execute();
+    $kwresults = $kwquery->get_result();
+
+    // Get the email groups and put it in a list
+    $query = "SELECT * 
+                FROM netlogconfig.emailgroup
+               WHERE active = 1
+               ORDER BY id";
+    $emailgrquery = $db_link->prepare($query);
+    $emailgrquery->execute();
+    $emailgrpresults = $emailgrquery->get_result();
+    while ($emailgrp = $emailgrpresults->fetch_assoc()) {
+        $_SESSION['emailgrp'][$emailgrp['groupname']] = $emailgrp['id'];
+    }
+    $emailgrpresults->free();
+}
+
 
 /*
  * Build the page
@@ -324,11 +361,11 @@ var_dump($_GET);
                     Toggle view:
                     <input type="radio" name="toggleview" value="All" title="All items"
                            onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "All") {
-                        echo "checked";
+                        echo " checked";
                     } ?>>All
                     <input type="radio" name="toggleview" value="Unnamed" title="Unnamed items"
                            onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "Unnamed") {
-                        echo "checked";
+                        echo " checked";
                     } ?>>Unnamed
                     <input type="radio" name="toggleview" value="Unused"
                            title="Unused items (no log table exists for these)"
@@ -349,32 +386,98 @@ var_dump($_GET);
             unset($_SESSION['updated']) ?>
         </div>
     </div>
-    <div class="results"><?php
-        if ((isset($_SESSION['view'])) && ($_SESSION['view'] == "contacts")) {
-            ?>
-            Contacts dingen
-            <?php
-        } elseif ((isset($_SESSION['view'])) && ($_SESSION['view'] == "scavenger")) {
-            ?>
-            Scavenger dingen
-            <?php
-        } else {
-            echo "\n"; ?>
-        <form name="config" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-            <table class="none">
+    <div class="results">
+        <form name="config" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>"><?php
+            echo "\n";
+            if ((isset($_SESSION['view'])) && ($_SESSION['view'] == "scavenger")) {
+                ?>
+                <table class="none">
                 <tr>
-                    <th>Log client hostnames:</th>
+                    <th id="settings">Netalert Scavenger:</th>
                 </tr>
                 <tr>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <th>IP</th>
-                    <th>Current Name</th>
-                    <th>New Name</th>
-                    <th>Type</th>
-                    <th>Lograte</th><?php if ($_SESSION['viewitem'] == "Unused") {
-                        echo "\n                    <th>Delete?</th>\n";
+                    <th id="settings">Keyword</th>
+                    <th id="settings_hostname">Email group</th>
+                    <th id="settings_checkbox">Active</th>
+                    <th id="settings_checkbox">Delete?</th>
+                </tr>
+                <?php
+                while ($keyword = $kwresults->fetch_assoc()) {
+                    $kwid = $keyword['id']; ?>
+                    <tr>
+                        <td>
+                            <?php echo $keyword["keyword"]; ?>
+                        </td>
+                        <td>
+                            <select title="Select the email group"
+                                    name=<?php echo "\"keywordgrp-$kwid\""; ?>> <?php
+                                foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
+                                    $group_selected = ($keyword['emailgroupid'] == $groupid ? ' selected' : '');
+                                    echo "\n"; ?>
+                                    <option value=
+                                    <?php echo "\"" . $groupname . "\"" . $group_selected; ?>><?php echo $groupname; ?></option><?php
+                                }
+                                echo "\n"; ?>
+                            </select>
+                        </td>
+                        <td id="settings_checkbox">
+                            <input type="hidden" value=0 name="scavactive-<?php echo $kwid; ?>">
+                            <input type="checkbox" title="Disable scavenging"
+                                   name=<?php echo "\"scavactive-$kwid\""; ?>>
+                        </td>
+                        <td id="settings_checkbox">
+                            <input type="hidden" value=0 name="delete-<?php echo $kwid; ?>">
+                            <input type="checkbox" title="Delete this entry" name="delete-<?php echo $kwid; ?>">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Enter a new keyword:<br/>
+                            <input title="Enter a new keyword to scavenge" type="text" name="new_keyword">
+                        </td>
+                    </tr>
+                <?php }
+                ?>
+                <tr>
+                    <td>
+                        &nbsp;
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button type="submit">submit
+                        </button>
+                    </td>
+                </tr>
+                </table><?php
+            } elseif ((isset($_SESSION['view'])) && ($_SESSION['view'] == "contacts")) {
+                ?>
+                Contacts dingen
+                <?php
+            } else {
+                ?>
+                <table class="none">
+                <tr>
+                    <th id="settings">Log client hostnames:</th>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <th id="settings">IP</th>
+                    <th id="settings_hostname">Current Name</th>
+                    <th id="settings_hostname">New Name</th>
+                    <th id="settings_hosttype">Type</th>
+                    <th id="settings_checkbox">Lograte</th><?php if ($_SESSION['viewitem'] == "Unused") {
+                        echo "\n                    <th id=\"settings_checkbox\">Delete?</th>\n";
                     } else {
                         echo "\n";
                     } ?>
@@ -396,12 +499,15 @@ var_dump($_GET);
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <button type="submit">submit</button>
+                        <button type="submit"<?php if (($_SESSION['viewitem'] == "Unnamed") && (sizeof($unnamed_hosts) == 0)) {
+                            echo " disabled";
+                        } ?>>submit
+                        </button>
                     </td>
                 </tr>
-            </table>
-            </form><?php
-        } ?>
+                </table><?php
+            } ?>
+        </form>
     </div>
     <div class="footer">
         <a href="#">Return to top</a>
