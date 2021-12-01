@@ -162,6 +162,8 @@ if (isset($_POST)) {
                         $query = "UPDATE netlogconfig.hostnames
                                      SET lograte = $lograte
                                    WHERE hostip = '$hostip'";
+                    } else {
+                        continue;
                     }
                     $updatequery = $db_link->prepare($query);
                     if ($column == "hostname") {
@@ -214,8 +216,11 @@ if (isset($_POST)) {
 /*
  * Fetch data from DB and populate vars/arrays
  */
-unset($query, $result);
+// Clean, should do nothing, but hey
 unset($_SESSION['config']);
+unset($_SESSION['typelist']);
+unset($_SESSION['emailgrp']);
+unset($query, $hostnameresult, $tablesresult, $typeresult, $kwresults, $emailgrpresults);
 
 // Set blanks (if no entry in DB exists)
 $current_hosts = array();
@@ -284,7 +289,6 @@ foreach ($current_hosts as $ip) {
 }
 
 // Make an array for the selection box
-unset($_SESSION['typelist']);
 $query = "SELECT id, name
             FROM netlogconfig.hosttype
            ORDER BY name";
@@ -297,28 +301,37 @@ while ($types = $typeresult->fetch_assoc()) {
 }
 $typeresult->free();
 
-if ($_SESSION['view'] == "scavenger") {
-    // Get the scavenger keywords
-    $query = "SELECT * 
-                FROM netlogconfig.logscavenger
-                ORDER BY id";
-    $kwquery = $db_link->prepare($query);
-    $kwquery->execute();
-    $kwresults = $kwquery->get_result();
-
-    // Get the email groups and put it in a list
-    $query = "SELECT * 
-                FROM netlogconfig.emailgroup
-               WHERE active = 1
-               ORDER BY id";
-    $emailgrquery = $db_link->prepare($query);
-    $emailgrquery->execute();
-    $emailgrpresults = $emailgrquery->get_result();
-    while ($emailgrp = $emailgrpresults->fetch_assoc()) {
-        $_SESSION['emailgrp'][$emailgrp['groupname']] = $emailgrp['id'];
-    }
-    $emailgrpresults->free();
+// Get the scavenger keywords
+$query = "SELECT logscavenger.id, keyword, logscavenger.active, emailgroupid, groupname
+            FROM netlogconfig.logscavenger
+            LEFT JOIN netlogconfig.emailgroup
+                 ON (netlogconfig.logscavenger.emailgroupid=netlogconfig.emailgroup.id)
+           ORDER BY netlogconfig.logscavenger.id";
+$kwquery = $db_link->prepare($query);
+$kwquery->execute();
+$kwresults = $kwquery->get_result();
+$keywords = array();
+while ($kw = $kwresults->fetch_assoc()) {
+    $kwid = $kw['id'];
+    $kwgrp = $kw['groupname'];
+    $_SESSION['config']["keywordgrp-$kwid"] = $kwgrp;
+    $keywords[$kwid] = $kw['keyword'];
 }
+$kwresults->free();
+
+// Get the email groups and put it in a list
+$query = "SELECT *
+            FROM netlogconfig.emailgroup
+           WHERE active = 1
+           ORDER BY id";
+$emailgrquery = $db_link->prepare($query);
+$emailgrquery->execute();
+$emailgrpresults = $emailgrquery->get_result();
+while ($emailgrp = $emailgrpresults->fetch_assoc()) {
+    $groupname = $emailgrp['groupname'];
+    $_SESSION["emailgrp"]["$groupname"] = $emailgrp['id'];
+}
+$emailgrpresults->free();
 
 
 /*
@@ -405,17 +418,16 @@ var_dump($_GET);
                     <th id="settings_checkbox">Delete?</th>
                 </tr>
                 <?php
-                while ($keyword = $kwresults->fetch_assoc()) {
-                    $kwid = $keyword['id']; ?>
+                foreach ($keywords as $kwid => $keyword) { ?>
                     <tr>
                         <td>
-                            <?php echo $keyword["keyword"]; ?>
+                            <?php echo $keyword; ?>
                         </td>
                         <td>
                             <select title="Select the email group"
                                     name=<?php echo "\"keywordgrp-$kwid\""; ?>> <?php
                                 foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
-                                    $group_selected = ($keyword['emailgroupid'] == $groupid ? ' selected' : '');
+                                    $group_selected = ($_SESSION['config']["keywordgrp-$kwid"] == $groupname ? ' selected' : '');
                                     echo "\n"; ?>
                                     <option value=
                                     <?php echo "\"" . $groupname . "\"" . $group_selected; ?>><?php echo $groupname; ?></option><?php
@@ -430,13 +442,11 @@ var_dump($_GET);
                         </td>
                         <td id="settings_checkbox">
                             <input type="hidden" value=0 name="delete-<?php echo $kwid; ?>">
-                            <input type="checkbox" title="Delete this entry" name="delete-<?php echo $kwid; ?>">
+                            <input type="checkbox" title="Delete this entry" name="scavdelete-<?php echo $kwid; ?>">
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            &nbsp;
-                        </td>
+                        <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <td>
@@ -447,9 +457,7 @@ var_dump($_GET);
                 <?php }
                 ?>
                 <tr>
-                    <td>
-                        &nbsp;
-                    </td>
+                    <td>&nbsp;</td>
                 </tr>
                 <tr>
                     <td colspan="2">
