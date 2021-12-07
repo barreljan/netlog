@@ -173,7 +173,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/hostname-/', $key)) {
+            } elseif (preg_match('/^hostname-/', $key)) {
                 // New host
                 if ($value != "") {
                     $readkey = explode('-', $key);
@@ -189,9 +189,11 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/delete-/', $key)) {
+            } elseif (preg_match('/^delete-/', $key)) {
                 // Deletion of (unused) configured host
                 if ($value == "on") {
+                    $readkey = explode('-', $key);
+                    $hostip = str_replace('_', '.', $readkey['1']);
                     $lograte = 1;
                     $query = "DELETE
                                 FROM netlogconfig.hostnames
