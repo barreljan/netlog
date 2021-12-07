@@ -410,9 +410,10 @@ if (!is_numeric($_SESSION['showpage'])) {
     $timecountquery = $db_link->prepare($query);
     $timecountquery->bind_param('s', $searchstring);
     $timecountquery->execute();
-    $timecountedresult = $timecountquery->fetch_assoc();
-    if ($timecountedresult) {
-        $timelinecount = $timecountedresult['cnt'];
+    $timecountedresult = $timecountquery->get_result();
+    $timecounted = $timecountedresult->fetch_assoc();
+    if ($timecounted) {
+        $timelinecount = $timecounted['cnt'];
         $timecountedresult->free();
     } else {
         $timelinecount = 0;
