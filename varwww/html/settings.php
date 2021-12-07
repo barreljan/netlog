@@ -441,7 +441,7 @@ var_dump($_GET);
                                    name=<?php echo "\"scavactive-$kwid\""; ?>>
                         </td>
                         <td id="settings_checkbox">
-                            <input type="hidden" value=0 name="delete-<?php echo $kwid; ?>">
+                            <input type="hidden" value=0 name="scavdelete-<?php echo $kwid; ?>">
                             <input type="checkbox" title="Delete this entry" name="scavdelete-<?php echo $kwid; ?>">
                         </td>
                     </tr>

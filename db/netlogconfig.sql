@@ -25,6 +25,26 @@ INSERT INTO `emailgroup` VALUES (1,'Default','johndoe@domain.tld',1);
 UNLOCK TABLES;
 
 --
+-- Table structure for table `hosttype`
+--
+
+DROP TABLE IF EXISTS `hosttype`;
+CREATE TABLE `hosttype` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `name` (`name`(1000))
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `hosttype`
+--
+
+LOCK TABLES `hosttype` WRITE;
+INSERT INTO `hosttype` VALUES (1,'Unnamed'),(2,'Servers');
+UNLOCK TABLES;
+
+--
 -- Table structure for table `hostnames`
 --
 
@@ -47,26 +67,6 @@ CREATE TABLE `hostnames` (
 
 LOCK TABLES `hostnames` WRITE;
 INSERT INTO `hostnames` VALUES (1,'127.0.0.1','localhost',2,1);
-UNLOCK TABLES;
-
---
--- Table structure for table `hosttype`
---
-
-DROP TABLE IF EXISTS `hosttype`;
-CREATE TABLE `hosttype` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` text NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `name` (`name`(1000))
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `hosttype`
---
-
-LOCK TABLES `hosttype` WRITE;
-INSERT INTO `hosttype` VALUES (1,'Unnamed'),(2,'Servers');
 UNLOCK TABLES;
 
 --
@@ -141,6 +141,6 @@ CREATE TABLE `logscavenger` (
 --
 
 LOCK TABLES `logscavenger` WRITE;
-INSERT INTO `logscavenger` (id, keyword, active, emailgroup) VALUES (1,'reboot',1,,1);
+INSERT INTO `logscavenger` (id, keyword, active, emailgroup) VALUES (1,'reboot',1,1);
 UNLOCK TABLES;
 
