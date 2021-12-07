@@ -48,10 +48,10 @@ if (!$db_link->select_db($db_NAME)) {
 function gen_rows_hosts($input)
 {
     foreach ($input as $ip) {
-        $hostname = $_SESSION['config']["hostname-$ip"] ?? '';
-        $hosttype = $_SESSION['config']["hosttype-$ip"] ?? '';
-        if (isset($_SESSION['config']["lograte-$ip"])) {
-            if ($_SESSION['config']["lograte-$ip"] == 1) {
+        $hostname = $_SESSION['names_config']["hostname-$ip"] ?? '';
+        $hosttype = $_SESSION['names_config']["hosttype-$ip"] ?? '';
+        if (isset($_SESSION['names_config']["lograte-$ip"])) {
+            if ($_SESSION['names_config']["lograte-$ip"] == 1) {
                 $lograte_checked = ' checked';
             } else {
                 $lograte_checked = '';
@@ -138,9 +138,9 @@ if (isset($_POST)) {
         foreach ($_POST as $key => $value) {
             $seskey = str_replace('_', '.', $key);
 
-            if (isset($_SESSION['config']["$seskey"])) {
+            if (isset($_SESSION['names_config']["$seskey"])) {
                 // Existing host
-                if ($_POST["$key"] != $_SESSION['config']["$seskey"]) {
+                if ($_POST["$key"] != $_SESSION['names_config']["$seskey"]) {
                     $readkey = explode('-', $seskey);
                     $column = $readkey['0'];
                     $hostip = $readkey['1'];
@@ -219,7 +219,8 @@ if (isset($_POST)) {
  * Fetch data from DB and populate vars/arrays
  */
 // Clean, should do nothing, but hey
-unset($_SESSION['config']);
+unset($_SESSION['names_config']);
+unset($_SESSION['scav_config']);
 unset($_SESSION['typelist']);
 unset($_SESSION['emailgrp']);
 unset($query, $hostnameresult, $tablesresult, $typeresult, $kwresults, $emailgrpresults);
@@ -245,14 +246,10 @@ while ($dbhostnames = $hostnameresult->fetch_assoc()) {
     $current_hosts[] = $hostnameip;
 
     // If we already have an entry, don't overwrite it (in case of multiple records...)
-    if (!isset($_SESSION['config']["hostname-$hostnameip"])) {
-        $_SESSION['config']["hostname-$hostnameip"] = $dbhostnames['hostname'];
-        $_SESSION['config']["hosttype-$hostnameip"] = $dbhostnames['name'];
-        if (isset($dbhostnames['lograte'])) {
-            $_SESSION['config']["lograte-$hostnameip"] = $dbhostnames['lograte'];
-        } else {
-            $_SESSION['config']["lograte-$hostnameip"] = 0;
-        }
+    if (!isset($_SESSION['names_config']["hostname-$hostnameip"])) {
+        $_SESSION['names_config']["hostname-$hostnameip"] = $dbhostnames['hostname'];
+        $_SESSION['names_config']["hosttype-$hostnameip"] = $dbhostnames['name'];
+        $_SESSION['names_config']["lograte-$hostnameip"] = $dbhostnames['lograte'];
     }
 }
 $hostnameresult->free();
@@ -285,7 +282,7 @@ $current_hosts = array_unique(array_merge($current_hosts, $logging_hosts));
 $unused_hosts = array_diff($current_hosts, $logging_hosts);
 
 foreach ($current_hosts as $ip) {
-    if (!isset($_SESSION['config']["hostname-$ip"])) {
+    if (!isset($_SESSION['names_config']["hostname-$ip"])) {
         $unnamed_hosts[] = $ip;
     }
 }
@@ -316,7 +313,7 @@ $keywords = array();
 while ($kw = $kwresults->fetch_assoc()) {
     $kwid = $kw['id'];
     $kwgrp = $kw['groupname'];
-    $_SESSION['config']["keywordgrp-$kwid"] = $kwgrp;
+    $_SESSION['scav_config']["keywordgrp-$kwid"] = $kwgrp;
     $keywords[$kwid] = $kw['keyword'];
 }
 $kwresults->free();
@@ -429,7 +426,7 @@ var_dump($_GET);
                             <select title="Select the email group"
                                     name=<?php echo "\"keywordgrp-$kwid\""; ?>> <?php
                                 foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
-                                    $group_selected = ($_SESSION['config']["keywordgrp-$kwid"] == $groupname ? ' selected' : '');
+                                    $group_selected = ($_SESSION['scav_config']["keywordgrp-$kwid"] == $groupname ? ' selected' : '');
                                     echo "\n"; ?>
                                     <option value=
                                     <?php echo "\"" . $groupname . "\"" . $group_selected; ?>><?php echo $groupname; ?></option><?php
