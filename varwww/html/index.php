@@ -183,7 +183,7 @@ if (isset($_POST['type'])) {
                     }
                 }
             }
-        } elseif ((preg_match('/[0-9][0-9]:[0-9][0-9]/', $_POST['jumptopage'])) || (preg_match('/[0-9]{4}-[0-9]{2}-[0-9{2}] [0-9]{2}:[0-9]{2}/', $_POST['jumptopage']))) {
+        } elseif ((preg_match('/[0-9][0-9]:[0-9][0-9]/', $_POST['jumptopage'])) || (preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}/', $_POST['jumptopage']))) {
             $_SESSION['showpage'] = $_POST['jumptopage'];
         }
     }
@@ -257,7 +257,7 @@ $hostnameresult = $hostnamequery->get_result();
 
 while ($dbhostnames = $hostnameresult->fetch_assoc()) {
     $hostnameip = $dbhostnames['hostip'];
-    $hostname["$hostnameip"] = $dbhostnames['hostname'];
+    $hostname[$hostnameip] = $dbhostnames['hostname'];
 }
 $hostnameresult->free();
 
@@ -279,9 +279,9 @@ while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
         continue;
     }
     if (preg_match('/\d{4}_\d{2}_\d{2}/', $thishost['1'])) {
-        $hostdaylist["$ip"][] = $thishost['1'];
+        $hostdaylist[$ip][] = $thishost['1'];
     } else {
-        $hostmonthlist["$ip"][] = $thishost['1'];
+        $hostmonthlist[$ip][] = $thishost['1'];
     }
     if ($_SESSION['type'] == "All") {
         $iplist[] = $ip;
@@ -291,7 +291,7 @@ while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
             if ($hostselectip == $ip) {
                 $addtolist = "skip";
                 break;
-            } 
+            }
         }
         if ($addtolist == "add") {
             $iplist[] = $ip;
@@ -548,8 +548,7 @@ if (!$empty_iplist) {
             <div class="header_refresh">
                 <a href="<?php echo $_SERVER['PHP_SELF']; ?>" onClick="document.location.href = this.href;return false"
                    title="click to refresh the page">
-                    Refresh:
-                </a><?php
+                    Refresh</a>: <?php
                 echo "\n";
                 if ((isset($_SESSION['refresh'])) && ($_SESSION['refresh'] != 'off')) {
                     ?>
@@ -598,8 +597,8 @@ if (!$empty_iplist) {
                             echo " SELECTED";
                         }
                         echo ">";
-                        if (isset($hostname["$ip"])) {
-                            echo $hostname["$ip"];
+                        if (isset($hostname[$ip])) {
+                            echo $hostname[$ip];
                         } else {
                             echo $ip;
                         }
@@ -628,7 +627,7 @@ if (!$empty_iplist) {
                     echo ">none</option>";
                     foreach ($log_levels as $log_level) {
                         echo "\n                      <option value=\"" . $log_level . "\" class=\"" . $log_level . "\"";
-                        if ($_SESSION['filter_LVL'] == "$log_level") {
+                        if ($_SESSION['filter_LVL'] == $log_level) {
                             echo " SELECTED";
                         }
                         echo ">" . $log_level . "</option>";
@@ -637,17 +636,13 @@ if (!$empty_iplist) {
                 </select>
             </div>
             <div class="header_search">
-                Search:
                 <input title="Filter based on your input" name="search" type="text" onKeyPress="checkEnter(event)"
                        value="<?php if (isset($_SESSION['search'])) {
                            echo $_SESSION['search'];
-                       } ?>" autofocus>
-                <button type="submit">Go</button>
+                       } ?>" autofocus placeholder="Search" style="width: 80%;">
+                <br><span class="search_button"><button style="width: 50px;" type="submit">Go</button><span>
             </div>
-            <div class="header_sub">
-                <div class="header_lines">Total lines: <?php echo $linecount ?></div>
-                <div class="header_blank"></div>
-            </div>
+            <div class="header_lines">Total lines: <?php echo $linecount ?></div>
         </div>
         <div class="results">
 
@@ -660,13 +655,13 @@ if (!$empty_iplist) {
                             case "TIME":
                             case "DAY":
                             case "PROG":
-                                echo "                    <th style=\"width: 100px;\">" . $column . "</th>";
+                                echo "                    <th style=\"min-width: 100px;\">" . $column . "</th>";
                                 break;
                             case "MSG":
                                 echo "                    <th>" . $column . "</th>";
                                 break;
                             default:
-                                echo "                    <th style=\"width: 50px;\">" . $column . "</th>";
+                                echo "                    <th style=\"min-width: 50px;\">" . $column . "</th>";
                         }
                         echo "\n";
                     } ?>
@@ -684,7 +679,7 @@ if (!$empty_iplist) {
                         foreach ($columns as $column) {
                             if ($column == "LVL") {
                                 echo "<td ";
-                                switch ($logline["$column"]) {
+                                switch ($logline[$column]) {
                                     case "debug":
                                         echo "class=\"debug\">";
                                         break;
@@ -715,9 +710,9 @@ if (!$empty_iplist) {
                                     default:
                                         echo ">";
                                 }
-                                echo $logline["$column"] . "</td>";
+                                echo $logline[$column] . "</td>";
                             } elseif ($linetag == "0") {
-                                echo "<td>" . $logline["$column"] . "</td>";
+                                echo "<td>" . $logline[$column] . "</td>";
                             } else {
                                 echo "<td class=\"grey\">" . $logline["$column"] . "</td>";
                             }

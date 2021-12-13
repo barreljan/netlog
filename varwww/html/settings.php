@@ -136,11 +136,12 @@ if (isset($_POST)) {
 
     try {
         foreach ($_POST as $key => $value) {
+            // Revert what PHP is doing to POST
             $seskey = str_replace('_', '.', $key);
 
-            if (isset($_SESSION['names_config']["$seskey"])) {
+            if (isset($_SESSION['names_config'][$seskey])) {
                 // Existing host
-                if ($_POST["$key"] != $_SESSION['names_config']["$seskey"]) {
+                if ($_POST[$key] != $_SESSION['names_config'][$seskey]) {
                     $readkey = explode('-', $seskey);
                     $column = $readkey['0'];
                     $hostip = $readkey['1'];
@@ -167,7 +168,7 @@ if (isset($_POST)) {
                     }
                     $updatequery = $db_link->prepare($query);
                     if ($column == "hostname") {
-                        $updatequery->bind_param('s', $_POST["$key"]);
+                        $updatequery->bind_param('s', $_POST[$key]);
                     }
                     $updatequery->execute();
 
@@ -176,8 +177,8 @@ if (isset($_POST)) {
             } elseif (preg_match('/^hostname-/', $key)) {
                 // New host
                 if ($value != "") {
-                    $readkey = explode('-', $key);
-                    $hostip = str_replace('_', '.', $readkey['1']);
+                    $readkey = explode('-', $seskey);
+                    $hostip = $readkey['1'];
                     $hosttypekey = 'hosttype-' . $readkey['1'];
                     $hosttype = $_SESSION['typelist'][$_POST[$hosttypekey]];
 
@@ -192,9 +193,8 @@ if (isset($_POST)) {
             } elseif (preg_match('/^delete-/', $key)) {
                 // Deletion of (unused) configured host
                 if ($value == "on") {
-                    $readkey = explode('-', $key);
-                    $hostip = str_replace('_', '.', $readkey['1']);
-                    $lograte = 1;
+                    $readkey = explode('-', $seskey);
+                    $hostip = $readkey['1'];
                     $query = "DELETE
                                 FROM netlogconfig.hostnames
                                WHERE hostip = '$hostip'";
@@ -203,6 +203,9 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
+            } elseif (isset($_SESSION['scav_config'][$seskey])) {
+                // Scavenger existing keyword
+                echo "";
             }
         }
         /* Set autocommit on (and commit) */
@@ -328,7 +331,7 @@ $emailgrquery->execute();
 $emailgrpresults = $emailgrquery->get_result();
 while ($emailgrp = $emailgrpresults->fetch_assoc()) {
     $groupname = $emailgrp['groupname'];
-    $_SESSION["emailgrp"]["$groupname"] = $emailgrp['id'];
+    $_SESSION["emailgrp"][$groupname] = $emailgrp['id'];
 }
 $emailgrpresults->free();
 
@@ -358,7 +361,7 @@ var_dump($_GET);
     <div class="header">
         <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
         <div class="header_nav">netalert | lograte | <a href="index.php" title="Back to logging">logging</a></div>
-        <div class="header_device">
+        <div class="header_settings">
             <form name="view" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                 Category:
                 <button type="submit" name="names">Names/Types</button>
@@ -366,7 +369,7 @@ var_dump($_GET);
                 <button type="submit" name="contacts">Contacts</button>
             </form>
         </div>
-        <div class="header_search">
+        <div class="header_toggle">
             <form name="toggleview" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>"><?php echo "\n";
                 if ((isset($_SESSION['view'])) && ($_SESSION['view'] == "names")) {
                     ?>

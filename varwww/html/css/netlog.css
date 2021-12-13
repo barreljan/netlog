@@ -1,5 +1,7 @@
-@import "fonts.css";
-
+/*
+ * Styling of Netlog
+ *
+ */
 
 body {
     color: #000000;
@@ -315,7 +317,12 @@ table.none td {
     text-align: center;
 }
 
-.header {
+.header_title {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.header_nav {
     font-size: 11px;
     font-weight: bold;
 }
@@ -355,6 +362,11 @@ h3 {
     top: 20px;
     left: 90px;
     background-color: #ffffcc;
+}
+
+.search_button {
+    display: inline-block;
+    padding: 4px;
 }
 
 #succMsg {
