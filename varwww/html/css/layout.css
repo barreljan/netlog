@@ -18,6 +18,7 @@
     border-style: solid;
     border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
     border-collapse: collapse;
+    font-weight: 200;
 }
 
 .header {
@@ -36,72 +37,64 @@
 
 .header_title {
     grid-area: 1 / 1 / 2 / 2;
+    font-weight: 400;
 }
 
 .header_nav {
     grid-area: 1 / 2 / 2 / 4;
+    font-weight: 400;
     text-align: right;
 }
 
 .header_select {
     grid-area: 2 / 2 / 2 / 2;
-    font-weight: lighter;
 }
 
 .header_paging {
     grid-area: 3 / 2 / 4 / 3;
     height: 100%;
-    font-weight: lighter;
 }
 
 .header_refresh {
     grid-area: 3 / 3 / 3 / 4;
     text-align: right;
-    font-weight: lighter;
 }
 
 .header_pagenr {
     grid-area: 4 / 3 / 4 / 4;
     text-align: right;
-    font-weight: lighter;
 }
 
 .header_device {
     grid-area: 3 / 1 / 3 / 2;
     justify-self: left;
     min-width: 750px;
-    font-weight: lighter;
 }
 
 .header_settings {
     grid-area: 3 / 1 / 3 / 2;
     min-width: 600px;
-    font-weight: lighter;
 }
 
 .header_search {
     grid-area: 3 / 1 / 4 / 2;
     justify-self: right;
     width: 200px;
-    font-weight: lighter;
     text-align: center;
 }
 
 .header_toggle {
     grid-area: 3 / 1 / 4 / 2;
     justify-self: end;
-    font-weight: lighter;
     text-align: center;
 }
 
 .header_lines {
     grid-area: 4 / 1 / 4 / 1;
-    font-weight: lighter;
 }
 
 .header_filter {
     grid-area: 1 / 2 / 2 / 3;
-    font-weight: lighter;
 }
 
 .header_blank {
@@ -110,7 +103,6 @@
 
 .results {
     grid-area: results;
-    font-weight: lighter;
     border-width: 0 0 1px 0;
     border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
 }
