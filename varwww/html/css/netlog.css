@@ -274,7 +274,8 @@ table.none {
     border-spacing: 0;
     border-style: none;
     border-collapse: collapse;
-    word-wrap: normal;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 table.none th {
