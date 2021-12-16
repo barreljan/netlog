@@ -177,8 +177,8 @@ if (isset($_POST)) {
             } elseif (preg_match('/^hostname-/', $key)) {
                 // New host
                 if ($value != "") {
-                    $readkey = explode('-', $seskey);
-                    $hostip = $readkey['1'];
+                    $readkey = explode('-',$key);
+                    $hostip = str_replace('_','.',$readkey['1']);
                     $hosttypekey = 'hosttype-' . $readkey['1'];
                     $hosttype = $_SESSION['typelist'][$_POST[$hosttypekey]];
 
