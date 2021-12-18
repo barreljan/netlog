@@ -144,3 +144,21 @@ LOCK TABLES `logscavenger` WRITE;
 INSERT INTO `logscavenger` (id, keyword, active, emailgroup) VALUES (1,'reboot',1,1);
 UNLOCK TABLES;
 
+--
+-- Table structure for table `global`
+--
+
+DROP TABLE IF EXISTS `global`;
+CREATE TABLE `global` (
+  `setting` varchar(40) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`setting`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `global`
+--
+
+LOCK TABLES `global` WRITE;
+INSERT INTO `global` VALUES ('cron_mail_from','no-reply@domain.tld'),('cron_mail_rcpt','johndoe@domain.tld'),('default_view','2'),('lograte_graph_height','275'),('lograte_graph_width','750'),('lograte_history','30,60,120,240,480,1440,2880,4320,10080'),('log_fields','HOST,FAC,PRIO,LVL,TAG,DAY,TIME,PROG,MSG'),('log_levels','debug,info,notice,warning,err,crit,alert,emergency,panic'),('netalert_fields','DAY,TIME,LVL,MSG,PROG'),('netalert_show_lines','20'),('netalert_time_threshold','3600'),('refresh','off,1,2,5,10'),('scavenger_history','300'),('show_lines','50,100,250,500,1000'),('show_lines_default','50');
+UNLOCK TABLES;
