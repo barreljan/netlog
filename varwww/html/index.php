@@ -27,20 +27,10 @@ if (!isset($_SESSION)) {
     die;
 }
 
-
 /*
  * Create and check database link
  */
-$db_link = new mysqli($db_HOST, $db_USER, $db_PASS, $db_NAME);
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    die;
-}
-if (!$db_link->select_db($db_NAME)) {
-    printf("Unable to select DB: %s\n", mysqli_connect_error());
-    die;
-}
-
+$db_link = connect_db();
 
 /*
  * Some functions
@@ -246,11 +236,11 @@ $searchstring = isset($_SESSION['search']) ? "%" . $_SESSION['search'] . "%" : "
 /*
  * Fetch data from DB and populate vars/arrays
  */
-$query = "SELECT hostip, hostname, hosttype
-            FROM netlogconfig.hostnames
-                 LEFT JOIN netlogconfig.hosttype
-                 ON (netlogconfig.hostnames.hosttype=netlogconfig.hosttype.id)
-           WHERE name like '$hosttypeselect'";
+$query = "SELECT `hostip`, `hostname`, `hosttype`
+            FROM `{$database['DB_CONF']}`.`hostnames`
+                 LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
+                 ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
+           WHERE `name` LIKE '$hosttypeselect'";
 $hostnamequery = $db_link->prepare($query);
 $hostnamequery->execute();
 $hostnameresult = $hostnamequery->get_result();
@@ -261,9 +251,9 @@ while ($dbhostnames = $hostnameresult->fetch_assoc()) {
 }
 $hostnameresult->free();
 
-$query = "SELECT TABLE_NAME AS tblnm
-            FROM INFORMATION_SCHEMA.TABLES
-           WHERE TABLE_SCHEMA = '$db_NAME'";
+$query = "SELECT `TABLE_NAME` AS `tblnm`
+            FROM `INFORMATION_SCHEMA`.`TABLES`
+           WHERE `TABLE_SCHEMA` = '{$database['DB']}'";
 $tablesquery = $db_link->prepare($query);
 $tablesquery->execute();
 $tablesresult = $tablesquery->get_result();
@@ -328,9 +318,9 @@ foreach ($iplist as $ip) {
 }
 
 // Get list of types
-$typequery = $db_link->prepare("SELECT id, name
-                                  FROM netlogconfig.hosttype
-                                 ORDER BY name");
+$typequery = $db_link->prepare("SELECT `id`, `name`
+                                  FROM `{$database['DB_CONF']}`.`hosttype`
+                                 ORDER BY `name`");
 $typequery->execute();
 $typeresult = $typequery->get_result();
 
@@ -358,12 +348,12 @@ if (!$empty_iplist) {
     $host = str_replace('.', '_', $_SESSION['showip']);
     $tablename = "HST_" . $host . "_DATE_" . $_SESSION['day'];
     if ($searchstring == '%') {
-        $query = "SELECT COUNT(*) AS cnt
-                    FROM $tablename";
+        $query = "SELECT COUNT(*) AS `cnt`
+                    FROM `$tablename`";
     } else {
-        $query = "SELECT COUNT(*) AS cnt
-                    FROM $tablename
-                   WHERE MSG LIKE ?";
+        $query = "SELECT COUNT(*) AS `cnt`
+                    FROM `$tablename`
+                   WHERE `MSG` LIKE ?";
     }
     if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
         if ($searchstring == '%') {
@@ -391,17 +381,17 @@ if (!$empty_iplist) {
 
 if (!is_numeric($_SESSION['showpage'])) {
     if (preg_match('/^[0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
-        $query = "SELECT COUNT(*) AS cnt
-                    FROM $tablename
-                   WHERE MSG LIKE ? ";
+        $query = "SELECT COUNT(*) AS `cnt`
+                    FROM `$tablename`
+                   WHERE `MSG` LIKE ? ";
         if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             $query .= "AND LVL IN (" . $lvl_filter . ") ";
         }
         $query .= "AND TIME <= '" . $_SESSION['showpage'] . "'";
     } elseif (preg_match('/20[0-1][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
-        $query = "SELECT COUNT(*) AS cnt
-                    FROM $tablename
-                   WHERE MSG LIKE ? ";
+        $query = "SELECT COUNT(*) AS `cnt`
+                    FROM `$tablename`
+                   WHERE `MSG` LIKE ? ";
         if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             $query .= "AND LVL IN (" . $lvl_filter . ") ";
         }
@@ -427,7 +417,10 @@ $offset = ($_SESSION['showpage'] - 1) * $_SESSION['showlines'];
 
 // Get the actual lines for the selected host
 if (!$empty_iplist) {
-    $query = "SELECT $log_fields FROM $tablename WHERE MSG LIKE ? ";
+    $fields = implode(', ', $log_fields);
+    $query = "SELECT $fields
+                FROM `$tablename`
+               WHERE `MSG` LIKE ? ";
     if (isset ($lvl_filter)) {
         $query .= "AND LVL IN (" . $lvl_filter . ") ";
     }
@@ -648,8 +641,7 @@ if (!$empty_iplist) {
 
             <table class="none" style="width: 100%">
                 <tr><?php echo "\n";
-                    $columns = explode(', ', $log_fields);
-                    foreach ($columns as $column) {
+                    foreach ($log_fields as $column) {
                         switch ($column) {
                             case "HOST":
                             case "TIME":
@@ -676,7 +668,7 @@ if (!$empty_iplist) {
                             $linetag = "0";
                         }
                         echo "<tr>\n                  ";
-                        foreach ($columns as $column) {
+                        foreach ($log_fields as $column) {
                             if ($column == "LVL") {
                                 echo "<td ";
                                 switch ($logline[$column]) {
@@ -733,4 +725,3 @@ if (!$empty_iplist) {
 
 </html>
 <?php $db_link->close() ?>
-
