@@ -1,67 +1,115 @@
 <?php
 // ###### NetLog ######
 
-// Versioning
-
+// Versioning etc
 $VERSION = "v3.0";
 $NAME = "Syslog-ng to MySQL parser";
 $AUTHOR = "bartjan@pc-mania.nl";
+$PROJECT = "https://github.com/barreljan/netlog";
 
-// MySQL DB Information
+// MySQL Database Information
+$database = array();
+$database['DB'] = "syslog";
+$database['DB_CONF'] = "netlogconfig";
+$database['USER'] = "netlog";
+$database['PASS'] = "WonFaznu$(s#3nCi";
+$database['HOST'] = "127.0.0.1";
 
-$db_NAME = "syslog";
-$db_NAMECONF = "netlogconfig";
-$db_USER = "syslog";
-$db_PASS = "WonFaznu$(s#3nCi";
-$db_HOST = "127.0.0.1";
+function connect_db()
+{
+    /*
+     * Create and check database link
+     */
+    global $database;
+
+    $db_link = new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
+    if (mysqli_connect_errno()) {
+        printf("Connect failed: %s\n", mysqli_connect_error());
+        die;
+    }
+    if (!$db_link->select_db($database['DB'])) {
+        printf("Unable to select DB: %s\n", mysqli_connect_error());
+        die;
+    }
+    // All ok?
+    return $db_link;
+}
+$db_link = connect_db();
+
+$config = array();
+
+// Populate the global config settings
+$query = "SELECT `setting`, `value`
+            FROM `{$database['DB_CONF']}`.`global`";
+$globalquery = $db_link->prepare($query);
+$globalquery->execute();
+$globalresults = $globalquery->get_result();
+while ($global = $globalresults->fetch_assoc()) {
+    $config['global'][$global['setting']] = $global['value'];
+}
+
+// Get the default view
+$query = "SELECT `setting`, `hosttype`.`name` AS `value`
+            FROM `{$database['DB_CONF']}`.`global`
+           INNER JOIN `{$database['DB_CONF']}`.`hosttype`
+                 ON (`{$database['DB_CONF']}`.`global`.`value`=`{$database['DB_CONF']}`.`hosttype`.`id`)
+           WHERE `setting` = 'default_view'";
+$default_viewquery = $db_link->prepare($query);
+$default_viewquery->execute();
+$default_viewresults = $default_viewquery->get_result();
+while ($global = $default_viewresults->fetch_assoc()) {
+    $config['global'][$global['setting']] = $global['value'];
+}
 
 // Mail
-
-$mail_from = "no-reply@domain.tld";
-$mail_rcpt = "john_doe@domain.tld";
+$mail_from = $config['global']['mail_from'];
+$mail_rcpt = $config['global']['mail_rcpt'];
 
 // Debug
-
 $debug = True;
-if ($debug == True) {
+/** @noinspection PhpConditionAlreadyCheckedInspection */
+if ($debug) {
     error_reporting(-1);
     ini_set('display_errors', 'On');
 }
 
 // Displayed fields
-$log_fields = "HOST, FAC, PRIO, LVL, TAG, DAY, TIME, PROG, MSG";
-$log_levels = array('debug', 'info', 'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic');
+$log_fields = explode(',', $config['global']['log_fields']);
+$log_levels = explode(',', $config['global']['log_levels']);
 
 // Default category to start viewing
-$default_view = "Servers";
+$default_view = $config['global']['default_view'];
 
 // Ammount of lines we can show per page and the default to start off with
-$showlines = array('50', '100', '250', '500', '1000');
-$showlines_default = "50";
+$showlines = explode(',', $config['global']['show_lines']);
+$showlines_default = $config['global']['show_lines_default'];
 
 // Page refresh options
-$refresh = array('off', 1, 2, 5, 10);
+$refresh = explode(',', $config['global']['refresh']);
 
 // Lograte variables
-$height = 275;
-$width = 750;
-$graphhistory = array('30', '60', '120', '240', '480', '1440', '2880', '4320', '10080');
+$height = $config['global']['lograte_graph_height'];
+$width = $config['global']['lograte_graph_width'];
+$graphhistory = explode(',', $config['global']['lograte_history']);
 
-// ###### Net alert variables ######
+
+// ###### Netalert variables ######
 
 // Change displayed fields and even order of fields
 // Do mind this page has blank space after TIME column
-$alert_fields = "DAY, TIME, LVL, MSG, PROG";
+$alert_fields = explode(',', $config['global']['netalert_fields']);
+
 // Control ammount of history lines shown
-$showlines_alert = "20";
-// Threshold in seconds after we grey out lines
-$timethresh = "3600";
+$showlines_alert = $config['global']['netalert_show_lines'];
+
+// Threshold in seconds after we normalize lines
+$timethresh = $config['global']['netalert_time_threshold'];
 
 
 // ###### NetLog Scavenger ######
 
 // Set the searching in seconds
-$history = 300;
+$history = $config['global']['scavenger_history'];
 
 // Others, do not touch
 $datum = (time() - $history);
@@ -73,6 +121,3 @@ $GLOBALS['scavver'] = "v0.93, 25 March 2016";
 
 // Scav Config
 $GLOBALS['scavconfver'] = "v0.8, 02 April 2016";
-
-?>
-

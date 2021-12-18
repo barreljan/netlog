@@ -27,20 +27,10 @@ if (!isset($_SESSION)) {
     die;
 }
 
-
 /*
  * Create and check database link
  */
-$db_link = new mysqli($db_HOST, $db_USER, $db_PASS, $db_NAME);
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    die;
-}
-if (!$db_link->select_db($db_NAME)) {
-    printf("Unable to select DB: %s\n", mysqli_connect_error());
-    die;
-}
-
+$db_link = connect_db();
 
 /*
  * Some functions
@@ -177,8 +167,8 @@ if (isset($_POST)) {
             } elseif (preg_match('/^hostname-/', $key)) {
                 // New host
                 if ($value != "") {
-                    $readkey = explode('-',$key);
-                    $hostip = str_replace('_','.',$readkey['1']);
+                    $readkey = explode('-', $key);
+                    $hostip = str_replace('_', '.', $readkey['1']);
                     $hosttypekey = 'hosttype-' . $readkey['1'];
                     $hosttype = $_SESSION['typelist'][$_POST[$hosttypekey]];
 
@@ -259,7 +249,7 @@ $hostnameresult->free();
 
 $query = "SELECT TABLE_NAME AS tblnm
             FROM INFORMATION_SCHEMA.TABLES
-           WHERE TABLE_SCHEMA = '$db_NAME'";
+           WHERE TABLE_SCHEMA = '{$database['DB']}'";
 $tablesquery = $db_link->prepare($query);
 $tablesquery->execute();
 $tablesresult = $tablesquery->get_result();
@@ -527,4 +517,3 @@ var_dump($_GET);
 </body>
 </html>
 <?php $db_link->close() ?>
-

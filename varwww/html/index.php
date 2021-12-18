@@ -27,20 +27,10 @@ if (!isset($_SESSION)) {
     die;
 }
 
-
 /*
  * Create and check database link
  */
-$db_link = new mysqli($db_HOST, $db_USER, $db_PASS, $db_NAME);
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    die;
-}
-if (!$db_link->select_db($db_NAME)) {
-    printf("Unable to select DB: %s\n", mysqli_connect_error());
-    die;
-}
-
+$db_link = connect_db();
 
 /*
  * Some functions
@@ -263,7 +253,7 @@ $hostnameresult->free();
 
 $query = "SELECT TABLE_NAME AS tblnm
             FROM INFORMATION_SCHEMA.TABLES
-           WHERE TABLE_SCHEMA = '$db_NAME'";
+           WHERE TABLE_SCHEMA = '{$database['DB']}'";
 $tablesquery = $db_link->prepare($query);
 $tablesquery->execute();
 $tablesresult = $tablesquery->get_result();
@@ -427,7 +417,8 @@ $offset = ($_SESSION['showpage'] - 1) * $_SESSION['showlines'];
 
 // Get the actual lines for the selected host
 if (!$empty_iplist) {
-    $query = "SELECT $log_fields FROM $tablename WHERE MSG LIKE ? ";
+    $fields = implode(', ', $log_fields);
+    $query = "SELECT $fields FROM $tablename WHERE MSG LIKE ? ";
     if (isset ($lvl_filter)) {
         $query .= "AND LVL IN (" . $lvl_filter . ") ";
     }
@@ -648,8 +639,7 @@ if (!$empty_iplist) {
 
             <table class="none" style="width: 100%">
                 <tr><?php echo "\n";
-                    $columns = explode(', ', $log_fields);
-                    foreach ($columns as $column) {
+                    foreach ($log_fields as $column) {
                         switch ($column) {
                             case "HOST":
                             case "TIME":
@@ -676,7 +666,7 @@ if (!$empty_iplist) {
                             $linetag = "0";
                         }
                         echo "<tr>\n                  ";
-                        foreach ($columns as $column) {
+                        foreach ($log_fields as $column) {
                             if ($column == "LVL") {
                                 echo "<td ";
                                 switch ($logline[$column]) {
@@ -733,4 +723,3 @@ if (!$empty_iplist) {
 
 </html>
 <?php $db_link->close() ?>
-
