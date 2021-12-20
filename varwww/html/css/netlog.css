@@ -12,15 +12,15 @@ body {
 
 select {
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
-    font-size: 9px;
+    font-size: 10px;
 }
 
 select.lpp {
-    font-size: 8px;
+    font-size: 10px;
 }
 
 span.lpp {
-    font-size: 8px;
+    font-size: 10px;
 }
 
 button {
@@ -30,52 +30,7 @@ button {
 
 option {
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
-    font-size: 8px;
-}
-
-option.debug {
-    font-size: 9px;
-    background-color: #22CC00;
-}
-
-option.info {
-    font-size: 9px;
-    background-color: #66EE00;
-}
-
-option.notice {
-    font-size: 9px;
-    background-color: #BBFF22;
-}
-
-option.warning {
-    font-size: 9px;
-    background-color: #FFFF33;
-}
-
-option.err {
-    font-size: 9px;
-    background-color: #FFCC00;
-}
-
-option.crit {
-    font-size: 9px;
-    background-color: #FF9922;
-}
-
-option.alert {
-    font-size: 9px;
-    background-color: #FF6600;
-}
-
-option.emergency {
-    font-size: 9px;
-    background-color: #FF4400;
-}
-
-option.panic {
-    font-size: 9px;
-    background-color: #CC1100;
+    font-size: 10px;
 }
 
 input {
@@ -104,6 +59,29 @@ input[type="radio"] {
     vertical-align: middle;
 }
 
+a {
+    color: #000000;
+    text-decoration: none;
+    /*font-weight:bold;*/
+}
+
+a:hover {
+    color: #000000;
+    text-decoration: underline;
+    /*font-weight:bold;*/
+}
+
+a:active {
+    color: #000000;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+h3 {
+    text-decoration: none;
+    font-size: 110%;
+}
+
 td {
 }
 
@@ -117,42 +95,6 @@ td.darkgrey {
 
 td.header {
     background-color: #CCCCCC;
-}
-
-td.debug {
-    background-color: #22CC00;
-}
-
-td.info {
-    background-color: #66EE00;
-}
-
-td.notice {
-    background-color: #BBFF22;
-}
-
-td.warning {
-    background-color: #FFFF33;
-}
-
-td.error {
-    background-color: #FFCC00;
-}
-
-td.critical {
-    background-color: #FF9922;
-}
-
-td.alert {
-    background-color: #FF6600;
-}
-
-td.emergency {
-    background-color: #FF4400;
-}
-
-td.panic {
-    background-color: #CC1100;
 }
 
 td.netup {
@@ -297,6 +239,42 @@ table.none td {
     border-radius: 0 0 0 0;
 }
 
+.debug {
+    background-color: #22CC00;
+}
+
+.info {
+    background-color: #66EE00;
+}
+
+.notice {
+    background-color: #BBFF22;
+}
+
+.warning {
+    background-color: #FFFF33;
+}
+
+.err {
+    background-color: #FFCC00;
+}
+
+.crit {
+    background-color: #FF9922;
+}
+
+.alert {
+    background-color: #FF6600;
+}
+
+.emergency {
+    background-color: #FF4400;
+}
+
+.panic {
+    background-color: #CC1100;
+}
+
 #settings {
     width: 132px;
 }
@@ -326,29 +304,6 @@ table.none td {
 .header_nav {
     font-size: 11px;
     font-weight: bold;
-}
-
-a {
-    color: #000000;
-    text-decoration: none;
-    /*font-weight:bold;*/
-}
-
-a:hover {
-    color: #000000;
-    text-decoration: underline;
-    /*font-weight:bold;*/
-}
-
-a:active {
-    color: #000000;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-h3 {
-    text-decoration: none;
-    font-size: 110%;
 }
 
 .tip {
