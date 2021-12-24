@@ -1,14 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <?php
-
-// Include the basics ;)
-include("config/config.php");
-
-//session_start();
+require("config/config.php");
 
 ?>
 <html lang="en">
 <head>
+    <title>Netalert</title>
 	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
 	<link rel="stylesheet" type="text/css" href="/css/netlog.css">
 	<meta http-equiv="refresh" content="15">
@@ -19,23 +16,19 @@ include("config/config.php");
 // Create and check database link
 $today = date('Y_m_d');
 
-$db_link = mysqli_connect($db_HOST, $db_USER, $db_PASS, $db_NAME);
-if (!$db_link) {
-	die('Could not connect to MySQL server: ' . mysqli_error($db_link));
-}
+/*
+ * Create and check database link
+ */
+$db_link = connect_db();
 
-if (!mysqli_select_db($db_link,$db_NAME)) {
-	die('Unable to select DB: ' . mysqli_error($db_link));
-}
+$tablename = 'HST_127_0_0_1_DATE_' . $today;
 
-$tablename = 'HST_10_80_0_176_DATE_' . $today;
-
-$query = "SELECT $alert_fields FROM $tablename ORDER BY id DESC LIMIT $showlines_alert";
+$fiels = implode(', ', $alert_fields);
+$query = "SELECT $fields FROM $tablename ORDER BY id DESC LIMIT $showlines_alert";
 $result = mysqli_query($db_link,$query);
 
-echo "<table class=\"outline\" width=\"100%\">\n\t<tr><td>\n\t\t<table class=\"none\" width=\"100%\">\n\t\t\t<tr>"; 
-$columns = explode(', ',$alert_fields);
-foreach( $columns as $column ) {
+echo "<table class=\"outline\" width=\"100%\">\n\t<tr><td>\n\t\t<table class=\"none\" width=\"100%\">\n\t\t\t<tr>";
+foreach($alert_fields as $column) {
 	switch ( $column ) {
 		case "TIME":
 			echo "<th class=\"aqua\">".$column."</th>";
@@ -188,7 +181,7 @@ if($result) {
 			}
 		} else {
 			echo "<tr>";
-			foreach($columns as $column) {
+			foreach($alert_fields as $column) {
 				if ( $column == "TIME" ) {
 					if ($linetag == "0") {
 						echo "<td class=\"white\">".$loglines["$column"]."</td>";
