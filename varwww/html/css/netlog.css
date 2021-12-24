@@ -4,7 +4,7 @@
  */
 
 body {
-    color: #000000;
+    color: #444444;
     font-size: 10px;
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
     background-color: #FFFFFF;
@@ -60,19 +60,19 @@ input[type="radio"] {
 }
 
 a {
-    color: #000000;
+    color: #444444;
     text-decoration: none;
     /*font-weight:bold;*/
 }
 
 a:hover {
-    color: #000000;
+    color: #444444;
     text-decoration: underline;
     /*font-weight:bold;*/
 }
 
 a:active {
-    color: #000000;
+    color: #444444;
     text-decoration: none;
     font-weight: bold;
 }
