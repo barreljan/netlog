@@ -336,7 +336,7 @@ if (!$empty_iplist) {
         }
     }
     if (isset($hostmonthlist[$_SESSION['showip']])) {
-        foreach ($hostdaylist[$_SESSION['showip']] as $day) {
+        foreach ($hostmonthlist[$_SESSION['showip']] as $day) {
             if (!isset($_SESSION['day'])) {
                 $_SESSION['day'] = $day;
                 break;
