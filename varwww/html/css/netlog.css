@@ -60,19 +60,19 @@ input[type="radio"] {
 }
 
 a {
-    color: #000000;
+    color: #444444;
     text-decoration: none;
     /*font-weight:bold;*/
 }
 
 a:hover {
-    color: #000000;
+    color: #444444;
     text-decoration: underline;
     /*font-weight:bold;*/
 }
 
 a:active {
-    color: #000000;
+    color: #444444;
     text-decoration: none;
     font-weight: bold;
 }

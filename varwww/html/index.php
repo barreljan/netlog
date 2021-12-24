@@ -685,10 +685,10 @@ if (!$empty_iplist) {
                                         echo "class=\"warning\">";
                                         break;
                                     case "err":
-                                        echo "class=\"error\">";
+                                        echo "class=\"err\">";
                                         break;
                                     case "crit":
-                                        echo "class=\"critical\">";
+                                        echo "class=\"crit\">";
                                         break;
                                     case "alert":
                                         echo "class=\"alert\">";
