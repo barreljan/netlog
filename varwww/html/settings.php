@@ -228,7 +228,7 @@ if (isset($_POST)) {
                     $_SESSION['updated'] = 'true';
                 }
             } elseif (preg_match('/^scavdelete/', $key)) {
-                // Deletion of (unused) configured host
+                // Deletion of configured keyword
                 if ($value == "on") {
                     $kwid = $readkey[1];
                     $query = "DELETE
