@@ -70,13 +70,13 @@ function gen_rows_hosts($input)
                 </select>
             </td>
             <td id="settings_checkbox">
-                <input type="hidden" value=0 name="lograte-<?php echo $ip; ?>">
+                <input type="hidden" value="off" name="lograte-<?php echo $ip; ?>">
                 <input type="checkbox" title="Disable lograte"
                        name=<?php echo "\"lograte-$ip\"" . $lograte_checked; ?>>
             </td>
             <?php if ($_SESSION['viewitem'] == "Unused") { ?>
                 <td id="settings_checkbox">
-                <input type="hidden" value=0 name="delete-<?php echo $ip; ?>">
+                <input type="hidden" value="off" name="delete-<?php echo $ip; ?>">
                 <input type="checkbox" title="Delete this entry" name="delete-<?php echo $ip; ?>">
                 </td><?php
             }
@@ -128,29 +128,29 @@ if (isset($_POST)) {
         foreach ($_POST as $key => $value) {
             // Revert what PHP is doing to POST
             $seskey = str_replace('_', '.', $key);
+            $readkey = explode('-', $key);
+            $readseskey = explode('-', $seskey);
 
             if (isset($_SESSION['names_config'][$seskey])) {
                 // Existing host
                 if ($_POST[$key] != $_SESSION['names_config'][$seskey]) {
-                    $readkey = explode('-', $seskey);
-                    $column = $readkey['0'];
-                    $hostip = $readkey['1'];
+                    $column = $readseskey[0];
+                    $hostip = $readseskey[1];
 
                     if ($column == "hosttype") {
-                        $query = "UPDATE netlogconfig.hostnames
+                        $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET $column = '" . $_SESSION['typelist'][$value] . "'
                                    WHERE hostip = '$hostip'";
                     } elseif ($column == "hostname") {
-                        $query = "UPDATE netlogconfig.hostnames
+                        $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET $column = ?
                                    WHERE hostip = '$hostip'";
                     } elseif ($column == "lograte") {
+                        $lograte = 0;
                         if ($value == "on") {
                             $lograte = 1;
-                        } else {
-                            $lograte = 0;
                         }
-                        $query = "UPDATE netlogconfig.hostnames
+                        $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET lograte = $lograte
                                    WHERE hostip = '$hostip'";
                     } else {
@@ -167,12 +167,11 @@ if (isset($_POST)) {
             } elseif (preg_match('/^hostname-/', $key)) {
                 // New host
                 if ($value != "") {
-                    $readkey = explode('-', $key);
-                    $hostip = str_replace('_', '.', $readkey['1']);
-                    $hosttypekey = 'hosttype-' . $readkey['1'];
+                    $hostip = str_replace('_', '.', $readkey[1]);
+                    $hosttypekey = 'hosttype-' . $readkey[1];
                     $hosttype = $_SESSION['typelist'][$_POST[$hosttypekey]];
 
-                    $query = "INSERT INTO netlogconfig.hostnames (hostip, hostname, hosttype)
+                    $query = "INSERT INTO `{$database['DB_CONF']}`.`hostnames` (`hostip`, `hostname`, `hosttype`)
                                    VALUES ('$hostip', ?, '$hosttype')";
                     $insertquery = $db_link->prepare($query);
                     $insertquery->bind_param('s', $value);
@@ -183,19 +182,63 @@ if (isset($_POST)) {
             } elseif (preg_match('/^delete-/', $key)) {
                 // Deletion of (unused) configured host
                 if ($value == "on") {
-                    $readkey = explode('-', $seskey);
-                    $hostip = $readkey['1'];
+                    $hostip = $readseskey[1];
                     $query = "DELETE
-                                FROM netlogconfig.hostnames
-                               WHERE hostip = '$hostip'";
+                                FROM `{$database['DB_CONF']}`.`hostnames`
+                               WHERE `hostip` = '$hostip'";
+                    $deletequery = $db_link->prepare($query);
+                    $deletequery->execute();
+
+                    $_SESSION['updated'] = 'true';
+                }
+            } elseif (isset($_SESSION['scav_config'][$key])) {
+                // Scavenger existing keyword
+                if ($_POST[$key] != $_SESSION['scav_config'][$key]) {
+                    // Change detected ";
+                    $kwid = $readkey[1];
+                    $column = str_replace('scav', '', $readkey[0]);
+                    if ($column == "emailgroupid") {
+                        $grpid = $_SESSION['emailgrp'][$_POST[$key]];
+                        $query = "UPDATE `{$database['DB_CONF']}`.`logscavenger`
+                                     SET `emailgroupid` = $grpid
+                                   WHERE `id` = $kwid";
+                    } elseif ($column == "active") {
+                        $scavenger = 0;
+                        if ($value == "on") {
+                            $scavenger = 1;
+                        }
+                        $query = "UPDATE `{$database['DB_CONF']}`.`logscavenger`
+                                     SET `active` = $scavenger
+                                   WHERE `id` = $kwid";
+                    }
+                    $updatequery = $db_link->prepare($query);
+                    $updatequery->execute();
+
+                    $_SESSION['updated'] = 'true';
+                }
+            } elseif (preg_match('/^new_keyword/', $key)) {
+                // New keyword
+                if ($value != "") {
+                    $query = "INSERT INTO `{$database['DB_CONF']}`.`logscavenger` (keyword, active, emailgroupid)
+                                   VALUES (?, 1, 1)";
                     $insertquery = $db_link->prepare($query);
+                    $insertquery->bind_param('s', $value);
                     $insertquery->execute();
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (isset($_SESSION['scav_config'][$seskey])) {
-                // Scavenger existing keyword
-                echo "";
+            } elseif (preg_match('/^scavdelete/', $key)) {
+                // Deletion of (unused) configured host
+                if ($value == "on") {
+                    $kwid = $readkey[1];
+                    $query = "DELETE
+                                FROM `{$database['DB_CONF']}`.`logscavenger`
+                               WHERE `id` = $kwid";
+                    $deletequery = $db_link->prepare($query);
+                    $deletequery->execute();
+
+                    $_SESSION['updated'] = 'true';
+                }
             }
         }
         /* Set autocommit on (and commit) */
@@ -225,9 +268,9 @@ $unused_hosts = array();
 $unnamed_hosts = array();
 
 $query = "SELECT `hostip`, `hostname`, `name`, `lograte`
-            FROM netlogconfig.hostnames
-            LEFT JOIN netlogconfig.hosttype
-                 ON (netlogconfig.hostnames.hosttype=netlogconfig.hosttype.id)
+            FROM `{$database['DB_CONF']}`.`hostnames`
+            LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
+                 ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
            ORDER BY `hostip`, `hosttype` DESC";
 $hostnamequery = $db_link->prepare($query);
 $hostnamequery->execute();
@@ -256,13 +299,13 @@ $tablesresult = $tablesquery->get_result();
 
 // Throw all ip parts of tables in an array
 while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
-    if (strpos($lines['0'], "template") !== false || strpos($lines['0'], "UHO") !== false || strpos($lines['0'], "criteria") !== false) {
+    if (strpos($lines[0], "template") !== false || strpos($lines[0], "UHO") !== false || strpos($lines[0], "criteria") !== false) {
         continue;
     }
-    $thishost = explode('_DATE_', $lines['0']);
-    $host = trim($thishost['0'], 'HST_');
+    $thishost = explode('_DATE_', $lines[0]);
+    $host = trim($thishost[0], 'HST_');
     $ip = str_replace('_', '.', $host);
-    $hostdaylist["$ip"][] = $thishost['1'];
+    $hostdaylist[$ip][] = $thishost[1];
     if (!in_array($ip, $logging_hosts)) {
         $logging_hosts[] = $ip;
     }
@@ -281,9 +324,9 @@ foreach ($current_hosts as $ip) {
 }
 
 // Make an array for the selection box
-$query = "SELECT id, name
-            FROM netlogconfig.hosttype
-           ORDER BY name";
+$query = "SELECT `id`, `name`
+            FROM `{$database['DB_CONF']}`.`hosttype`
+           ORDER BY `name`";
 $typequery = $db_link->prepare($query);
 $typequery->execute();
 $typeresult = $typequery->get_result();
@@ -294,11 +337,11 @@ while ($types = $typeresult->fetch_assoc()) {
 $typeresult->free();
 
 // Get the scavenger keywords
-$query = "SELECT logscavenger.id, keyword, logscavenger.active, emailgroupid, groupname
-            FROM netlogconfig.logscavenger
-            LEFT JOIN netlogconfig.emailgroup
-                 ON (netlogconfig.logscavenger.emailgroupid=netlogconfig.emailgroup.id)
-           ORDER BY netlogconfig.logscavenger.id";
+$query = "SELECT `logscavenger`.`id`, `keyword`, `logscavenger`.`active`, `emailgroupid`, `groupname`
+            FROM `{$database['DB_CONF']}`.`logscavenger`
+            LEFT JOIN `{$database['DB_CONF']}`.`emailgroup`
+                 ON (`{$database['DB_CONF']}`.`logscavenger`.`emailgroupid`=`{$database['DB_CONF']}`.`emailgroup`.`id`)
+           ORDER BY `{$database['DB_CONF']}`.`logscavenger`.`id`";
 $kwquery = $db_link->prepare($query);
 $kwquery->execute();
 $kwresults = $kwquery->get_result();
@@ -306,16 +349,21 @@ $keywords = array();
 while ($kw = $kwresults->fetch_assoc()) {
     $kwid = $kw['id'];
     $kwgrp = $kw['groupname'];
-    $_SESSION['scav_config']["keywordgrp-$kwid"] = $kwgrp;
+    $active = "off";
+    if ($kw['active'] == 1) {
+        $active = "on";
+    }
+    $_SESSION['scav_config']["scavemailgroupid-$kwid"] = $kwgrp;
+    $_SESSION['scav_config']["scavactive-$kwid"] = $active;
     $keywords[$kwid] = $kw['keyword'];
 }
 $kwresults->free();
 
 // Get the email groups and put it in a list
 $query = "SELECT *
-            FROM netlogconfig.emailgroup
-           WHERE active = 1
-           ORDER BY id";
+            FROM `{$database['DB_CONF']}`.`emailgroup`
+           WHERE `active` = 1
+           ORDER BY `id`";
 $emailgrquery = $db_link->prepare($query);
 $emailgrquery->execute();
 $emailgrpresults = $emailgrquery->get_result();
@@ -332,7 +380,8 @@ $emailgrpresults->free();
 
 /*
 var_dump($_SESSION);
-echo "<br>";
+echo "<br><br>";
+var_dump($_POST);
 var_dump($_GET);
 */
 
@@ -417,9 +466,9 @@ var_dump($_GET);
                         </td>
                         <td>
                             <select title="Select the email group"
-                                    name=<?php echo "\"keywordgrp-$kwid\""; ?>> <?php
+                                    name=<?php echo "\"scavemailgroupid-$kwid\""; ?>> <?php
                                 foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
-                                    $group_selected = ($_SESSION['scav_config']["keywordgrp-$kwid"] == $groupname ? ' selected' : '');
+                                    $group_selected = ($_SESSION['scav_config']["scavemailgroupid-$kwid"] == $groupname ? ' selected' : '');
                                     echo "\n"; ?>
                                     <option value=
                                     <?php echo "\"" . $groupname . "\"" . $group_selected; ?>><?php echo $groupname; ?></option><?php
@@ -428,26 +477,29 @@ var_dump($_GET);
                             </select>
                         </td>
                         <td id="settings_checkbox">
-                            <input type="hidden" value=0 name="scavactive-<?php echo $kwid; ?>">
+                            <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">
                             <input type="checkbox" title="Disable scavenging"
-                                   name=<?php echo "\"scavactive-$kwid\""; ?>>
+                                   name=<?php echo "\"scavactive-$kwid\"";
+                            if ($_SESSION['scav_config']["scavactive-$kwid"] == 'on') {
+                                echo ' checked';
+                            } ?>>
                         </td>
                         <td id="settings_checkbox">
-                            <input type="hidden" value=0 name="scavdelete-<?php echo $kwid; ?>">
+                            <input type="hidden" value="off" name="scavdelete-<?php echo $kwid; ?>">
                             <input type="checkbox" title="Delete this entry" name="scavdelete-<?php echo $kwid; ?>">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Enter a new keyword:<br/>
-                            <input title="Enter a new keyword to scavenge" type="text" name="new_keyword">
                         </td>
                     </tr>
                 <?php }
                 ?>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>
+                        Enter a new keyword:<br/>
+                        <input title="Enter a new keyword to scavenge" type="text" name="new_keyword">
+                    </td>
+                </tr>
                 <tr>
                     <td>&nbsp;</td>
                 </tr>
