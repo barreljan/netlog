@@ -138,13 +138,18 @@ if (isset($_POST)) {
                     $hostip = $readseskey[1];
 
                     if ($column == "hosttype") {
+                        $hosttype = $_SESSION['typelist'][$value];
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
-                                     SET $column = '" . $_SESSION['typelist'][$value] . "'
-                                   WHERE hostip = '$hostip'";
+                                     SET $column = ?
+                                   WHERE hostip = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $hosttype, $hostip);
                     } elseif ($column == "hostname") {
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET $column = ?
-                                   WHERE hostip = '$hostip'";
+                                   WHERE hostip = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $_POST[$key], $hostip);
                     } elseif ($column == "lograte") {
                         $lograte = 0;
                         if ($value == "on") {
@@ -152,13 +157,11 @@ if (isset($_POST)) {
                         }
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET lograte = $lograte
-                                   WHERE hostip = '$hostip'";
+                                   WHERE hostip = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('s', $hostip);
                     } else {
                         continue;
-                    }
-                    $updatequery = $db_link->prepare($query);
-                    if ($column == "hostname") {
-                        $updatequery->bind_param('s', $_POST[$key]);
                     }
                     $updatequery->execute();
 
@@ -172,9 +175,9 @@ if (isset($_POST)) {
                     $hosttype = $_SESSION['typelist'][$_POST[$hosttypekey]];
 
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`hostnames` (`hostip`, `hostname`, `hosttype`)
-                                   VALUES ('$hostip', ?, '$hosttype')";
+                                   VALUES (?, ?, ?)";
                     $insertquery = $db_link->prepare($query);
-                    $insertquery->bind_param('s', $value);
+                    $insertquery->bind_param('sss', $hostip, $value, $hosttype);
                     $insertquery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -185,8 +188,9 @@ if (isset($_POST)) {
                     $hostip = $readseskey[1];
                     $query = "DELETE
                                 FROM `{$database['DB_CONF']}`.`hostnames`
-                               WHERE `hostip` = '$hostip'";
+                               WHERE `hostip` = ?";
                     $deletequery = $db_link->prepare($query);
+                    $deletequery->bind_param('s', $hostip);
                     $deletequery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -200,18 +204,21 @@ if (isset($_POST)) {
                     if ($column == "emailgroupid") {
                         $grpid = $_SESSION['emailgrp'][$_POST[$key]];
                         $query = "UPDATE `{$database['DB_CONF']}`.`logscavenger`
-                                     SET `emailgroupid` = $grpid
-                                   WHERE `id` = $kwid";
+                                     SET `emailgroupid` = ?
+                                   WHERE `id` = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $grpid, $kwid);
                     } elseif ($column == "active") {
                         $scavenger = 0;
                         if ($value == "on") {
                             $scavenger = 1;
                         }
                         $query = "UPDATE `{$database['DB_CONF']}`.`logscavenger`
-                                     SET `active` = $scavenger
-                                   WHERE `id` = $kwid";
+                                     SET `active` = ?
+                                   WHERE `id` = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $scavenger, $kwid);
                     }
-                    $updatequery = $db_link->prepare($query);
                     $updatequery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -233,8 +240,9 @@ if (isset($_POST)) {
                     $kwid = $readkey[1];
                     $query = "DELETE
                                 FROM `{$database['DB_CONF']}`.`logscavenger`
-                               WHERE `id` = $kwid";
+                               WHERE `id` = ?";
                     $deletequery = $db_link->prepare($query);
+                    $deletequery->bind_param('s', $kwid);
                     $deletequery->execute();
 
                     $_SESSION['updated'] = 'true';
