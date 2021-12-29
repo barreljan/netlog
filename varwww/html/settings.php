@@ -71,7 +71,7 @@ function gen_rows_hosts($input)
             </td>
             <td id="settings_checkbox">
                 <input type="hidden" value="off" name="lograte-<?php echo $ip; ?>">
-                <input type="checkbox" title="Enable of disable lograte"
+                <input type="checkbox" title="Enable or disable lograte"
                        name=<?php echo "\"lograte-$ip\"" . $lograte_checked; ?>>
             </td>
             <?php if ($_SESSION['viewitem'] == "Unused") { ?>
@@ -550,6 +550,30 @@ var_dump($_GET);
                         <?php
                     }
                     ?>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Enter a new group:<br/>
+                            <input title="Enter a new group" type="text" name="new_group">
+                        </td>
+                        <td>
+                            Enter one or more recipients:<br/>
+                            <input id="settings_input_hostname" title="Enter recipients, comma separated" type="text" name="new_recipients">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit">submit
+                            </button>
+                        </td>
+                    </tr>
+
+
                 </table>
                 <?php
             } else {
