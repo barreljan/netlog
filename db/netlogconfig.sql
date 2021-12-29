@@ -11,7 +11,7 @@ CREATE TABLE `emailgroup`
 (
     `id`         int(10) unsigned NOT NULL AUTO_INCREMENT,
     `groupname`  varchar(40)      NOT NULL,
-    `recepients` text             NOT NULL,
+    `recipients` text             NOT NULL,
     `active`     int(1) DEFAULT 1,
     PRIMARY KEY (`id`),
     KEY `groupname` (`groupname`)

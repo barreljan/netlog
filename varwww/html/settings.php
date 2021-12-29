@@ -71,7 +71,7 @@ function gen_rows_hosts($input)
             </td>
             <td id="settings_checkbox">
                 <input type="hidden" value="off" name="lograte-<?php echo $ip; ?>">
-                <input type="checkbox" title="Disable lograte"
+                <input type="checkbox" title="Enable or disable lograte"
                        name=<?php echo "\"lograte-$ip\"" . $lograte_checked; ?>>
             </td>
             <?php if ($_SESSION['viewitem'] == "Unused") { ?>
@@ -104,9 +104,6 @@ if (isset($_POST)) {
     if (isset($_POST['names'])) {
         $_SESSION['view'] = "names";
     }
-    if (isset($_POST['lograte'])) {
-        $_SESSION['view'] = "lograte";
-    }
     if (isset($_POST['scavenger'])) {
         $_SESSION['view'] = "scavenger";
     }
@@ -138,27 +135,27 @@ if (isset($_POST)) {
                     $hostip = $readseskey[1];
 
                     if ($column == "hosttype") {
+                        $hosttype = $_SESSION['typelist'][$value];
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
-                                     SET $column = '" . $_SESSION['typelist'][$value] . "'
-                                   WHERE hostip = '$hostip'";
+                                     SET $column = ?
+                                   WHERE hostip = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $hosttype, $hostip);
                     } elseif ($column == "hostname") {
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET $column = ?
-                                   WHERE hostip = '$hostip'";
+                                   WHERE hostip = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $_POST[$key], $hostip);
                     } elseif ($column == "lograte") {
-                        $lograte = 0;
-                        if ($value == "on") {
-                            $lograte = 1;
-                        }
+                        $lograte = ($value == "on") ? 1 : 0;
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET lograte = $lograte
-                                   WHERE hostip = '$hostip'";
+                                   WHERE hostip = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('s', $hostip);
                     } else {
                         continue;
-                    }
-                    $updatequery = $db_link->prepare($query);
-                    if ($column == "hostname") {
-                        $updatequery->bind_param('s', $_POST[$key]);
                     }
                     $updatequery->execute();
 
@@ -172,9 +169,9 @@ if (isset($_POST)) {
                     $hosttype = $_SESSION['typelist'][$_POST[$hosttypekey]];
 
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`hostnames` (`hostip`, `hostname`, `hosttype`)
-                                   VALUES ('$hostip', ?, '$hosttype')";
+                                   VALUES (?, ?, ?)";
                     $insertquery = $db_link->prepare($query);
-                    $insertquery->bind_param('s', $value);
+                    $insertquery->bind_param('sss', $hostip, $value, $hosttype);
                     $insertquery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -185,8 +182,9 @@ if (isset($_POST)) {
                     $hostip = $readseskey[1];
                     $query = "DELETE
                                 FROM `{$database['DB_CONF']}`.`hostnames`
-                               WHERE `hostip` = '$hostip'";
+                               WHERE `hostip` = ?";
                     $deletequery = $db_link->prepare($query);
+                    $deletequery->bind_param('s', $hostip);
                     $deletequery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -200,18 +198,18 @@ if (isset($_POST)) {
                     if ($column == "emailgroupid") {
                         $grpid = $_SESSION['emailgrp'][$_POST[$key]];
                         $query = "UPDATE `{$database['DB_CONF']}`.`logscavenger`
-                                     SET `emailgroupid` = $grpid
-                                   WHERE `id` = $kwid";
+                                     SET `emailgroupid` = ?
+                                   WHERE `id` = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $grpid, $kwid);
                     } elseif ($column == "active") {
-                        $scavenger = 0;
-                        if ($value == "on") {
-                            $scavenger = 1;
-                        }
+                        $scavenger = ($value == "on") ? 1 : 0;
                         $query = "UPDATE `{$database['DB_CONF']}`.`logscavenger`
-                                     SET `active` = $scavenger
-                                   WHERE `id` = $kwid";
+                                     SET `active` = ?
+                                   WHERE `id` = ?";
+                        $updatequery = $db_link->prepare($query);
+                        $updatequery->bind_param('ss', $scavenger, $kwid);
                     }
-                    $updatequery = $db_link->prepare($query);
                     $updatequery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -233,8 +231,9 @@ if (isset($_POST)) {
                     $kwid = $readkey[1];
                     $query = "DELETE
                                 FROM `{$database['DB_CONF']}`.`logscavenger`
-                               WHERE `id` = $kwid";
+                               WHERE `id` = ?";
                     $deletequery = $db_link->prepare($query);
+                    $deletequery->bind_param('s', $kwid);
                     $deletequery->execute();
 
                     $_SESSION['updated'] = 'true';
@@ -362,16 +361,17 @@ $kwresults->free();
 // Get the email groups and put it in a list
 $query = "SELECT *
             FROM `{$database['DB_CONF']}`.`emailgroup`
-           WHERE `active` = 1
            ORDER BY `id`";
 $emailgrquery = $db_link->prepare($query);
 $emailgrquery->execute();
 $emailgrpresults = $emailgrquery->get_result();
+$emailgroups = array();
 while ($emailgrp = $emailgrpresults->fetch_assoc()) {
+    $emailgroups[] = $emailgrp;
     $groupname = $emailgrp['groupname'];
     $_SESSION["emailgrp"][$groupname] = $emailgrp['id'];
 }
-$emailgrpresults->free();
+//$emailgrpresults->free();
 
 
 /*
@@ -478,7 +478,7 @@ var_dump($_GET);
                         </td>
                         <td id="settings_checkbox">
                             <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">
-                            <input type="checkbox" title="Disable scavenging"
+                            <input type="checkbox" title="Enable or disable scavenging"
                                    name=<?php echo "\"scavactive-$kwid\"";
                             if ($_SESSION['scav_config']["scavactive-$kwid"] == 'on') {
                                 echo ' checked';
@@ -512,7 +512,69 @@ var_dump($_GET);
                 </table><?php
             } elseif ((isset($_SESSION['view'])) && ($_SESSION['view'] == "contacts")) {
                 ?>
-                Contacts dingen
+                <table class="none">
+                    <tr>
+                        <th id="settings">Contacts:</th>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th id="settings_hostname">Groupname</th>
+                        <th id="settings_hostname">Recipients</th>
+                        <th id="settings_checkbox">Active</th>
+                        <th id="settings_checkbox">Delete?</th>
+                    </tr>
+                    <?php
+                    foreach ($emailgroups as $row) {
+                        $id = $row['id'];
+                        $rec = $row['recipients'];
+                        $active = ($row['active'] == 1) ? " checked" : "";
+                        ?>
+                        <tr>
+                            <td><?php echo $row['groupname']; ?></td>
+                            <td><input id="settings_input_hostname" type="text" title="Recipients, comma separated"
+                                       name="contactsrec-<?php echo $id; ?>" value=<?php echo "\"" . $rec . "\""; ?>>
+                            </td>
+                            <td id="settings_checkbox">
+                                <input type="hidden" value="off" name="contactactive-<?php echo $row['id']; ?>">
+                                <input type="checkbox" title="Enable or disable this group"
+                                       name="contactactive-<?php echo $row['id']; ?>" <?php echo $active; ?>>
+                            </td>
+                            <td id="settings_checkbox">
+                                <input type="hidden" value="off" name="contactdelete-<?php echo $row['id']; ?>">
+                                <input type="checkbox" title="Delete this group"
+                                       name="contactdelete-<?php echo $row['id']; ?>">
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Enter a new group:<br/>
+                            <input title="Enter a new group" type="text" name="new_group">
+                        </td>
+                        <td>
+                            Enter one or more recipients:<br/>
+                            <input id="settings_input_hostname" title="Enter recipients, comma separated" type="text" name="new_recipients">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit">submit
+                            </button>
+                        </td>
+                    </tr>
+
+
+                </table>
                 <?php
             } else {
                 ?>
