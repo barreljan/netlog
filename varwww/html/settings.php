@@ -71,7 +71,7 @@ function gen_rows_hosts($input)
             </td>
             <td id="settings_checkbox">
                 <input type="hidden" value="off" name="lograte-<?php echo $ip; ?>">
-                <input type="checkbox" title="Disable lograte"
+                <input type="checkbox" title="Enable of disable lograte"
                        name=<?php echo "\"lograte-$ip\"" . $lograte_checked; ?>>
             </td>
             <?php if ($_SESSION['viewitem'] == "Unused") { ?>
@@ -103,9 +103,6 @@ if (!isset($_SESSION['updated'])) {
 if (isset($_POST)) {
     if (isset($_POST['names'])) {
         $_SESSION['view'] = "names";
-    }
-    if (isset($_POST['lograte'])) {
-        $_SESSION['view'] = "lograte";
     }
     if (isset($_POST['scavenger'])) {
         $_SESSION['view'] = "scavenger";
@@ -151,10 +148,7 @@ if (isset($_POST)) {
                         $updatequery = $db_link->prepare($query);
                         $updatequery->bind_param('ss', $_POST[$key], $hostip);
                     } elseif ($column == "lograte") {
-                        $lograte = 0;
-                        if ($value == "on") {
-                            $lograte = 1;
-                        }
+                        $lograte = ($value == "on") ? 1 : 0;
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET lograte = $lograte
                                    WHERE hostip = ?";
@@ -209,10 +203,7 @@ if (isset($_POST)) {
                         $updatequery = $db_link->prepare($query);
                         $updatequery->bind_param('ss', $grpid, $kwid);
                     } elseif ($column == "active") {
-                        $scavenger = 0;
-                        if ($value == "on") {
-                            $scavenger = 1;
-                        }
+                        $scavenger = ($value == "on") ? 1 : 0;
                         $query = "UPDATE `{$database['DB_CONF']}`.`logscavenger`
                                      SET `active` = ?
                                    WHERE `id` = ?";
@@ -370,16 +361,17 @@ $kwresults->free();
 // Get the email groups and put it in a list
 $query = "SELECT *
             FROM `{$database['DB_CONF']}`.`emailgroup`
-           WHERE `active` = 1
            ORDER BY `id`";
 $emailgrquery = $db_link->prepare($query);
 $emailgrquery->execute();
 $emailgrpresults = $emailgrquery->get_result();
+$emailgroups = array();
 while ($emailgrp = $emailgrpresults->fetch_assoc()) {
+    $emailgroups[] = $emailgrp;
     $groupname = $emailgrp['groupname'];
     $_SESSION["emailgrp"][$groupname] = $emailgrp['id'];
 }
-$emailgrpresults->free();
+//$emailgrpresults->free();
 
 
 /*
@@ -486,7 +478,7 @@ var_dump($_GET);
                         </td>
                         <td id="settings_checkbox">
                             <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">
-                            <input type="checkbox" title="Disable scavenging"
+                            <input type="checkbox" title="Enable or disable scavenging"
                                    name=<?php echo "\"scavactive-$kwid\"";
                             if ($_SESSION['scav_config']["scavactive-$kwid"] == 'on') {
                                 echo ' checked';
@@ -520,7 +512,45 @@ var_dump($_GET);
                 </table><?php
             } elseif ((isset($_SESSION['view'])) && ($_SESSION['view'] == "contacts")) {
                 ?>
-                Contacts dingen
+                <table class="none">
+                    <tr>
+                        <th id="settings">Contacts:</th>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th id="settings_hostname">Groupname</th>
+                        <th id="settings_hostname">Recipients</th>
+                        <th id="settings_checkbox">Active</th>
+                        <th id="settings_checkbox">Delete?</th>
+                    </tr>
+                    <?php
+                    foreach ($emailgroups as $row) {
+                        $id = $row['id'];
+                        $rec = $row['recipients'];
+                        $active = ($row['active'] == 1) ? " checked" : "";
+                        ?>
+                        <tr>
+                            <td><?php echo $row['groupname']; ?></td>
+                            <td><input id="settings_input_hostname" type="text" title="Recipients, comma separated"
+                                       name="contactsrec-<?php echo $id; ?>" value=<?php echo "\"" . $rec . "\""; ?>>
+                            </td>
+                            <td id="settings_checkbox">
+                                <input type="hidden" value="off" name="contactactive-<?php echo $row['id']; ?>">
+                                <input type="checkbox" title="Enable or disable this group"
+                                       name="contactactive-<?php echo $row['id']; ?>" <?php echo $active; ?>>
+                            </td>
+                            <td id="settings_checkbox">
+                                <input type="hidden" value="off" name="contactdelete-<?php echo $row['id']; ?>">
+                                <input type="checkbox" title="Delete this group"
+                                       name="contactdelete-<?php echo $row['id']; ?>">
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                </table>
                 <?php
             } else {
                 ?>
