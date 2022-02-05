@@ -5,27 +5,17 @@
 // This script will parse and divide logging per host, per day.
 // This way the most active tables will have a reasonable size, thus queryable.
 
-// Including logparses variables
-include("/usr/share/syslog-ng/etc/logparser.conf");
-
-// Create and check database link
-$db_link = new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    die();
-}
-if (!$db_link->select_db($database['DB'])) {
-    printf("Unable to select DB: %s\n", mysqli_connect_error());
-    die();
-}
+// Including Netlog config and variables
+require("/usr/share/syslog-ng/etc/logparser.conf");
 
 openlog("logparser", 0, LOG_LOCAL0);
 
 function create_table($tablename)
 {
     global $db_link;
+    global $database;
 
-    $query = "CREATE TABLE IF NOT EXISTS `$tablename` LIKE template";
+    $query = "CREATE TABLE IF NOT EXISTS `{$database['DB']}`.`$tablename` LIKE template";
     $createquery = $db_link->prepare($query);
     $result = $createquery->execute();
     if (!$result) {
@@ -38,6 +28,7 @@ function create_table($tablename)
 function parse_log($logitems)
 {
     global $db_link;
+    global $database;
 
     // Set defaults
     $FAC = $PRIO = $LVL = $TAG = $DAY = $TIME = $PROG = $MSG = '';
@@ -63,7 +54,7 @@ function parse_log($logitems)
     $DAY_us = str_replace('-', '_', $DAY);
     $tablename = 'HST_' . $HOST_us . '_DATE_' . $DAY_us;
 
-    $query = "INSERT INTO $tablename (`HOST`, `FAC`, `PRIO`, `LVL`, `TAG`, `DAY`, `TIME`, `PROG`, `MSG`)
+    $query = "INSERT INTO `{$database['DB']}`.`$tablename` (`HOST`, `FAC`, `PRIO`, `LVL`, `TAG`, `DAY`, `TIME`, `PROG`, `MSG`)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     if (!$db_link->prepare($query)) {
         create_table($tablename);
