@@ -5,9 +5,9 @@
 // - A table per host, per month for the current and last months of logging
 
 // Including Netlog config and variables
-require("/usr/share/syslog-ng/etc/logparser.conf");
+require("/usr/share/syslog-ng/etc/netlog.conf");
 
-// Todo: Make lockfile mechanism for single process
+$lock = aquire_lock();
 
 $archinterval = date("Y_m_d", strtotime("-{$config['global']['logarchive_interval']} days"));
 
@@ -58,3 +58,5 @@ while ($tables = $tableresult->fetch_assoc()) {
         unset($query, $dropquery);
     }
 }
+
+unlock($lock);

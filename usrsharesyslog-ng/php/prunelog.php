@@ -16,7 +16,7 @@ if (isset($arguments['l'])) {
 	$includelastmonth = "no";
 }
 
-include("/usr/share/syslog-ng/etc/logparser.conf");
+include("/usr/share/syslog-ng/etc/netlog.conf");
 
 global $mailmsg, $mailerr, $mailcrit, $tablecount, $failcount, $successcount;
 $archstarttime = date("d.m.y G:i:s");

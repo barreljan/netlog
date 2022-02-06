@@ -6,7 +6,9 @@
 // This way the most active tables will have a reasonable size, thus queryable.
 
 // Including Netlog config and variables
-require("/usr/share/syslog-ng/etc/logparser.conf");
+require("/usr/share/syslog-ng/etc/netlog.conf");
+
+$lock = aquire_lock();
 
 openlog("logparser", 0, LOG_LOCAL0);
 
@@ -88,3 +90,5 @@ if (!file_exists($log_fifo)) {
 }
 // Process the incomming entries
 read_fifo();
+
+unlock($lock);
