@@ -34,8 +34,11 @@ while ($host = $hostresult->fetch_assoc()) {
                        WHERE TIME > SUBTIME(CURTIME(), '00:10:00')) as 10min 
                 FROM `{$database['DB']}`.`$tablename`
                WHERE TIME > SUBTIME(CURTIME(), '00:01:00')";
+    if (!$db_link->prepare($query)) {
+        // No logging today for current host
+        continue;
+    }
     $ratequery = $db_link->prepare($query);
-    // Todo: fix routine when a lograte-enabled host has not logged today...
     $ratequery->execute();
     $rateresult = $ratequery->get_result();
 
