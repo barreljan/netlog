@@ -34,11 +34,11 @@ function connect_db()
     // All ok?
     return $db_link;
 }
+
 $db_link = connect_db();
 
-$config = array();
-
 // Populate the global config settings
+$config = array();
 $query = "SELECT `setting`, `value`
             FROM `{$database['DB_CONF']}`.`global`";
 $globalquery = $db_link->prepare($query);

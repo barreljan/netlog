@@ -2,6 +2,9 @@
 
 // This script will prune all logging tables that exist in netlog archive server, leaving those that are not in sync
 // last month will be excluded by default
+//
+// DISCONTINUED: No log archiving solution, old file kept for reference.
+//
 
 // Including logparses variables
 
@@ -13,7 +16,7 @@ if (isset($arguments['l'])) {
 	$includelastmonth = "no";
 }
 
-include("/usr/share/syslog-ng/etc/logparser.conf");
+include("/usr/share/syslog-ng/etc/netlog.conf");
 
 global $mailmsg, $mailerr, $mailcrit, $tablecount, $failcount, $successcount;
 $archstarttime = date("d.m.y G:i:s");
