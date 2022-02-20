@@ -190,6 +190,7 @@ INSERT INTO `global`
 VALUES ('cron_mail_from', 'no-reply@domain.tld'),
        ('cron_mail_rcpt', 'johndoe@domain.tld'),
        ('default_view', '2'),
+       ('lograte_days', '14'),
        ('logarchive_interval', '14'),
        ('lograte_graph_height', '275'),
        ('lograte_graph_width', '750'),
