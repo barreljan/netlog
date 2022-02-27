@@ -31,7 +31,7 @@ Netlog has a few key-features
 - stupidly easy navigation through log entries per host
 - configurable hostnames
 - Lograte graphing for trend analysis and fast detecting of events
-- Logscavenger for early detections of issues, speficic events
+- Logscavenger for early detections of issues, specific events
 - netalert dashboard page with easy coloring of new items from Logscavenger
 - archiving day-to-day tables in monthly tables after (default) 14 days
 
