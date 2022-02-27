@@ -106,12 +106,12 @@ CREATE TABLE `logcache`
 DROP TABLE IF EXISTS `lograte`;
 CREATE TABLE `lograte`
 (
-    `id`         int(10)   NOT NULL AUTO_INCREMENT,
-    `hostnameid` int(10)   NOT NULL,
-    `timestamp`  timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-    `1min`       float              DEFAULT NULL,
-    `5min`       float              DEFAULT NULL,
-    `10min`      float              DEFAULT NULL,
+    `id`               int(10)   NOT NULL AUTO_INCREMENT,
+    `hostnameid`       int(10)   NOT NULL,
+    `sample_timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+    `1min`             float              DEFAULT NULL,
+    `5min`             float              DEFAULT NULL,
+    `10min`            float              DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = MyISAM
   DEFAULT CHARSET = latin1;

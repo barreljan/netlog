@@ -1,72 +1,124 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <?php
+require("config/config.php");
+require_once('jpgraph/jpgraph.php');
+require_once('jpgraph/jpgraph_line.php');
 
-// Include the basics ;)
-include("config/config.php");
-require_once ('jpgraph/jpgraph.php');
-require_once ('jpgraph/jpgraph_line.php');
-
-session_start();
-
-?>
-<html lang="en">
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-	<link rel="stylesheet" type="text/css" href="css/netlog.css">
-	<script type="text/javascript" src="scripts/netlog.js"></script>
-</head>
-<body>
-<?php
-
-// Create and check database link
 $today = date('Y_m_d');
 
-$db_link = mysqli_connect($db_HOST, $db_USER, $db_PASS, $db_NAME);
-if (!$db_link) {
-	die('Could not connect to MySQL server: ' . mysql_error($db_link));
+$session_name = "PHP_NETLOG";
+
+$graph_height = 250;
+$graph_width = 600;
+
+
+/*
+ * Start (or not) session
+ */
+function is_session_started(): bool
+{
+    if (php_sapi_name() === 'cli')
+        return false;
+    if (version_compare(phpversion(), '5.4.0', '>='))
+        return session_status() === PHP_SESSION_ACTIVE;
+    return session_id() !== '';
 }
 
-if (!mysqli_select_db($db_link,$db_NAME)) {
-	die('Unable to select DB: ' . mysql_error($db_link));
+if (!is_session_started()) {
+    session_name($session_name);
+    session_start();
 }
+
+if (!isset($_SESSION)) {
+    echo "No session set or server is not allowing PHP Sessions to be stored?";
+    die;
+}
+
+/*
+ * Create and check database link
+ */
+$db_link = connect_db();
+
 
 if (!isset($_SESSION['timelimit'])) {
-	$_SESSION['timelimit'] = 30;
+    $_SESSION['timelimit'] = 30;
 }
 
-if ( isset($_POST['time']) ) {
-	$_SESSION['timelimit'] = $_POST['time'];
+if (isset($_POST['time'])) {
+    $_SESSION['timelimit'] = $_POST['time'];
 }
 
-$query = "SELECT hostnameid,hostname FROM netlogconfig.lograteconf LEFT JOIN netlogconfig.hostnames ON (hostnameid=id) WHERE samplerate=1 order by hostnameid";
-$result = mysqli_query($db_link,$query);
+$query = "SELECT `id`, `hostname`
+            FROM `{$database['DB_CONF']}`.`hostnames`
+           WHERE lograte = 1
+           ORDER BY `id`";
+$logratequery = $db_link->prepare($query);
+$logratequery->execute();
+$lograteresult = $logratequery->get_result();
 
-echo "<table class=\"outline\" width=\"100%\">\n\t<tr>\n\t\t<th width=\"75%\">Netlog ".date('Y-m-d H:i:s')."</th><td align=\"right\"><a href=\"index.php\">view logging</a></td>\n";
-echo "\t</tr>\n\t<tr>\n\t\t<td colspan=\"2\"><br></td>\n\t</tr>\n\t<tr>\n\t";
-echo "\t<td colspan=\"2\">\n\t\t\t<form method=\"post\" action=\"viewlograte.php\">\n\t\t\t<table class=\"none\" width=\"100%\">\n";
-echo "\t\t\t\t<tr>\n\t\t\t\t<th>Log rates for clients:</th>\n\t\t\t\t<td colspan=\"2\"> <a href=\"viewlograte.php\" onClick=\"document.location.href = this.href;return false\" title=\"click to refresh the page\">Refresh</a> \n\t\t\t\tShow last \n";
-echo "\t\t\t\t<select name=\"time\" onChange=\"this.form.submit()\">\n";
-foreach( $graphhistory as $timelimit ) {
-	echo "\t\t\t\t\t<option value=\"".$timelimit."\"";
-	if (( isset($_SESSION['timelimit'])) && ( $timelimit == $_SESSION['timelimit']) ) {
-		echo " SELECTED";
-	}
-	echo ">".$timelimit."</option>\n";
-}
-echo "\t\t\t\t</select> measurements\n\t\t\t\t</td>\n\t\t\t</table>\n\t\t\t</form>\n\t\t</td>\n";
-echo "\t</tr>\n\t<tr>\n";
-$height = 250;
-$width = 600;
-$graphcount = 1;
-while ( $drawhost = mysqli_fetch_assoc($result)) {
-	echo "\t<td><img src=\"drawgraph.php?hostid=".$drawhost['hostnameid']."&hostname=".$drawhost['hostname']."&width=".$width."&height=".$height."&time=".$_SESSION['timelimit']."\"></td>";
-	$graphcount += 1;
-	if($graphcount & 1) {
-		echo "</tr>\n\t<tr>";
-	}
-}
+
+/*
+ * Build the page
+ */
 ?>
-	</tr>
-</table>
+
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Netlog - Lograte viewer</title>
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="scripts/netlog.js"></script>
+    <!-- <?php echo "$NAME, $VERSION -- $AUTHOR"; ?> -->
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
+        <div class="header_nav">netalert | lograte | <a href="index.php" title="Back to logging">logging</a></div>
+        <div class="header_settings">
+            <form method="post" action="viewlograte.php">
+                Show last
+                <select title="period" name="time" onChange="this.form.submit()"><?php
+                    foreach ($graphhistory as $timelimit) {
+                        echo "\n";
+                        $timelimit_selected = ($timelimit == $_SESSION['timelimit'] ? " selected" : '') ?>
+                        <option value=<?php echo "\"" . $timelimit . "\"" . $timelimit_selected; ?>><?php echo $timelimit; ?></option><?php
+                    }
+                    echo "\n"; ?>
+                </select> seconds
+            </form>
+        </div>
+
+    </div>
+    <div class="results">
+        <table class="none" width="100%">
+            <tr>
+                <th id="settings">Log rates for clients:</th>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+
+            <tr><?php
+                $graph_count = 0;
+                while ($drawhost = $lograteresult->fetch_assoc()) {
+                    echo "\n"; ?>
+                    <td>
+                        <img src="drawgraph.php?hostid=<?php echo $drawhost['id'] . "&hostname=" . $drawhost['hostname'] . "&width=" . $graph_width . "&height=" . $graph_height . "&time=" . $_SESSION['timelimit']; ?>"
+                             alt="">
+                    </td> <?php
+                    $graph_count += 1;
+                    // 2 graphs max per row
+                    if ($graph_count % 2 === 0) {
+                        echo "\t</tr>\n\t<tr>";
+                    }
+                }
+                // End row if odd and last graph
+                if (!$graph_count % 2 === 0) {
+                    echo "\n\t</tr>\n";
+                }
+                ?>
+    </div>
+</div>
 </body>
 </html>
