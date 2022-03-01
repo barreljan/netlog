@@ -1,12 +1,11 @@
 # Netlog
 A Syslog-NG to MySQL parser with no-nonsense frontend
 
-![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-development-informational.svg) ![](https://img.shields.io/badge/progress-65%25-yellowgreen.svg) 
+![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-development-informational.svg) ![](https://img.shields.io/badge/progress-70%25-yellowgreen.svg) 
 
 Current development work: reworking from php <5.6-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
 
 Current open items:
-- netalert
 - email/contacts
 - directory structure
 - deployment/installation
@@ -45,4 +44,7 @@ The hostname table can be modified with ease to keep it in sync with your NMS (e
 
 
 ![Screenshot](docs/images/netlog_2.png)
+
+
+![Screenshot](docs/images/netlog_3.png)
 

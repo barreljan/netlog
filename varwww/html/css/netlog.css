@@ -8,9 +8,12 @@ body {
     font-size: 10px;
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
     background-color: #FFFFFF;
+    overflow: hidden;
 }
 
 select {
+    margin-left: -6px;
+    margin-right: 2px;
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
     font-size: 10px;
 }

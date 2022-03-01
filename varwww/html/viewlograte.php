@@ -74,7 +74,12 @@ $lograteresult = $logratequery->get_result();
 <div class="container">
     <div class="header">
         <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
-        <div class="header_nav">netalert | lograte | <a href="index.php" title="Back to logging">logging</a></div>
+        <div class="header_nav">
+            <a href="netalert.php?inline" title="NetAlert">netalert</a> |
+            lograte |
+            <a href="settings.php" title="Configuration panel">config</a> |
+            <a href="index.php" title="Back to logging">logging</a>
+        </div>
         <div class="header_settings">
             <form method="post" action="viewlograte.php">
                 Show last
@@ -132,4 +137,4 @@ $lograteresult = $logratequery->get_result();
 </div>
 </body>
 </html>
-<?php $db_link->close(); ?>
+<?php $db_link->close();
