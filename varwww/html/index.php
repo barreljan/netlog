@@ -565,7 +565,7 @@ if (!$empty_iplist) {
                 echo "\n"; ?>
             </div>
             <div class="header_pagenr">
-                Page <?php echo $_SESSION['showpage'] . " of " . $_SESSION['pagecount'] ?></div>
+                Page <?php echo $_SESSION['showpage'] . " of " . $_SESSION['pagecount']; ?></div>
             <div class="header_device">
                 Device Type:
                 <select title="Select a type" name="type" onChange="this.form.submit()"><?php
@@ -635,7 +635,7 @@ if (!$empty_iplist) {
                        } ?>" autofocus placeholder="Search" style="width: 80%;">
                 <br><span class="search_button"><button style="width: 50px;" type="submit">Go</button><span>
             </div>
-            <div class="header_lines">Total lines: <?php echo $linecount ?></div>
+            <div class="header_lines">Total lines: <?php echo $linecount; ?></div>
         </div>
         <div class="results">
 
@@ -724,4 +724,4 @@ if (!$empty_iplist) {
 </body>
 
 </html>
-<?php $db_link->close() ?>
+<?php $db_link->close(); ?>
