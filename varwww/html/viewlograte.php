@@ -82,7 +82,8 @@ $lograteresult = $logratequery->get_result();
                     foreach ($graphhistory as $timelimit) {
                         echo "\n";
                         $timelimit_selected = ($timelimit == $_SESSION['timelimit'] ? " selected" : '') ?>
-                        <option value=<?php echo "\"" . $timelimit . "\"" . $timelimit_selected; ?>><?php echo $timelimit; ?></option><?php
+                        <option
+                        value=<?php echo "\"" . $timelimit . "\"" . $timelimit_selected; ?>><?php echo $timelimit; ?></option><?php
                     }
                     echo "\n"; ?>
                 </select> seconds
@@ -91,33 +92,42 @@ $lograteresult = $logratequery->get_result();
 
     </div>
     <div class="results">
-        <table class="none" width="100%">
+        <table class="none">
             <tr>
-                <th id="settings">Log rates for clients:</th>
+                <th>Log rates for clients:</th>
+                <th>&nbsp;</th>
             </tr>
             <tr>
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
             </tr>
 
             <tr><?php
                 $graph_count = 0;
                 while ($drawhost = $lograteresult->fetch_assoc()) {
-                    echo "\n"; ?>
+                    echo "\n";
+                    $id = $drawhost['id'];
+                    $name = $drawhost['hostname'];
+                    $time = $_SESSION['timelimit']
+
+                    ?>
                     <td>
-                        <img src="drawgraph.php?hostid=<?php echo $drawhost['id'] . "&hostname=" . $drawhost['hostname'] . "&width=" . $graph_width . "&height=" . $graph_height . "&time=" . $_SESSION['timelimit']; ?>"
+                        <img src="drawgraph.php?hostid=<?php echo "$id&hostname=$name&width=$graph_width&height=$graph_height&time=$time"; ?>"
                              alt="">
-                    </td> <?php
+                    </td>
+                    <?php
                     $graph_count += 1;
                     // 2 graphs max per row
                     if ($graph_count % 2 === 0) {
-                        echo "\t</tr>\n\t<tr>";
+                        echo "\n\t\t\t</tr>\n\t\t\t<tr>";
                     }
                 }
                 // End row if odd and last graph
                 if (!$graph_count % 2 === 0) {
-                    echo "\n\t</tr>\n";
+                    echo "\n\t\t\t<tr>";
                 }
-                ?>
+                echo "\n"; ?>
+        </table>
     </div>
 </div>
 </body>

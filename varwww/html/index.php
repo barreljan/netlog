@@ -457,8 +457,7 @@ if (!$empty_iplist) {
         <div class="header">
             <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
             <div class="header_select">Select Page:</div>
-            <div class="header_nav">netalert | <a href="settings.php" title="Configuration panel">config</a> | <a
-                        href="<?php echo $_SERVER['PHP_SELF']; ?>?action=clear">clear search</a></div>
+            <div class="header_nav"><a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=clear">clear search | </a>netalert | <a href="viewlograte.php" title="Logrates">lograte</a> | <a href="settings.php" title="Configuration panel">config</a></div>
             <div class="header_paging">
 
                 <table class="outline">

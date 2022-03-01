@@ -399,7 +399,7 @@ var_dump($_GET);
 <div class="container">
     <div class="header">
         <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
-        <div class="header_nav">netalert | lograte | <a href="index.php" title="Back to logging">logging</a></div>
+        <div class="header_nav">netalert | <a href="viewlograte.php" title="Logrates">lograte</a> | <a href="index.php" title="Back to logging">logging</a></div>
         <div class="header_settings">
             <form name="view" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                 Category:
