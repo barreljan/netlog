@@ -84,3 +84,5 @@ $graph->Add($lineplot3);
 
 // Display the graph
 $graph->Stroke();
+
+$db_link->close();

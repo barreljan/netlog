@@ -122,3 +122,4 @@ $lograteresult = $logratequery->get_result();
 </div>
 </body>
 </html>
+<?php $db_link->close(); ?>

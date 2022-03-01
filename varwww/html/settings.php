@@ -437,7 +437,7 @@ var_dump($_GET);
             } elseif ($_SESSION['updated'] == 'false') {
                 echo "<div id=\"failMsg\">Update failed!</div>";
             }
-            unset($_SESSION['updated']) ?>
+            unset($_SESSION['updated']); ?>
         </div>
     </div>
     <div class="results">
@@ -630,4 +630,4 @@ var_dump($_GET);
 
 </body>
 </html>
-<?php $db_link->close() ?>
+<?php $db_link->close(); ?>
