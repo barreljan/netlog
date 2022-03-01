@@ -6,7 +6,7 @@ A Syslog-NG to MySQL parser with no-nonsense frontend
 Current development work: reworking from php <5.6-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
 
 Current open items:
-- lograte
+- netalert
 - email/contacts
 - directory structure
 - deployment/installation
