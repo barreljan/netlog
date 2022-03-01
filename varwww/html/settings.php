@@ -287,7 +287,7 @@ while ($dbhostnames = $hostnameresult->fetch_assoc()) {
         $_SESSION['names_config']["lograte-$hostnameip"] = $dbhostnames['lograte'];
     }
 }
-$hostnameresult->free();
+$hostnameresult->free_result();
 
 $query = "SELECT TABLE_NAME AS tblnm
             FROM INFORMATION_SCHEMA.TABLES
@@ -309,7 +309,7 @@ while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
         $logging_hosts[] = $ip;
     }
 }
-$tablesresult->free();
+$tablesresult->free_result();
 
 // Merge and diff lists
 natsort($current_hosts);
@@ -333,7 +333,7 @@ $typeresult = $typequery->get_result();
 while ($types = $typeresult->fetch_assoc()) {
     $_SESSION['typelist'][$types['name']] = $types['id'];
 }
-$typeresult->free();
+$typeresult->free_result();
 
 // Get the scavenger keywords
 $query = "SELECT `logscavenger`.`id`, `keyword`, `logscavenger`.`active`, `emailgroupid`, `groupname`
@@ -356,7 +356,7 @@ while ($kw = $kwresults->fetch_assoc()) {
     $_SESSION['scav_config']["scavactive-$kwid"] = $active;
     $keywords[$kwid] = $kw['keyword'];
 }
-$kwresults->free();
+$kwresults->free_result();
 
 // Get the email groups and put it in a list
 $query = "SELECT *
@@ -371,20 +371,12 @@ while ($emailgrp = $emailgrpresults->fetch_assoc()) {
     $groupname = $emailgrp['groupname'];
     $_SESSION["emailgrp"][$groupname] = $emailgrp['id'];
 }
-//$emailgrpresults->free();
+$emailgrpresults->free_result();
 
 
 /*
  * Build the page
  */
-
-/*
-var_dump($_SESSION);
-echo "<br><br>";
-var_dump($_POST);
-var_dump($_GET);
-*/
-
 ?>
 <!DOCTYPE HTML>
 <html lang="en">
@@ -399,8 +391,11 @@ var_dump($_GET);
 <div class="container">
     <div class="header">
         <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
-        <div class="header_nav">netalert | <a href="viewlograte.php" title="Logrates">lograte</a> | <a href="index.php"
-                                                                                                       title="Back to logging">logging</a>
+        <div class="header_nav">
+            <a href="netalert.php?inline" title="NetAlert">netalert</a> |
+            <a href="viewlograte.php" title="Logrates">lograte</a> |
+            config |
+            <a href="index.php" title="Back to logging">logging</a>
         </div>
         <div class="header_settings">
             <form name="view" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
@@ -633,4 +628,4 @@ var_dump($_GET);
 
 </body>
 </html>
-<?php $db_link->close(); ?>
+<?php $db_link->close();
