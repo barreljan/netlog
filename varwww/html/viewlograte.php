@@ -34,10 +34,11 @@ if (!isset($_SESSION)) {
 }
 
 /*
- * Create and check database link
+ * Check and if not, create database link
  */
-$db_link = connect_db();
-
+if (!isset($db_link)) {
+    $db_link = connect_db();
+}
 
 if (!isset($_SESSION['timelimit'])) {
     $_SESSION['timelimit'] = 30;

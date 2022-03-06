@@ -104,20 +104,3 @@ $showlines_alert = $config['global']['netalert_show_lines'];
 
 // Threshold in seconds after we normalize lines
 $timethresh = $config['global']['netalert_time_threshold'];
-
-
-// ###### NetLog Scavenger ######
-
-// Set the searching in seconds
-$history = $config['global']['scavenger_history'];
-
-// Others, do not touch
-$datum = (time() - $history);
-$maand = date('Y-m-d', $datum);
-$tijd = date('H:i:s', $datum);
-$realtime = date('H:i:s');
-$DAY_us = str_replace('-', '_', $maand);
-$GLOBALS['scavver'] = "v0.93, 25 March 2016";
-
-// Scav Config
-$GLOBALS['scavconfver'] = "v0.8, 02 April 2016";

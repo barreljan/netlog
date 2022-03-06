@@ -6,9 +6,11 @@ require_once('jpgraph/jpgraph_date.php');
 
 
 /*
- * Create and check database link
+ * Check and if not, create database link
  */
-$db_link = connect_db();
+if (!isset($db_link)) {
+    $db_link = connect_db();
+}
 
 $hostid = $_GET['hostid'];
 $hostname = $_GET['hostname'];

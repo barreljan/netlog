@@ -258,11 +258,11 @@ table.none td {
     background-color: #FFFF33;
 }
 
-.err {
+.error {
     background-color: #FFCC00;
 }
 
-.crit {
+.critical {
     background-color: #FF9922;
 }
 

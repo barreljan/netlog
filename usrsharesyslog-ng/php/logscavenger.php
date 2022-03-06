@@ -139,10 +139,14 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
         }
     }
 }
-$cacheresult->free_result();
+if (isset($cacheresult)) {
+    $cacheresult->free_result();
+}
 $hostresult->free_result();
 $msgsresult->free_result();
-$hstnmresult->free_result();
+if (isset($hstnmresult)) {
+    $hstnmresult->free_result();
+}
 $kwresult->free_result();
 
 closelog();
