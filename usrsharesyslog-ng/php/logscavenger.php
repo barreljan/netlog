@@ -115,6 +115,9 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 $logcachequery->bind_param('s', $row['MSG']);
                 $logcachequery->execute();
 
+                // Prevent doubles from same host in this run
+                $host_cache_arr[] = $row['MSG'];
+
                 // Push message out to system to be fetched by the logparser
                 syslog(LOG_WARNING, "{$hostname}: {$row['MSG']}");
 
