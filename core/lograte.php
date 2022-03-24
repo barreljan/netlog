@@ -3,7 +3,7 @@
 // Hopefully this will be a quick way of identifying trouble spots
 
 // Including Netlog config and variables
-require("/usr/share/syslog-ng/etc/netlog.conf");
+require("../etc/config.php");
 
 $lock = aquire_lock();
 

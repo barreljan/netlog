@@ -6,7 +6,7 @@
 // This way the most active tables will have a reasonable size, thus queryable.
 
 // Including Netlog config and variables
-require("/usr/share/syslog-ng/etc/netlog.conf");
+require("../etc/config.php");
 
 $lock = aquire_lock();
 

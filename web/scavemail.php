@@ -2,7 +2,7 @@
 // NetLog scavenger email 
 // For continuous searching of specific events
 // Created, April 2016 | bartjan@pc-mania.nl
-include 'config/config.php';
+include '../etc/config.php';
 
 $conn = mysqli_connect($db_HOST,$db_USER,$db_PASS) or die ("Unable to connect to the database");
 

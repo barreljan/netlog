@@ -1,0 +1,6 @@
+etc/netlog.conf
+.git
+.idea
+.tmp
+.log
+.swp
