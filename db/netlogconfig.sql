@@ -25,7 +25,7 @@ CREATE TABLE `emailgroup`
 
 LOCK TABLES `emailgroup` WRITE;
 INSERT INTO `emailgroup`
-VALUES (1, 'Default', 'johndoe@domain.tld', 1);
+VALUES (1, 'None', '', 1);
 UNLOCK TABLES;
 
 --

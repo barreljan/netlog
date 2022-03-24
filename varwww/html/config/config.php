@@ -62,8 +62,9 @@ while ($global = $default_viewresults->fetch_assoc()) {
 }
 
 // Mail
-$mail_from = $config['global']['mail_from'];
-$mail_rcpt = $config['global']['mail_rcpt'];
+// Todo: figure out if this needs to be here
+//$mail_from = $config['global']['mail_from'];
+//$mail_rcpt = $config['global']['mail_rcpt'];
 
 // Debug
 $debug = True;

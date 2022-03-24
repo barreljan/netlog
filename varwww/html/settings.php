@@ -529,21 +529,23 @@ $emailgrpresults->free_result();
                         $id = $row['id'];
                         $rec = $row['recipients'];
                         $active = ($row['active'] == 1) ? " checked" : "";
+                        $disabled = ($row['groupname'] == "None") ? " disabled" : "";
                         ?>
                         <tr>
                             <td><?php echo $row['groupname']; ?></td>
                             <td><input id="settings_input_hostname" type="text" title="Recipients, comma separated"
-                                       name="contactsrec-<?php echo $id; ?>" value=<?php echo "\"" . $rec . "\""; ?>>
+                                       name="contactsrec-<?php echo $id; ?>"
+                                       value=<?php echo "\"" . $rec . "\"" . $disabled; ?>>
                             </td>
                             <td id="settings_checkbox">
                                 <input type="hidden" value="off" name="contactactive-<?php echo $row['id']; ?>">
                                 <input type="checkbox" title="Enable or disable this group"
-                                       name="contactactive-<?php echo $row['id']; ?>" <?php echo $active; ?>>
+                                       name="contactactive-<?php echo $row['id']; ?>" <?php echo $active . $disabled; ?>>
                             </td>
                             <td id="settings_checkbox">
                                 <input type="hidden" value="off" name="contactdelete-<?php echo $row['id']; ?>">
                                 <input type="checkbox" title="Delete this group"
-                                       name="contactdelete-<?php echo $row['id']; ?>">
+                                       name="contactdelete-<?php echo $row['id']; ?>"<?php echo $disabled; ?>>
                             </td>
                         </tr>
                         <?php
@@ -559,7 +561,8 @@ $emailgrpresults->free_result();
                         </td>
                         <td>
                             Enter one or more recipients:<br/>
-                            <input id="settings_input_hostname" title="Enter recipients, comma separated" type="text"
+                            <input id="settings_input_hostname" title="Enter recipients, comma separated"
+                                   type="text"
                                    name="new_recipients">
                         </td>
                     </tr>
@@ -620,11 +623,9 @@ $emailgrpresults->free_result();
                     </td>
                 </tr>
                 </table><?php
-            } ?>
+            }
+            echo "\n"; ?>
         </form>
-    </div>
-    <div class="footer">
-        <a href="#">Return to top</a>
     </div>
 </div>
 

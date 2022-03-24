@@ -3,7 +3,7 @@
 // For continuous searching of specific keywords (and thus events)
 
 // Including Netlog config and variables
-require("/usr/share/syslog-ng/etc/netlog.conf");
+require("../etc/netlog.conf");
 
 $lock = aquire_lock();
 
@@ -25,7 +25,7 @@ $cleancachequery->execute();
 $query = "SELECT `TABLE_NAME` AS `name`
             FROM `information_schema`.`COLUMNS`
            WHERE `COLUMN_NAME` = 'MSG'
-                 AND `TABLE_NAME` RLIKE 'HST_[0-9].*{$today}'
+                 AND `TABLE_NAME` RLIKE 'HST_[0-9].*$today'
                  AND `TABLE_NAME` NOT RLIKE 'HST_127_0_0_.*'";
 $hostquery = $db_link->prepare($query);
 $hostquery->execute();
@@ -56,9 +56,9 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
     $host = $hosts_table['name'];
 
     $query = "SELECT `MSG` 
-                FROM `{$database['DB']}`.`{$host}`
-               WHERE `TIME` >= '{$time}'
-                     AND ({$querykw1})
+                FROM `{$database['DB']}`.`$host`
+               WHERE `TIME` >= '$time'
+                     AND ($querykw1)
                ORDER BY `TIME` DESC";
     $msgsquery = $db_link->prepare($query);
     $msgsquery->execute();
@@ -72,7 +72,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
         // Get the user-submitted hostname
         $query = "SELECT `hostname`
                     FROM `{$database['DB_CONF']}`.`hostnames`
-                   WHERE `hostip` = \"{$hostip}\" LIMIT 1";
+                   WHERE `hostip` = \"$hostip\" LIMIT 1";
         $hstnmquery = $db_link->prepare($query);
         $hstnmquery->execute();
         $hstnmresult = $hstnmquery->get_result();
@@ -85,7 +85,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
         // Reading the cache
         $query = "SELECT `msg` 
                     FROM `{$database['DB_CONF']}`.`logcache`
-                   WHERE `HOST` = \"{$hostip}\"";
+                   WHERE `HOST` = \"$hostip\"";
         $cachequery = $db_link->prepare($query);
         $cachequery->execute();
         $cacheresult = $cachequery->get_result();
@@ -110,7 +110,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
             if (!in_array($row['MSG'], $host_cache_arr, true)) {
                 // Fill the cache with new entry
                 $query = "INSERT INTO `{$database['DB_CONF']}`.`logcache` (`HOST`, `MSG`)
-                          VALUES (\"{$hostip}\", ?)";
+                          VALUES (\"$hostip\", ?)";
                 $logcachequery = $db_link->prepare($query);
                 $logcachequery->bind_param('s', $row['MSG']);
                 $logcachequery->execute();
@@ -119,21 +119,11 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 $host_cache_arr[] = $row['MSG'];
 
                 // Push message out to system to be fetched by the logparser
-                syslog(LOG_WARNING, "{$hostname}: {$row['MSG']}");
+                syslog(LOG_WARNING, "$hostname: {$row['MSG']}");
 
-                // Send an email, for worst-case situation
+                // Send email to recipient(s), for selected keywords if group is active
                 if ((strpos($hostname, "coresw01") !== false) && (strpos($row['MSG'], "PSECURE_VIOLATION") !== false)) {
-                    $subject = "Network port violation on {$hostname}";
-                    $msg = "There is a port violation detected on the network\n\n";
-                    $msg .= "{$hostname}:\n {$row['MSG']}";
-                    $msg .= "\n\n\nTake actions asap!";
-                    $headers = array();
-                    $headers[] = "MIME-Version: 1.0";
-                    $headers[] = "Content-type: text/plain; charset=iso-8859-1";
-                    $headers[] = "From: Netlog server <{$from}>";
-                    $headers[] = "Reply-To: No-Reply <{$from}>";
-                    $headers[] = "X-Mailer: PHP/" . phpversion();
-                    mail($mail_rcpt, $subject, $msg, implode("\r\n", $headers), "-f {$mail_from}");
+                    send_email($hostname, $from, $row['MSG']);
                 }
             }
         }
