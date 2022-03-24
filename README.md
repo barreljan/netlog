@@ -8,7 +8,6 @@ Current development work: reworking from php <5.6-style to modern php, better SQ
 Current open items:
 - logscavenger email
 - global config settings page
-- directory structure
 - deployment/installation
 - documentation
 
