@@ -1,6 +1,6 @@
 <?php
 // Netlog: A Syslog-NG to MySQL parser with no-nonsense frontend
-// Project: https://github.com/barreljan/netlog'
+// Project: https://github.com/barreljan/netlog
 
 // Versioning etc
 const VERSION = 'v3.0';
