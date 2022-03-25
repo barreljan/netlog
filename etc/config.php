@@ -11,6 +11,15 @@ const AUTHOR = 'bartjan@pc-mania.nl';
 require('netlog.conf');
 $database ?? die('Database settings not found!');
 
+function is_session_started(): bool
+{
+    if (php_sapi_name() === 'cli')
+        return false;
+    if (version_compare(phpversion(), '5.4.0', '>='))
+        return session_status() === PHP_SESSION_ACTIVE;
+    return session_id() !== '';
+}
+
 function alpha2num($a)
 {
     // Converts an alphabetic string into an integer.

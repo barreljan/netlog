@@ -8,15 +8,6 @@ $session_name = "PHP_NETLOG";
 /*
  * Start (or not) session
  */
-function is_session_started(): bool
-{
-    if (php_sapi_name() === 'cli')
-        return false;
-    if (version_compare(phpversion(), '5.4.0', '>='))
-        return session_status() === PHP_SESSION_ACTIVE;
-    return session_id() !== '';
-}
-
 if (!is_session_started()) {
     session_name($session_name);
     session_start();
