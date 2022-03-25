@@ -20,6 +20,12 @@ function is_session_started(): bool
     return session_id() !== '';
 }
 
+function check_cli_sapi() {
+    if (PHP_SAPI != 'cli') {
+        die('Run me from the command line');
+    }
+}
+
 function alpha2num($a)
 {
     // Converts an alphabetic string into an integer.

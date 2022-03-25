@@ -8,6 +8,9 @@
 // Including Netlog config and variables
 require("../etc/config.php");
 
+// Check I am running from the command line
+check_cli_sapi();
+
 $lock = aquire_lock();
 
 openlog("logparser", 0, LOG_LOCAL0);

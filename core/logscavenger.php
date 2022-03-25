@@ -5,6 +5,9 @@
 // Including Netlog config and variables
 require("../etc/config.php");
 
+// Check I am running from the command line
+check_cli_sapi();
+
 $lock = aquire_lock();
 
 // Start a logging session with the appropriate PROG-name

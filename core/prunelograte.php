@@ -4,6 +4,9 @@
 // Including Netlog config and variables
 require("../etc/config.php");
 
+// Check I am running from the command line
+check_cli_sapi();
+
 $lock = aquire_lock();
 $days = $config['global']['lograte_days'];
 
