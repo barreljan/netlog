@@ -5,7 +5,7 @@
 // - A table per host, per month for the current and last months of logging
 
 // Including Netlog config and variables
-require("/usr/share/syslog-ng/etc/netlog.conf");
+require("../etc/config.php");
 
 $lock = aquire_lock();
 

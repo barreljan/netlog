@@ -1,5 +1,5 @@
 <?php
-require("config/config.php");
+require("../etc/config.php");
 $today = date('Y_m_d');
 
 $session_name = "PHP_NETLOG";
@@ -387,7 +387,7 @@ $emailgrpresults->free_result();
     <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script type="text/javascript" src="scripts/netlog.js"></script>
-    <!-- <?php echo "$NAME, $VERSION -- $AUTHOR"; ?> -->
+    <!-- <?php echo constant(NAME) . ", " . constant(VERSION) . " -- " . constant(AUTHOR); ?> -->
 </head>
 <body>
 <div class="container">

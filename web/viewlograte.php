@@ -1,5 +1,5 @@
 <?php
-require("config/config.php");
+require("../etc/config.php");
 require_once('jpgraph/jpgraph.php');
 require_once('jpgraph/jpgraph_line.php');
 
@@ -69,7 +69,7 @@ $lograteresult = $logratequery->get_result();
     <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script type="text/javascript" src="scripts/netlog.js"></script>
-    <!-- <?php echo "$NAME, $VERSION -- $AUTHOR"; ?> -->
+    <!-- <?php echo constant(NAME) . ", " . constant(VERSION) . " -- " . constant(AUTHOR); ?> -->
 </head>
 <body>
 <div class="container">

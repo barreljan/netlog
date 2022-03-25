@@ -23,7 +23,7 @@ if [ ! -f /etc/crontab ]; then
 	exit 1
 elif [ -f /etc/crontab ]; then
 	printf "setting cronjobs, but not active in /etc/cron.d/netlog\n";
-	cp cron/job >> /etc/cron.d/netlog;
+	cp cronjob > /etc/cron.d/netlog;
 fi
 
 if [ -d /usr/share/fonts ]; then

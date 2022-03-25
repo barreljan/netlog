@@ -1,19 +1,64 @@
 <?php
-// ###### NetLog ######
+// Netlog: A Syslog-NG to MySQL parser with no-nonsense frontend
+// Project: https://github.com/barreljan/netlog
 
 // Versioning etc
-$VERSION = "v3.0";
-$NAME = "Syslog-ng to MySQL parser";
-$AUTHOR = "bartjan@pc-mania.nl";
-$PROJECT = "https://github.com/barreljan/netlog";
+const VERSION = 'v3.0';
+const NAME = 'Syslog-ng to MySQL parser';
+const AUTHOR = 'bartjan@pc-mania.nl';
 
-// MySQL Database Information
-$database = array();
-$database['DB'] = "syslog";
-$database['DB_CONF'] = "netlogconfig";
-$database['USER'] = "netlog";
-$database['PASS'] = "WonFaznu$(s#3nCi";
-$database['HOST'] = "127.0.0.1";
+// Load database settings
+require('netlog.conf');
+$database ?? die('Database settings not found!');
+
+function alpha2num($a)
+{
+    // Converts an alphabetic string into an integer.
+    $r = 0;
+    $l = strlen($a);
+    for ($i = 0; $i < $l; $i++) {
+        $r += pow(26, $i) * (ord($a[$l - $i - 1]) - 0x40);
+    }
+    return substr($r - 1, 0, 9);
+}
+
+function aquire_lock()
+{
+    global $argv;
+    // Use the origin's filename to make an uniq id
+    $key = alpha2num(basename($argv[0], ".php"));
+    $maxAcquire = 1;
+    $permissions = 0666;
+    $autoRelease = 1;
+
+    $semaphore = sem_get($key, $maxAcquire, $permissions, $autoRelease);
+    if (sem_acquire($semaphore, true)) {
+        return $semaphore;
+    } else {
+        die("Process already running\n");
+    }
+}
+
+function unlock($semaphore)
+{
+    sem_release($semaphore);
+}
+
+function send_email($hostname, $from, $message)
+{
+    global $mail_from, $mail_rcpt;
+    $subject = "Network port violation on $hostname";
+    $msg = "There is a event detected by Logscavenger\n\n";
+    $msg .= "$hostname:\n $message";
+    $msg .= "\n\n\nTake actions asap!";
+    $headers = array();
+    $headers[] = "MIME-Version: 1.0";
+    $headers[] = "Content-type: text/plain; charset=iso-8859-1";
+    $headers[] = "From: Netlog server <$from>";
+    $headers[] = "Reply-To: No-Reply <$from>";
+    $headers[] = "X-Mailer: PHP/" . phpversion();
+    mail($mail_rcpt, $subject, $msg, implode("\r\n", $headers), "-f $mail_from");
+}
 
 function connect_db()
 {
@@ -35,7 +80,11 @@ function connect_db()
     return $db_link;
 }
 
+// Connect to database
 $db_link = connect_db();
+
+// Fifo socket
+$log_fifo = "/var/log/syslog.fifo";
 
 // Populate the global config settings
 $config = array();
@@ -62,9 +111,8 @@ while ($global = $default_viewresults->fetch_assoc()) {
 }
 
 // Mail
-// Todo: figure out if this needs to be here
-//$mail_from = $config['global']['mail_from'];
-//$mail_rcpt = $config['global']['mail_rcpt'];
+$mail_from = $config['global']['mail_from'];
+$mail_rcpt = $config['global']['mail_rcpt'];
 
 // Debug
 $debug = True;
@@ -92,7 +140,6 @@ $refresh = explode(',', $config['global']['refresh']);
 $height = $config['global']['lograte_graph_height'];
 $width = $config['global']['lograte_graph_width'];
 $graphhistory = explode(',', $config['global']['lograte_history']);
-
 
 // ###### Netalert variables ######
 

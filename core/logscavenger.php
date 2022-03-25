@@ -3,7 +3,7 @@
 // For continuous searching of specific keywords (and thus events)
 
 // Including Netlog config and variables
-require("../etc/netlog.conf");
+require("../etc/config.php");
 
 $lock = aquire_lock();
 
