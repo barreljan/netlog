@@ -1,0 +1,2 @@
+This directory could contain maintenance scripts or tools to provide a sync.
+For instance, the `netlogconfig` SQL table could be synced with your NMS (like LibreNMS).

@@ -1,9 +1,11 @@
 <?php
+// Netlog: A Syslog-NG to MySQL parser with no-nonsense frontend
+// Project: https://github.com/barreljan/netlog'
+
 // Versioning etc
 const VERSION = 'v3.0';
 const NAME = 'Syslog-ng to MySQL parser';
 const AUTHOR = 'bartjan@pc-mania.nl';
-const PROJECT = 'https://github.com/barreljan/netlog';
 
 // Load database settings
 require('netlog.conf');
