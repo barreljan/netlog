@@ -127,8 +127,8 @@ while ($global = $default_viewresults->fetch_assoc()) {
 }
 
 // Mail
-$mail_from = $config['global']['mail_from'];
-$mail_rcpt = $config['global']['mail_rcpt'];
+$mail_from = $config['global']['cron_mail_from'];
+$mail_rcpt = $config['global']['cron_mail_rcpt'];
 
 // Debug
 $debug = True;

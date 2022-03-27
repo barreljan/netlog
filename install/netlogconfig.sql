@@ -164,7 +164,7 @@ CREATE TABLE `logscavenger`
 --
 
 LOCK TABLES `logscavenger` WRITE;
-INSERT INTO `logscavenger` (id, keyword, active, emailgroup)
+INSERT INTO `logscavenger` (id, keyword, active, emailgroupid)
 VALUES (1, 'reboot', 1, 1);
 UNLOCK TABLES;
 

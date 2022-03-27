@@ -5,7 +5,7 @@
 // - A table per host, per month for the current and last months of logging
 
 // Including Netlog config and variables
-require("../etc/config.php");
+require(dirname(__DIR__, 1) . "/etc/config.php");
 
 // Check I am running from the command line
 check_cli_sapi();
