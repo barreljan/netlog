@@ -38,7 +38,7 @@ if ($loglinequery) {
         <link rel="stylesheet" type="text/css" href="css/style.css">
         <script type="text/javascript" src="scripts/netlog.js"></script>
         <meta http-equiv="refresh" content="15">
-        <!-- <?php echo constant(NAME) . ", " . constant(VERSION) . " -- " . constant(AUTHOR); ?> -->
+        <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
     </head><?php
     if ((sizeof($_GET) >= 0) && (isset($_GET['inline']))) { ?>
     <body style="background-color: #ffffff;">
