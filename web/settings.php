@@ -103,6 +103,9 @@ if (isset($_POST)) {
     if (isset($_POST['contacts'])) {
         $_SESSION['view'] = "contacts";
     }
+    if (isset($_POST['global'])) {
+        $_SESSION['view'] = "global";
+    }
     if (!isset($_SESSION['viewitem'])) {
         $_SESSION['viewitem'] = "Unnamed";
     }
@@ -251,7 +254,8 @@ unset($_SESSION['names_config']);
 unset($_SESSION['scav_config']);
 unset($_SESSION['typelist']);
 unset($_SESSION['emailgrp']);
-unset($query, $hostnameresult, $tablesresult, $typeresult, $kwresults, $emailgrpresults);
+unset($_SESSION['globalsetting']);
+unset($query, $hostnameresult, $tablesresult, $typeresult, $kwresults, $emailgrpresults, $globalsetresult);
 
 // Set blanks (if no entry in DB exists)
 $current_hosts = array();
@@ -362,10 +366,23 @@ $emailgroups = array();
 while ($emailgrp = $emailgrpresults->fetch_assoc()) {
     $emailgroups[] = $emailgrp;
     $groupname = $emailgrp['groupname'];
-    $_SESSION["emailgrp"][$groupname] = $emailgrp['id'];
+    $_SESSION['emailgrp'][$groupname] = $emailgrp['id'];
 }
 $emailgrpresults->free_result();
 
+// Get the default (global) settings and put it in a list
+$query = "SELECT *
+            FROM `{$database['DB_CONF']}`.`global`
+           ORDER BY `setting`";
+$globalsetgrquery = $db_link->prepare($query);
+$globalsetgrquery->execute();
+$globalsetresult = $globalsetgrquery->get_result();
+while ($row = $globalsetresult->fetch_assoc()) {
+    $setting = $row['setting'];
+    $value = $row['value'];
+    $_SESSION['globalset'][$setting] = $value;
+}
+$globalsetresult->free_result();
 
 /*
  * Build the page
@@ -396,6 +413,7 @@ $emailgrpresults->free_result();
                 <button type="submit" name="names">Names/Types</button>
                 <button type="submit" name="scavenger">Scavenger</button>
                 <button type="submit" name="contacts">Contacts</button>
+                <button type="submit" name="global">Global</button>
             </form>
         </div>
         <div class="header_toggle">
@@ -436,70 +454,71 @@ $emailgrpresults->free_result();
             if ((isset($_SESSION['view'])) && ($_SESSION['view'] == "scavenger")) {
                 ?>
                 <table class="none">
-                <tr>
-                    <th id="settings">Netalert Scavenger:</th>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <th id="settings">Keyword</th>
-                    <th id="settings_hostname">Email group</th>
-                    <th id="settings_checkbox">Active</th>
-                    <th id="settings_checkbox">Delete?</th>
-                </tr>
-                <?php
-                foreach ($keywords as $kwid => $keyword) { ?>
+                    <tr>
+                        <th id="settings">Netalert Scavenger:</th>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th id="settings">Keyword</th>
+                        <th id="settings_hostname">Email group</th>
+                        <th id="settings_checkbox">Active</th>
+                        <th id="settings_checkbox">Delete?</th>
+                    </tr>
+                    <?php
+                    foreach ($keywords as $kwid => $keyword) { ?>
+                        <tr>
+                            <td>
+                                <?php echo $keyword; ?>
+                            </td>
+                            <td>
+                                <select title="Select the email group"
+                                        name=<?php echo "\"scavemailgroupid-$kwid\""; ?>> <?php
+                                    foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
+                                        $group_selected = ($_SESSION['scav_config']["scavemailgroupid-$kwid"] == $groupname ? ' selected' : '');
+                                        echo "\n"; ?>
+                                        <option value=
+                                        <?php echo "\"" . $groupname . "\"" . $group_selected; ?>><?php echo $groupname; ?></option><?php
+                                    }
+                                    echo "\n"; ?>
+                                </select>
+                            </td>
+                            <td id="settings_checkbox">
+                                <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">
+                                <input type="checkbox" title="Enable or disable scavenging"
+                                       name=<?php echo "\"scavactive-$kwid\"";
+                                if ($_SESSION['scav_config']["scavactive-$kwid"] == 'on') {
+                                    echo ' checked';
+                                } ?>>
+                            </td>
+                            <td id="settings_checkbox">
+                                <input type="hidden" value="off" name="scavdelete-<?php echo $kwid; ?>">
+                                <input type="checkbox" title="Delete this entry" name="scavdelete-<?php echo $kwid; ?>">
+                            </td>
+                        </tr>
+                    <?php }
+                    ?>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
                     <tr>
                         <td>
-                            <?php echo $keyword; ?>
-                        </td>
-                        <td>
-                            <select title="Select the email group"
-                                    name=<?php echo "\"scavemailgroupid-$kwid\""; ?>> <?php
-                                foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
-                                    $group_selected = ($_SESSION['scav_config']["scavemailgroupid-$kwid"] == $groupname ? ' selected' : '');
-                                    echo "\n"; ?>
-                                    <option value=
-                                    <?php echo "\"" . $groupname . "\"" . $group_selected; ?>><?php echo $groupname; ?></option><?php
-                                }
-                                echo "\n"; ?>
-                            </select>
-                        </td>
-                        <td id="settings_checkbox">
-                            <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">
-                            <input type="checkbox" title="Enable or disable scavenging"
-                                   name=<?php echo "\"scavactive-$kwid\"";
-                            if ($_SESSION['scav_config']["scavactive-$kwid"] == 'on') {
-                                echo ' checked';
-                            } ?>>
-                        </td>
-                        <td id="settings_checkbox">
-                            <input type="hidden" value="off" name="scavdelete-<?php echo $kwid; ?>">
-                            <input type="checkbox" title="Delete this entry" name="scavdelete-<?php echo $kwid; ?>">
+                            Enter a new keyword:<br/>
+                            <input title="Enter a new keyword to scavenge" type="text" name="new_keyword">
                         </td>
                     </tr>
-                <?php }
-                ?>
-                <tr>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>
-                        Enter a new keyword:<br/>
-                        <input title="Enter a new keyword to scavenge" type="text" name="new_keyword">
-                    </td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <button type="submit">submit
-                        </button>
-                    </td>
-                </tr>
-                </table><?php
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit">submit
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+                <?php
             } elseif ((isset($_SESSION['view'])) && ($_SESSION['view'] == "contacts")) {
                 ?>
                 <table class="none">
@@ -570,50 +589,89 @@ $emailgrpresults->free_result();
 
                 </table>
                 <?php
+            } elseif ((isset($_SESSION['view'])) && ($_SESSION['view'] == "global")) {
+                ?>
+                <table class="none">
+                    <tr>
+                        <th id="settings">Global settings:</th>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th id="settings_hostname">Setting</th>
+                        <th id="settings_hostname">Value</th>
+                    </tr>
+                    <?php
+                    foreach($_SESSION['globalset'] as $setting => $value) {
+                        ?>
+                        <tr>
+                            <td><?php echo $setting; ?></td>
+                            <td><input id="setting" type="text" title="Value for setting"
+                                       name="global-<?php echo $setting; ?> value="<?php echo $value; ?>">
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit">submit
+                            </button>
+                        </td>
+                    </tr>
+
+
+                </table>
+                <?php
             } else {
                 ?>
                 <table class="none">
-                <tr>
-                    <th id="settings">Log client hostnames:</th>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <th id="settings">IP</th>
-                    <th id="settings_hostname">Current Name</th>
-                    <th id="settings_hostname">New Name</th>
-                    <th id="settings_hosttype">Type</th>
-                    <th id="settings_checkbox">Lograte</th><?php if ($_SESSION['viewitem'] == "Unused") {
-                        echo "\n                    <th id=\"settings_checkbox\">Delete?</th>\n";
+                    <tr>
+                        <th id="settings">Log client hostnames:</th>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th id="settings">IP</th>
+                        <th id="settings_hostname">Current Name</th>
+                        <th id="settings_hostname">New Name</th>
+                        <th id="settings_hosttype">Type</th>
+                        <th id="settings_checkbox">Lograte</th><?php if ($_SESSION['viewitem'] == "Unused") {
+                            echo "\n                    <th id=\"settings_checkbox\">Delete?</th>\n";
+                        } else {
+                            echo "\n";
+                        } ?>
+                    </tr><?php
+                    if ($_SESSION['viewitem'] == "All") {
+                        gen_rows_hosts($current_hosts);
+                    } elseif ($_SESSION['viewitem'] == "Unused") {
+                        gen_rows_hosts($unused_hosts);
                     } else {
-                        echo "\n";
-                    } ?>
-                </tr><?php
-                if ($_SESSION['viewitem'] == "All") {
-                    gen_rows_hosts($current_hosts);
-                } elseif ($_SESSION['viewitem'] == "Unused") {
-                    gen_rows_hosts($unused_hosts);
-                } else {
-                    // Unnamed
-                    gen_rows_hosts($unnamed_hosts);
-                }
+                        // Unnamed
+                        gen_rows_hosts($unnamed_hosts);
+                    }
 
-                ?>
-                <tr>
-                    <td>
-                        &nbsp;
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <button type="submit"<?php if (($_SESSION['viewitem'] == "Unnamed") && (sizeof($unnamed_hosts) == 0)) {
-                            echo " disabled";
-                        } ?>>submit
-                        </button>
-                    </td>
-                </tr>
-                </table><?php
+                    ?>
+                    <tr>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="submit"<?php if (($_SESSION['viewitem'] == "Unnamed") && (sizeof($unnamed_hosts) == 0)) {
+                                echo " disabled";
+                            } ?>>submit
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+                <?php
             }
             echo "\n"; ?>
         </form>
