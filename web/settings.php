@@ -253,6 +253,7 @@ if (isset($_POST)) {
 unset($_SESSION['names_config']);
 unset($_SESSION['scav_config']);
 unset($_SESSION['typelist']);
+unset($_SESSION['hosttypes']);
 unset($_SESSION['emailgrp']);
 unset($_SESSION['globalsetting']);
 unset($query, $hostnameresult, $tablesresult, $typeresult, $kwresults, $emailgrpresults, $globalsetresult);
@@ -329,6 +330,7 @@ $typeresult = $typequery->get_result();
 
 while ($types = $typeresult->fetch_assoc()) {
     $_SESSION['typelist'][$types['name']] = $types['id'];
+    $_SESSION['hosttypes'][$types['id']] = $types['name'];
 }
 $typeresult->free_result();
 
@@ -379,7 +381,11 @@ $globalsetgrquery->execute();
 $globalsetresult = $globalsetgrquery->get_result();
 while ($row = $globalsetresult->fetch_assoc()) {
     $setting = $row['setting'];
-    $value = $row['value'];
+    if ($row['setting'] == 'default_view') {
+        $value = $_SESSION['hosttypes'][$row['value']];
+    } else {
+        $value = $row['value'];
+    }
     $_SESSION['globalset'][$setting] = $value;
 }
 $globalsetresult->free_result();
@@ -494,7 +500,8 @@ $globalsetresult->free_result();
                             </td>
                             <td id="settings_checkbox">
                                 <input type="hidden" value="off" name="scavdelete-<?php echo $kwid; ?>">
-                                <input type="checkbox" title="Delete this entry" name="scavdelete-<?php echo $kwid; ?>">
+                                <input type="checkbox" title="Delete this entry"
+                                       name="scavdelete-<?php echo $kwid; ?>">
                             </td>
                         </tr>
                     <?php }
@@ -603,13 +610,28 @@ $globalsetresult->free_result();
                         <th id="settings_hostname">Value</th>
                     </tr>
                     <?php
-                    foreach($_SESSION['globalset'] as $setting => $value) {
+                    foreach ($_SESSION['globalset'] as $setting => $value) {
                         ?>
                         <tr>
                             <td><?php echo $setting; ?></td>
-                            <td><input id="setting" type="text" title="Value for setting"
-                                       name="global-<?php echo $setting; ?> value="<?php echo $value; ?>">
-                            </td>
+                            <?php
+                            // Make a select box
+                            if ($setting == 'default_view') { ?>
+                                <td><select id="settings_select_global" title="Select default type" name="global-<?php echo $setting; ?>">
+                                    <?php
+                                    foreach ($_SESSION['typelist'] as $typename => $typeid) {
+                                        $hosttype_selected = ($value == $typename ? ' selected' : '');
+                                        echo "\n"; ?>
+                                        <option value=
+                                        <?php echo "\"" . $typename . "\"" . $hosttype_selected; ?>><?php echo $typename; ?></option><?php
+                                    } ?>
+                                </select></td><?php
+                            } else {
+                                ?>
+                                <td><input id="settings_input_global" type="text" title="Value for setting"
+                                           name="global-<?php echo $setting; ?>" value="<?php echo $value; ?>">
+                                </td>
+                            <?php } ?>
                         </tr>
                         <?php
                     }

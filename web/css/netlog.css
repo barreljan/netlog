@@ -40,6 +40,7 @@ input {
     font-size: 10px;
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
     background-color: #FFFFFF;
+    border-color: #e8e4e4;
 }
 
 input button {
@@ -288,6 +289,15 @@ table.none td {
 
 #settings_input_hostname {
     width: 95%;
+}
+
+#settings_input_global {
+    width: 400px;
+}
+
+#settings_select_global {
+    margin-left: 0;
+    width: 408px;
 }
 
 #settings_hosttype {
