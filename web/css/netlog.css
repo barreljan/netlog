@@ -31,6 +31,10 @@ button {
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
 }
 
+#button_active {
+    box-shadow: 0 1px #888888;
+}
+
 option {
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
     font-size: 10px;
@@ -84,6 +88,10 @@ a:active {
 h3 {
     text-decoration: none;
     font-size: 110%;
+}
+
+pre.codedebug {
+    font-size: 12px;
 }
 
 td {

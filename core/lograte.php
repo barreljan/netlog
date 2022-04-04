@@ -5,7 +5,7 @@
 // Including Netlog config and variables
 require(dirname(__DIR__, 1) . "/etc/config.php");
 
-// Check I am running from the command line
+// Check if I am running from the command line
 check_cli_sapi();
 
 $lock = aquire_lock();

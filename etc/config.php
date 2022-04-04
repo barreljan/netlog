@@ -7,6 +7,10 @@ const VERSION = 'v3.0';
 const NAME = 'Syslog-ng to MySQL parser';
 const AUTHOR = 'bartjan@pc-mania.nl';
 
+// Debug
+//$debug = true;
+$debug = false;
+
 // Load database settings
 require('netlog.conf');
 $database ?? die('Database settings not found!');
@@ -59,6 +63,26 @@ function unlock($semaphore)
 {
     sem_release($semaphore);
 }
+
+function codedebug()
+{
+    /*
+     * For displaying some interesting parts on the bottom of the result div
+     */
+    global $debug;
+
+    if ($debug) {
+        echo "<br><br>\n<pre class='codedebug'>\n";
+        echo "\$_SESSION:\n";
+        print_r($_SESSION);
+        echo "\$_POST:\n";
+        print_r($_POST);
+        // echo "constants\n";
+        // print_r(get_defined_constants(true)['user']);
+        echo "</pre>\n";
+    }
+}
+
 
 function send_email($hostname, $from, $message)
 {
@@ -130,9 +154,6 @@ while ($global = $default_viewresults->fetch_assoc()) {
 $mail_from = $config['global']['cron_mail_from'];
 $mail_rcpt = $config['global']['cron_mail_rcpt'];
 
-// Debug
-$debug = True;
-/** @noinspection PhpConditionAlreadyCheckedInspection */
 if ($debug) {
     error_reporting(-1);
     ini_set('display_errors', 'On');
