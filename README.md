@@ -3,13 +3,12 @@ A Syslog-NG to MySQL parser with no-nonsense frontend
 
 ![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-development-informational.svg) ![](https://img.shields.io/badge/progress-70%25-yellowgreen.svg) 
 
-Current development work: reworking from php <5.6-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
+Current development work: reworking from php <5.4-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
 
 Current open items:
-- logscavenger email
-- global config settings page
-- deployment/installation
-- documentation
+- coremodule: logscavenger email-on-event
+- general: deployment/installation
+- general: documentation
 
 ### Requirements
 
@@ -21,7 +20,7 @@ _Build and tested on Centos7.9, Apache 2.4 PHP 7.4 (Remi), MariaDB 10.6_
 
 ### External software
 
-- TrueType fonts
+- TrueType (msttcore) fonts
 - JPGraph 4.3.5 (https://jpgraph.net/)
 
 ### Features
@@ -35,7 +34,7 @@ Netlog has a few key-features
 - archiving day-to-day tables in monthly tables after (default) 14 days
 
 And of course, most settings are present in the 'global' netlog config database table, so some customisation can be made.
-The hostname table can be modified with ease to keep it in sync with your NMS (e.g. LibreNMS) as this is an simple task between the 2 databases.
+The hostname table can be modified with ease to keep it in sync with your NMS (e.g. LibreNMS) as this is a simple task between the 2 databases.
 
 
 ### The gui

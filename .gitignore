@@ -1,4 +1,5 @@
 etc/netlog.conf
+/web/web
 .git
 .idea
 .tmp

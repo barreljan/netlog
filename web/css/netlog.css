@@ -31,6 +31,10 @@ button {
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
 }
 
+#button_active {
+    box-shadow: 0 1px #888888;
+}
+
 option {
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
     font-size: 10px;
@@ -40,6 +44,7 @@ input {
     font-size: 10px;
     font-family: 'bitstream_vera_sans_mono', Verdana, Arial, sans-serif;
     background-color: #FFFFFF;
+    border-color: #e8e4e4;
 }
 
 input button {
@@ -83,6 +88,10 @@ a:active {
 h3 {
     text-decoration: none;
     font-size: 110%;
+}
+
+pre.codedebug {
+    font-size: 12px;
 }
 
 td {
@@ -288,6 +297,15 @@ table.none td {
 
 #settings_input_hostname {
     width: 95%;
+}
+
+#settings_input_global {
+    width: 400px;
+}
+
+#settings_select_global {
+    margin-left: 0;
+    width: 408px;
 }
 
 #settings_hosttype {

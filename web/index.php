@@ -186,16 +186,16 @@ if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             $lvl_filter = "'debug'";
             break;
         case "info":
-            $lvl_filter = "'info', 'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency', 'panic'";
             break;
         case "warning":
-            $lvl_filter = "'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'warning', 'error', 'critical', 'alert', 'emergency', 'panic'";
             break;
-        case "err":
-            $lvl_filter = "'err', 'crit', 'alert', 'emergency', 'panic'";
+        case "error":
+            $lvl_filter = "'error', 'critical', 'alert', 'emergency', 'panic'";
             break;
-        case "crit":
-            $lvl_filter = "'crit', 'alert', 'emergency', 'panic'";
+        case "critical":
+            $lvl_filter = "'critical', 'alert', 'emergency', 'panic'";
             break;
         case "alert":
             $lvl_filter = "'alert', 'emergency', 'panic'";
@@ -208,7 +208,7 @@ if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             break;
         default:
             // also 'notice'
-            $lvl_filter = "'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'notice', 'warning', 'error', 'critical', 'alert', 'emergency', 'panic'";
     }
 }
 
@@ -682,11 +682,11 @@ if (!$empty_iplist) {
                                     case "warning":
                                         echo "class=\"warning\">";
                                         break;
-                                    case "err":
-                                        echo "class=\"err\">";
+                                    case "error":
+                                        echo "class=\"error\">";
                                         break;
-                                    case "crit":
-                                        echo "class=\"crit\">";
+                                    case "critical":
+                                        echo "class=\"critical\">";
                                         break;
                                     case "alert":
                                         echo "class=\"alert\">";

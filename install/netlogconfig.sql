@@ -79,7 +79,8 @@ CREATE TABLE `hostnames`
 
 LOCK TABLES `hostnames` WRITE;
 INSERT INTO `hostnames`
-VALUES (1, '127.0.0.1', 'localhost', 2, 1);
+VALUES (1, '127.0.0.1', 'localhost', 2, 1),
+       (2, '127.0.0.2', 'Netalert', 2, 1);
 UNLOCK TABLES;
 
 --
@@ -196,7 +197,7 @@ VALUES ('cron_mail_from', 'no-reply@domain.tld'),
        ('lograte_graph_width', '750'),
        ('lograte_history', '30,60,120,240,480,1440,2880,4320,10080'),
        ('log_fields', 'HOST,FAC,PRIO,LVL,TAG,DAY,TIME,PROG,MSG'),
-       ('log_levels', 'debug,info,notice,warning,err,crit,alert,emergency,panic'),
+       ('log_levels', 'debug,info,notice,warning,error,critical,alert,emergency,panic'),
        ('netalert_fields', 'DAY,TIME,LVL,MSG,PROG'),
        ('netalert_show_lines', '20'),
        ('netalert_time_threshold', '3600'),
