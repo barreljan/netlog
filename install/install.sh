@@ -94,7 +94,7 @@ fi
 
 # Check if installation directory is not present
 printf "  Check installation directory\\t\\t"
-if [[ ! -L "$INSTALL_DIR" ]] || [[ -d "$INSTALL_DIR" ]]; then
+if [[ ! -L "$INSTALL_DIR" && ! -d "$INSTALL_DIR" ]]; then
   printf "%b No symlink or directory exists\\n" "${TICK}"
 else
   printf "%b Symlink or directory exists\\n" "${CROSS}"
