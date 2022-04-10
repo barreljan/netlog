@@ -1,13 +1,12 @@
 # Netlog
 A Syslog-NG to MySQL parser with no-nonsense frontend
 
-![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-development-informational.svg) ![](https://img.shields.io/badge/progress-70%25-yellowgreen.svg) 
+![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-development-informational.svg) ![](https://img.shields.io/badge/progress-80%25-green.svg) 
 
 Current development work: reworking from php <5.4-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
 
 Current open items:
 - coremodule: logscavenger email-on-event
-- general: deployment/installation
 - general: documentation
 
 ### Requirements
