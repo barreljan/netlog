@@ -1,5 +1,5 @@
 CREATE DATABASE `syslog`;
-GRANT ALL ON syslog.* TO 'netlog'@'localhost' IDENTIFIED BY 'WonFaznu$(s#3nCi';
+GRANT ALL ON syslog.* TO 'netlog'@'localhost' IDENTIFIED BY '<<PASSWORD>>';
 
 USE syslog;
 

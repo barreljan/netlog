@@ -1,5 +1,5 @@
 CREATE DATABASE `netlogconfig`;
-GRANT ALL ON netlogconfig.* TO 'netlog'@'localhost' IDENTIFIED BY 'WonFaznu$(s#3nCi';
+GRANT ALL ON netlogconfig.* TO 'netlog'@'localhost' IDENTIFIED BY '<<PASSWORD>>';
 USE netlogconfig;
 
 --

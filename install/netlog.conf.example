@@ -5,5 +5,5 @@ $database = array();
 $database['DB'] = "syslog";
 $database['DB_CONF'] = "netlogconfig";
 $database['USER'] = "netlog";
-$database['PASS'] = "!v3rysuPersecr3T@";
+$database['PASS'] = "<<PASSWORD>>";
 $database['HOST'] = "127.0.0.1";
