@@ -173,7 +173,7 @@ else
 fi
 # Check if the DBs do not exist, so it is a clean install
 printf "  Check for the databases...\\t\\t"
-if ! mysql --defaults-file="$CNFFILE" -A -e 'USE netlogcaonfig; USE sysalog' 1>/dev/null 2>&1; then
+if ! mysql --defaults-file="$CNFFILE" -A -e 'USE netlogconfig; USE syslog' 1>/dev/null 2>&1; then
   printf "%b Databases not found\\n" "${TICK}"
 else
   printf "%b One or more databases found\\n" "${CROSS}"
