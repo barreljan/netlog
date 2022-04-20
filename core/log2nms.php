@@ -19,7 +19,7 @@ if (!$nms_db_link->select_db($nms_database['DB'])) {
  *
  * @param string $hostname A hostname matching the ip address
  * @param string $hostip An ip address matching the hostname
- * @param array $message_row
+ * @param array $message_row The complete result of the syslog message
  */
 function remote_syslog(string $hostname, string $hostip, array $message_row)
 {
@@ -49,6 +49,7 @@ function remote_syslog(string $hostname, string $hostip, array $message_row)
     $devquery->execute();
     $devresult = $devquery->get_result();
 
+    // If there is a match, make the query and execute
     if ($devresult->num_rows == 1) {
         $row = $devresult->fetch_assoc();
         $dev_id = $row['device_id'];
@@ -69,5 +70,9 @@ function remote_syslog(string $hostname, string $hostip, array $message_row)
         $insertquery->execute();
 
         $nms_db_link->commit();
+
+        $devresult->free_result();
     }
 }
+
+$nms_db_link->close();
