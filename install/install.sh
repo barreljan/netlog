@@ -259,8 +259,8 @@ fi
 printf "  Check presence Logparser daemon\\t"
 if [[ ! -f /usr/lib/systemd/system/logparser.service ]]; then
   cp "$SCRIPTPATH/logparser.service" /usr/lib/systemd/system/
-  /bin/systemctl deamon-reload
-  /bin/systemctl enable logparser
+  /bin/systemctl daemon-reload 1>/dev/null 2>&1
+  /bin/systemctl enable logparser 1>/dev/null 2>&1
   printf "%b Logparser daemon installed\\n" "${TICK}"
 else
   printf "%b Logparser daemon found\\n" "${CROSS}"
@@ -304,17 +304,30 @@ cp "$SCRIPTPATH/netlog.conf.example" "$TEMPDIR/netlog.conf"
 sed -i "s/<<PASSWORD>>/$NETLOG_PASS/" "$TEMPDIR/netlog.conf"
 if [[ ! -f "$INSTALL_DIR/etc/netlog.conf" ]]; then
   cp "$TEMPDIR/netlog.conf" "$INSTALL_DIR/etc/netlog.conf"
+  printf "%b Netlog.conf successfuly copied\\n" "${TICK}"
 else
   printf "%b Config already exists\\n" "${CROSS}"
-  printf "  %b Verify existence of %s and compare\\n" "${INFO}" "$INSTALL_DIR/etc/config.php"
-  printf "      with %s\\n" "$TEMPDIR/config.php"
+  printf "  %b Verify existence of %s and compare\\n" "${INFO}" "$INSTALL_DIR/etc/netlog.conf"
+  printf "      with %s\\n" "$TEMPDIR/netlog.conf"
   TEMP_CLEAN=false
+fi
+
+# Copy the Httpd conf file to its location
+printf "  Copying the Httpd config\\t\\t"
+if [[ ! -f "$HTTPD_CONFD_DIR/netlog.conf" ]]; then
+  cp "$SCRIPTPATH/httpd.conf" "$HTTPD_CONFD_DIR/netlog.conf"
+  printf "%b Httpd config successfuly copied\\n" "${TICK}"
+else
+  printf "%b Config already exists\\n" "${CROSS}"
+  printf "  %b Verify existence of %s and compare\\n" "${INFO}" "$INSTALL_DIR/httpd.conf"
+  printf "      with %s\\n" "$HTTPD_CONFD_DIR/netlog.conf"
 fi
 
 # Copy the Syslog-NG conf file to its location
 printf "  Copying the Syslog-NG config\\t\\t"
 if [[ ! -f "$SYSLOGNG_DIR/netlog.conf" ]]; then
   cp "$SCRIPTPATH/syslog.conf" "$SYSLOGNG_DIR/netlog.conf"
+  printf "%b Syslog-NG config successfuly copied\\n" "${TICK}"
 else
   printf "%b Config already exists\\n" "${CROSS}"
   printf "  %b Verify existence of %s and compare\\n" "${INFO}" "$INSTALL_DIR/syslog.conf"
@@ -352,6 +365,7 @@ fi
 printf "  Copying the cron to /etc/cron.d\\t"
 if [[ ! -f "$CROND_DIR"/netlog ]]; then
   cp "$SCRIPTPATH/netlog.cronjob" "$CROND_DIR"/netlog
+  printf "%b Cron successfuly copied\\n" "${TICK}"
 else
   printf "%b Cron alreay exists\\n" "${CROSS}"
   printf "  %b Verify existence of %s/netlog and compare\\n" "${INFO}" "$CROND_DIR"
