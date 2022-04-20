@@ -14,25 +14,37 @@ if (!$nms_db_link->select_db($nms_database['DB'])) {
     die;
 }
 
-/*
+/**
  * Inserting the message as-is into the LibreNMS database
+ *
+ * @param string $hostname A hostname matching the ip address
+ * @param string $hostip An ip address matching the hostname
+ * @param array $message_row
  */
-function remote_syslog($hostname, $hostip, $message_row)
+function remote_syslog(string $hostname, string $hostip, array $message_row)
 {
-    // $hostname = a string containing the user-submitted name
-    // $hostip = the matching IP-address of the message
-    // $message_row = the complete row (array) fetched by the logscavenger
     global $nms_database, $nms_db_link;
 
-    // Get hostnames and their ID's
+    // Conversion table as LibreNMS does prefer integer values
+    $lvl['emerg'] = $lvl['emergency'] = $lvl['panic'] = '0';
+    $lvl['alert'] = '1';
+    $lvl['critical'] = $lvl['crit'] = '2';
+    $lvl['error'] = $lvl['err'] = '3';
+    $lvl['warning'] = '4';
+    $lvl['notice'] = '5';
+    $lvl['informational'] = $lvl['info'] = '6';
+    $lvl['debug'] = '7';
+
+    // Get hostname and the ID
+    $hostname = "%$hostname%";
+    $inet_pton = inet_pton($hostip);
+
     $query = "SELECT `device_id`
                 FROM `{$nms_database['DB']}`.`devices`
                WHERE `hostname` LIKE ?
                   OR `ip` = ?
                LIMIT 1";
     $devquery = $nms_db_link->prepare($query);
-    $hostname = "%$hostname%";
-    $inet_pton = inet_pton($hostip);
     $devquery->bind_param('ss', $hostname, $inet_pton);
     $devquery->execute();
     $devresult = $devquery->get_result();
@@ -43,7 +55,7 @@ function remote_syslog($hostname, $hostip, $message_row)
 
         $facilty = $message_row['FAC'];
         $priority = $message_row['PRIO'];
-        $level = $message_row['LVL'];
+        $level = $lvl[$message_row['LVL']];
         $tag = $message_row['TAG'];
         $timestamp = $message_row['DAY'] . " " . $message_row['TIME'];
         $program = $message_row['PROG'];
@@ -51,10 +63,11 @@ function remote_syslog($hostname, $hostip, $message_row)
 
         // Insert message
         $query = "INSERT INTO `{$nms_database['DB']}`.`syslog` (device_id, facility, priority, level, tag, timestamp, program, msg)
-                        VALUES ($dev_id, '?', '?', '?', '?', '?', '?', '?')";
+                        VALUES ($dev_id, ?, ?, ?, ?, ?, ?, ?)";
         $insertquery = $nms_db_link->prepare($query);
         $insertquery->bind_param('sssssss', $facilty, $priority, $level, $tag, $timestamp, $program, $msg);
         $insertquery->execute();
 
+        $nms_db_link->commit();
     }
 }
