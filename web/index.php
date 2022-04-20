@@ -186,16 +186,16 @@ if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             $lvl_filter = "'debug'";
             break;
         case "info":
-            $lvl_filter = "'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'info', 'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
             break;
         case "warning":
-            $lvl_filter = "'warning', 'error', 'critical', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
             break;
         case "error":
-            $lvl_filter = "'error', 'critical', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'err', 'crit', 'alert', 'emergency', 'panic'";
             break;
         case "critical":
-            $lvl_filter = "'critical', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'crit', 'alert', 'emergency', 'panic'";
             break;
         case "alert":
             $lvl_filter = "'alert', 'emergency', 'panic'";
@@ -208,7 +208,7 @@ if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             break;
         default:
             // also 'notice'
-            $lvl_filter = "'notice', 'warning', 'error', 'critical', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
     }
 }
 
