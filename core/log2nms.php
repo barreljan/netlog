@@ -26,7 +26,7 @@ function remote_syslog($hostname, $hostip, $message_row)
 
     // Get hostnames and their ID's
     $query = "SELECT `device_id`
-                FROM `{$nms_database['DB']}`.`syslog`
+                FROM `{$nms_database['DB']}`.`devices`
                WHERE `hostname` LIKE ?
                   OR `ip` = ?
                LIMIT 1";
@@ -39,7 +39,7 @@ function remote_syslog($hostname, $hostip, $message_row)
 
     if ($devresult->num_rows == 1) {
         $row = $devresult->fetch_assoc();
-        $dev_id = $row[0]['device_id'];
+        $dev_id = $row['device_id'];
 
         $facilty = $message_row['FAC'];
         $priority = $message_row['PRIO'];
@@ -51,8 +51,10 @@ function remote_syslog($hostname, $hostip, $message_row)
 
         // Insert message
         $query = "INSERT INTO `{$nms_database['DB']}`.`syslog` (device_id, facility, priority, level, tag, timestamp, program, msg)
-                        VALUES ($dev_id, $facilty, $priority, $level, $tag, $timestamp, $program, $msg)";
-        echo $query . "\n";
+                        VALUES ($dev_id, '?', '?', '?', '?', '?', '?', '?')";
+        $insertquery = $nms_db_link->prepare($query);
+        $insertquery->bind_param('sssssss', $facilty, $priority, $level, $tag, $timestamp, $program, $msg);
+        $insertquery->execute();
 
     }
 }

@@ -61,7 +61,7 @@ while ($keywords = $kwresult->fetch_assoc()) {
 while ($hosts_table = $hostresult->fetch_assoc()) {
     $host = $hosts_table['name'];
 
-    $query = "SELECT `MSG` 
+    $query = "SELECT * 
                 FROM `{$database['DB']}`.`$host`
                WHERE `TIME` >= '$time'
                      AND ($querykw1)
