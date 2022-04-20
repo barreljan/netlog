@@ -11,7 +11,7 @@ const AUTHOR = 'bartjan@pc-mania.nl';
 //$debug = true;
 $debug = false;
 
-// Load database settings
+// Load database and other local settings
 require('netlog.conf');
 $database ?? die('Database settings not found!');
 
