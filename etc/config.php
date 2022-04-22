@@ -11,7 +11,7 @@ const AUTHOR = 'bartjan@pc-mania.nl';
 //$debug = true;
 $debug = false;
 
-// Load database settings
+// Load database and other local settings
 require('netlog.conf');
 $database ?? die('Database settings not found!');
 
@@ -107,7 +107,7 @@ function connect_db()
      */
     global $database;
 
-    $db_link = new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
+    $db_link = @new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
     if (mysqli_connect_errno()) {
         printf("Connect failed: %s\n", mysqli_connect_error());
         die;

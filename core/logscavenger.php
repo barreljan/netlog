@@ -4,6 +4,9 @@
 
 // Including Netlog config and variables
 require(dirname(__DIR__, 1) . "/etc/config.php");
+if ($netalert_to_nms) {
+    require("log2nms.php");
+}
 
 // Check if I am running from the command line
 check_cli_sapi();
@@ -58,7 +61,7 @@ while ($keywords = $kwresult->fetch_assoc()) {
 while ($hosts_table = $hostresult->fetch_assoc()) {
     $host = $hosts_table['name'];
 
-    $query = "SELECT `MSG` 
+    $query = "SELECT * 
                 FROM `{$database['DB']}`.`$host`
                WHERE `TIME` >= '$time'
                      AND ($querykw1)
@@ -123,6 +126,11 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
 
                 // Push message out to system to be fetched by the logparser
                 syslog(LOG_WARNING, "$hostname: {$row['MSG']}");
+
+                // If true push message as-is to remote NMS host
+                if ($netalert_to_nms) {
+                    remote_syslog($hostname, $hostip, $row);
+                }
 
                 // Send email to recipient(s), for selected keywords if group is active
                 if ((strpos($hostname, "coresw01") !== false) && (strpos($row['MSG'], "PSECURE_VIOLATION") !== false)) {

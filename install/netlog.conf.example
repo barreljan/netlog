@@ -1,9 +1,18 @@
 <?php
 
-// MySQL Database Information
+// Netlog MySQL Database Information
 $database = array();
 $database['DB'] = "syslog";
 $database['DB_CONF'] = "netlogconfig";
 $database['USER'] = "netlog";
 $database['PASS'] = "<<PASSWORD>>";
 $database['HOST'] = "127.0.0.1";
+
+// Logscavenger to LibreNMS, set true for usage
+$netalert_to_nms = false;
+// NMS MySQL Database Information
+$nms_database = array();
+$nms_database['DB'] = "librenms";
+$nms_database['USER'] = "";
+$nms_database['PASS'] = "";
+$nms_database['HOST'] = "";
