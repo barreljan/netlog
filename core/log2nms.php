@@ -26,7 +26,7 @@ function remote_syslog(string $hostname, string $hostip, array $message_row)
     }
     if (!$nms_db_link->select_db($nms_database['DB'])) {
         // Do not die, keep the Logscavenger process running
-        syslog(LOG_WARNING, "could not select LibreNMS database: " . mysqli_connect_error());
+        syslog(LOG_WARNING, "Could not select LibreNMS database: " . mysqli_connect_error());
         return;
     }
 
