@@ -1,19 +1,6 @@
 <?php
 // Module to enable sending the NetAlerts to your LibreNMS for monitoring and alerting.
 
-/*
- * Create and check database link to NMS
- */
-$nms_db_link = new mysqli($nms_database['HOST'], $nms_database['USER'], $nms_database['PASS'], $nms_database['DB']);
-if (mysqli_connect_errno()) {
-    printf("Connect failed: %s\n", mysqli_connect_error());
-    die;
-}
-if (!$nms_db_link->select_db($nms_database['DB'])) {
-    printf("Unable to select DB: %s\n", mysqli_connect_error());
-    die;
-}
-
 /**
  * Inserting the message as-is into the LibreNMS database
  *
@@ -23,7 +10,25 @@ if (!$nms_db_link->select_db($nms_database['DB'])) {
  */
 function remote_syslog(string $hostname, string $hostip, array $message_row)
 {
-    global $nms_database, $nms_db_link;
+    global $nms_database;
+
+    // Start a logging session with the appropriate PROG-name
+    openlog('%log2nms%', LOG_PID, LOG_USER);
+
+    /*
+    * Create and check database link to NMS
+    */
+    $nms_db_link = @new mysqli($nms_database['HOST'], $nms_database['USER'], $nms_database['PASS'], $nms_database['DB']);
+    if (mysqli_connect_errno()) {
+        // Do not die, keep the Logscavenger process running
+        syslog(LOG_WARNING, "Could not connect to LibreNMS database: " . mysqli_connect_error());
+        return;
+    }
+    if (!$nms_db_link->select_db($nms_database['DB'])) {
+        // Do not die, keep the Logscavenger process running
+        syslog(LOG_WARNING, "could not select LibreNMS database: " . mysqli_connect_error());
+        return;
+    }
 
     // Conversion table as LibreNMS does prefer integer values
     $lvl['emerg'] = $lvl['emergency'] = $lvl['panic'] = '0';
@@ -72,7 +77,6 @@ function remote_syslog(string $hostname, string $hostip, array $message_row)
         $nms_db_link->commit();
 
         $devresult->free_result();
+        $nms_db_link->close();
     }
 }
-
-$nms_db_link->close();

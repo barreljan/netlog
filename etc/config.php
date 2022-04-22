@@ -107,7 +107,7 @@ function connect_db()
      */
     global $database;
 
-    $db_link = new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
+    $db_link = @new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
     if (mysqli_connect_errno()) {
         printf("Connect failed: %s\n", mysqli_connect_error());
         die;
