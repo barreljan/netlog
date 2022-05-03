@@ -537,7 +537,8 @@ if (!$empty_iplist) {
                 </table>
             </div>
             <div class="header_refresh">
-                <a href="<?php echo $_SERVER['PHP_SELF']; ?>" onClick="document.location.href = this.href;return false"
+                <a href="<?php echo $_SERVER['PHP_SELF']; ?>"
+                   onClick="document.location.href = this.href;return false"
                    title="click to refresh the page">
                     Refresh</a>: <?php
                 echo "\n";
@@ -608,23 +609,23 @@ if (!$empty_iplist) {
                     if ((isset($_SESSION['showip'])) && (isset($hostmonthlist[$_SESSION['showip']]))) {
                         get_day_option($hostmonthlist[$_SESSION['showip']]);
                     } ?>
-                </select>
-                Filter LVL:
-                <select title="Select a severity" name="filter_LVL" onChange="this.form.submit()"><?php
-                    echo "\n                      <option value=\"none\"";
-                    if ($_SESSION['filter_LVL'] == "none") {
-                        echo " SELECTED";
-                    }
-                    echo ">none</option>";
-                    foreach ($log_levels as $log_level) {
-                        echo "\n                      <option value=\"" . $log_level . "\" class=\"" . $log_level . "\"";
-                        if ($_SESSION['filter_LVL'] == $log_level) {
+                </select><br>
+                <p class="severity">&nbsp;Filter LVL:
+                    <select title="Select a severity" name="filter_LVL" onChange="this.form.submit()"><?php
+                        echo "\n                      <option value=\"none\"";
+                        if ($_SESSION['filter_LVL'] == "none") {
                             echo " SELECTED";
                         }
-                        echo ">" . $log_level . "</option>";
-                    }
-                    echo "\n"; ?>
-                </select>
+                        echo ">none</option>";
+                        foreach ($log_levels as $log_level) {
+                            echo "\n                      <option value=\"" . $log_level . "\" class=\"" . $log_level . "\"";
+                            if ($_SESSION['filter_LVL'] == $log_level) {
+                                echo " SELECTED";
+                            }
+                            echo ">" . $log_level . "</option>";
+                        }
+                        echo "\n"; ?>
+                    </select></p>
             </div>
             <div class="header_search">
                 <input title="Filter based on your input" name="search" type="text" onKeyPress="checkEnter(event)"

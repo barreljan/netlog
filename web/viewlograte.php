@@ -83,7 +83,7 @@ $lograteresult = $logratequery->get_result();
                         value=<?php echo "\"" . $timelimit . "\"" . $timelimit_selected; ?>><?php echo $timelimit; ?></option><?php
                     }
                     echo "\n"; ?>
-                </select> seconds
+                </select> minutes
             </form>
         </div>
 

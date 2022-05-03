@@ -94,6 +94,11 @@ pre.codedebug {
     font-size: 12px;
 }
 
+p.severity {
+    margin: 4px 0 0;
+}
+
+
 td {
 }
 
@@ -293,6 +298,10 @@ table.none td {
 
 #settings_hostname {
     width: 180px;
+}
+
+#settings_keyword {
+    width: 200px;
 }
 
 #settings_input_hostname {

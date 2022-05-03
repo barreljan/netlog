@@ -218,8 +218,6 @@ if (isset($_POST)) {
             } elseif (preg_match('/^new_hosttype/', $key)) {
                 // Host type
                 if ($value != "") {
-                    echo "in newhosttype: $key \n";
-
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`hosttype` (name)
                                    VALUES (?)";
                     $insertquery = $db_link->prepare($query);
@@ -358,6 +356,8 @@ if (isset($_POST)) {
                         $updatequery->bind_param('ss', $value, $setting);
 
                         $updatequery->execute();
+
+                        $_SESSION['updated'] = 'true';
                     }
                 }
             }
@@ -610,7 +610,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                             <td>&nbsp;</td>
                         </tr>
                         <tr>
-                            <th id="settings">Keyword</th>
+                            <th id="settings_keyword">Keyword</th>
                             <th id="settings_hostname">Email group</th>
                             <th id="settings_checkbox">Active</th>
                             <th id="settings_checkbox">Delete?</th>

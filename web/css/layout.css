@@ -10,14 +10,14 @@
     left: 0;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 110px calc(100% - 110px);
+    grid-template-rows: 115px calc(100% - 115px);
     gap: 0 0;
     grid-auto-flow: row;
     grid-template-areas:
     "header"
     "results";
     /*"footer";*/
-    border-width: 0 0 0 0 ;
+    border-width: 0 0 0 0;
     border-spacing: 0;
     border-style: solid;
     border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
@@ -84,6 +84,7 @@
 
 .header_pagenr {
     grid-area: 4 / 3 / 4 / 4;
+    margin: 6px 0 0 0;
     text-align: right;
 }
 
@@ -112,6 +113,7 @@
 
 .header_lines {
     grid-area: 4 / 1 / 4 / 1;
+    margin: 6px 0 0 0;
 }
 
 .header_filter {
