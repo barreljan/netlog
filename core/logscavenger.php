@@ -1,9 +1,11 @@
 <?php
-// NetLog scavenger (for background task)
-// For continuous searching of specific keywords (and thus events)
+// NetLog scavenger
+// For continuous, rapid searching of specific keywords (and thus events). Every found keyword
+// will be pushed into a separate 'Netalert' table: HST_127_0_0_1_DATE_YYYY_MM_DD'. See the
+// logparser.php module where distinction is made by the PROG name.
 
 // Including Netlog config and variables
-require(dirname(__DIR__, 1) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/config.php");
 if ($netalert_to_nms) {
     require("log2nms.php");
 }
@@ -27,7 +29,7 @@ $query = "DELETE FROM `{$database['DB_CONF']}`.`logcache`
 $cleancachequery = $db_link->prepare($query);
 $cleancachequery->execute();
 
-// Get all today's active hosts
+// Get all today's active hosts (but not Netalert nor localhost). Localhost could be included in the future
 $query = "SELECT `TABLE_NAME` AS `name`
             FROM `information_schema`.`COLUMNS`
            WHERE `COLUMN_NAME` = 'MSG'
@@ -105,13 +107,11 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
         // Loop through the found rows of the current host
         while ($row = $msgsresult->fetch_assoc()) {
 
-            // Evil thingy to skip certain words/bogus filter
-            if (
-                strpos($row['MSG'], "someting_i_do_not_want") !== false ||
-                (strpos($row['MSG'], "something_else") !== false && strpos($row['MSG'], "in combination with") !== false)
-            ) {
-                continue;
+            // Evil thingy to skip certain words/bogus filter.
+            if (file_exists('scavengerfilter.inc.php')) {
+                include('scavengerfilter.inc.php');
             }
+
             // Compare message with cache, if not in cache, process it
             if (!in_array($row['MSG'], $host_cache_arr, true)) {
                 // Fill the cache with new entry

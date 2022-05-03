@@ -13,8 +13,12 @@ $debug = false;
 
 // Load database and other local settings
 require('netlog.conf');
-$database ?? die('Database settings not found!');
+$database ?? die("Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
 
+/**
+ * A simple check if the PHP session is started
+ * @return bool Boolean (true or false)
+ */
 function is_session_started(): bool
 {
     if (php_sapi_name() === 'cli')
@@ -24,16 +28,24 @@ function is_session_started(): bool
     return session_id() !== '';
 }
 
+/**
+ * Check if I am running from the cli
+ * @return void
+ */
 function check_cli_sapi()
 {
-    if (PHP_SAPI != 'cli') {
+    if (php_sapi_name() !== 'cli') {
         die('Run me from the command line');
     }
 }
 
-function alpha2num($a)
+/**
+ * Converts an alphabetic string into an integer.
+ * @param string $a A string
+ * @return false|string
+ */
+function alpha2num(string $a)
 {
-    // Converts an alphabetic string into an integer.
     $r = 0;
     $l = strlen($a);
     for ($i = 0; $i < $l; $i++) {
@@ -42,6 +54,11 @@ function alpha2num($a)
     return substr($r - 1, 0, 9);
 }
 
+/**
+ * Aquires a semaphore lock for cli programs that do not permit multiple threads.
+ * It uses the caller's filename to make an uniq integer as key.
+ * @return false|resource|void
+ */
 function aquire_lock()
 {
     global $argv;
@@ -59,16 +76,24 @@ function aquire_lock()
     }
 }
 
+/**
+ * Unlockes a previous semaphore lock
+ * @param $semaphore
+ * @return void
+ */
 function unlock($semaphore)
 {
     sem_release($semaphore);
 }
 
+/**
+ * For debugging purposes, do not use in production environments!
+ * This is displaying some interesting parts on the bottom of the 'result' div.
+ * Can be used in conjunction with the config parameter 'debug'
+ * @return void
+ */
 function codedebug()
 {
-    /*
-     * For displaying some interesting parts on the bottom of the result div
-     */
     global $debug;
 
     if ($debug) {
@@ -83,8 +108,14 @@ function codedebug()
     }
 }
 
-
-function send_email($hostname, $from, $message)
+/**
+ * Send an HTML email to the admin. This function is primarily used within the Logscavenger module
+ * @param string $hostname
+ * @param string $from
+ * @param string $message
+ * @return void
+ */
+function send_email(string $hostname, string $from, string $message)
 {
     global $mail_from, $mail_rcpt;
     $subject = "Network port violation on $hostname";
@@ -100,11 +131,12 @@ function send_email($hostname, $from, $message)
     mail($mail_rcpt, $subject, $msg, implode("\r\n", $headers), "-f $mail_from");
 }
 
+/**
+ * Create and check database link
+ * @return mysqli|void
+ */
 function connect_db()
 {
-    /*
-     * Create and check database link
-     */
     global $database;
 
     $db_link = @new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
@@ -150,10 +182,11 @@ while ($global = $default_viewresults->fetch_assoc()) {
     $config['global'][$global['setting']] = $global['value'];
 }
 
-// Mail
+// Set mail variables for cron purposes
 $mail_from = $config['global']['cron_mail_from'];
 $mail_rcpt = $config['global']['cron_mail_rcpt'];
 
+// Add some granularity to the debugging
 if ($debug) {
     error_reporting(-1);
     ini_set('display_errors', 'On');

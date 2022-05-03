@@ -1,9 +1,8 @@
 <?php
-require("../etc/config.php");
+require(dirname(__DIR__) . "/etc/config.php");
 $today = date('Y_m_d');
 
 $session_name = "PHP_NETLOG";
-
 
 /*
  * Start (or not) session
@@ -28,7 +27,12 @@ if (!isset($db_link)) {
 /*
  * Some functions
  */
-function gen_rows_hosts($input)
+/**
+ * Makes the HTML output for the 3 options - all, unnamed, unused.
+ * @param array $input
+ * @return void
+ */
+function gen_rows_hosts(array $input)
 {
     foreach ($input as $ip) {
         $hostname = $_SESSION['names_config']["hostname-$ip"] ?? '';
@@ -389,6 +393,7 @@ $logging_hosts = array();
 $unused_hosts = array();
 $unnamed_hosts = array();
 
+// Get the IP-adresses and their hostname and type and lograte
 $query = "SELECT `hostip`, `hostname`, `name`, `lograte`
             FROM `{$database['DB_CONF']}`.`hostnames`
             LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
@@ -413,6 +418,7 @@ while ($dbhostnames = $hostnameresult->fetch_assoc()) {
 }
 $hostnameresult->free_result();
 
+// Get all the table names
 $query = "SELECT TABLE_NAME AS tblnm
             FROM INFORMATION_SCHEMA.TABLES
            WHERE TABLE_SCHEMA = '{$database['DB']}'";
@@ -420,7 +426,7 @@ $tablesquery = $db_link->prepare($query);
 $tablesquery->execute();
 $tablesresult = $tablesquery->get_result();
 
-// Throw all ip parts of tables in an array
+// Throw all ip parts of table names in an array
 while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
     if (strpos($lines[0], "template") !== false || strpos($lines[0], "UHO") !== false || strpos($lines[0], "criteria") !== false) {
         continue;
@@ -529,7 +535,6 @@ $types_view = ($_SESSION['view'] == "types") ? ' id="button_active"' : '';
 $scavenger_view = ($_SESSION['view'] == "scavenger") ? ' id="button_active"' : '';
 $contacts_view = ($_SESSION['view'] == "contacts") ? ' id="button_active"' : '';
 $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
-
 
 /*
  * Build the page
@@ -898,7 +903,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                 }
                 echo "\n"; ?>
             </form>
-            <?php codedebug(); ?>
+            <?php // codedebug(); ?>
         </div>
     </div>
 

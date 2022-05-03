@@ -1,9 +1,13 @@
 <?php
-require("../etc/config.php");
+// This makes the actual graph. Parameters are passend to this via the $_GET option.
+// The JPgraph makes the actual image that is presented and the full uri can be used
+// within the <img> tags of the HTML-code.
+// Example: <img src="drawgraph.php?hostid=1&hostname=localhost&width=600&height=250&time=30">
+
+require(dirname(__DIR__) . "/etc/config.php");
 require_once('jpgraph/jpgraph.php');
 require_once('jpgraph/jpgraph_line.php');
 require_once('jpgraph/jpgraph_date.php');
-
 
 /*
  * Check and if not, create database link
@@ -12,16 +16,14 @@ if (!isset($db_link)) {
     $db_link = connect_db();
 }
 
+// Get given parameters
 $hostid = $_GET['hostid'];
 $hostname = $_GET['hostname'];
 $time = $_GET['time'];
 $width = $_GET['width'];
 $height = $_GET['height'];
 
-if (!isset($logratedata)) {
-    global $logratedata;
-}
-
+// Get the samplerates of the given hostid
 $query = "SELECT `sample_timestamp`, 
        				ROUND(1min/60,2) as min1ps,
        				ROUND(5min/300,2) as min5ps,
@@ -35,6 +37,8 @@ $samplequery->bind_param('ss', $hostid, $time);
 $samplequery->execute();
 $sampleresult = $samplequery->get_result();
 
+// Put all data in an array to be used by the graph plotter
+$logratedata = array();
 while ($hostdata = $sampleresult->fetch_assoc()) {
     $logratedata[$hostid]['timestamp'][] = strtotime($hostdata['sample_timestamp']);
 
@@ -53,7 +57,7 @@ $graph = new Graph($width, $height);
 $graph->SetMargin(50, 30, 15, 95);
 
 $graph->SetScale('datlin');
-$graph->title->Set("$hostname");
+$graph->title->Set($hostname);
 $graph->title->SetFont(FF_ARIAL, FS_BOLD, 12);
 
 $graph->legend->SetPos(0.30, 0.98, 'center', 'bottom');
@@ -61,7 +65,7 @@ $graph->legend->SetColumns(3);
 $graph->legend->SetFont(FF_ARIAL, FS_NORMAL, 8);
 
 $graph->xaxis->SetLabelAngle(60);
-//$graph->xaxis->SetLabelFormatString('d M H:i',true);
+$graph->xaxis->SetLabelFormatString('d M H:i', true);
 $graph->xaxis->SetFont(FF_ARIAL, FS_NORMAL, 7);
 $graph->yaxis->SetFont(FF_ARIAL, FS_NORMAL, 8);
 
@@ -87,4 +91,5 @@ $graph->Add($lineplot3);
 // Display the graph
 $graph->Stroke();
 
+$sampleresult->free_result();
 $db_link->close();

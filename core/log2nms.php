@@ -13,7 +13,7 @@ function remote_syslog(string $hostname, string $hostip, array $message_row)
     global $nms_database;
 
     // Start a logging session with the appropriate PROG-name
-    openlog('%log2nms%', LOG_PID, LOG_USER);
+    openlog('log2nms', LOG_PID, LOG_USER);
 
     /*
     * Create and check database link to NMS

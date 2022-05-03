@@ -1,5 +1,5 @@
 <?php
-require("../etc/config.php");
+require(dirname(__DIR__) . "/etc/config.php");
 $today = date('Y_m_d');
 
 /*
@@ -12,6 +12,7 @@ if (!isset($db_link)) {
 $tablename = 'HST_127_0_0_2_DATE_' . $today;
 $fields = implode(', ', $alert_fields);
 
+// Get the Netalerts
 $query = "SELECT $fields
             FROM $tablename 
            ORDER BY `id` DESC
@@ -24,7 +25,6 @@ if ($loglinequery) {
 } else {
     $loglineresult = false;
 }
-
 
 /*
  * Build the page

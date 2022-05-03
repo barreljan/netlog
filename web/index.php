@@ -1,9 +1,8 @@
 <?php
-require("../etc/config.php");
+require(dirname(__DIR__) . "/etc/config.php");
 $today = date('Y_m_d');
 
 $session_name = "PHP_NETLOG";
-
 
 /*
  * Start (or not) session
@@ -14,8 +13,7 @@ if (!is_session_started()) {
 }
 
 if (!isset($_SESSION)) {
-    echo "No session set or server is not allowing PHP Sessions to be stored?";
-    die;
+    die("No session set or server is not allowing PHP Sessions to be stored?");
 }
 
 /*
@@ -28,13 +26,25 @@ if (!isset($db_link)) {
 /*
  * Some functions
  */
-function date_compare($a, $b): string
+
+/**
+ * Compare dates. To be used as a callback function for usort
+ * @param string $a
+ * @param string $b
+ * @return string
+ */
+function date_compare(string $a, string $b): string
 {
     $t1 = strtotime(str_replace('_', '-', $b));
     $t2 = strtotime(str_replace('_', '-', $a));
     return $t1 - $t2;
 }
 
+/**
+ * Set the basic settings to default for clearing the page.
+ * Is to be used with the 'clear search' button.
+ * @return void
+ */
 function set_defaults()
 {
     global $showlines_default;
@@ -46,7 +56,12 @@ function set_defaults()
     unset($_SESSION['search']);
 }
 
-function get_day_option($input)
+/**
+ * Make a dynamic html option list of days/months including selected
+ * @param array $input
+ * @return void
+ */
+function get_day_option(array $input)
 {
     foreach ($input as $dayoption) {
         $dayoption_selected = ($dayoption == $_SESSION['day'] ? ' selected' : ''); ?>
@@ -54,7 +69,6 @@ function get_day_option($input)
         <?php
     }
 }
-
 
 /*
  * Processing the GET parts
@@ -65,7 +79,6 @@ if (isset($_GET['action'])) {
         header("Location: " . $_SERVER['PHP_SELF']);
     }
 }
-
 
 /*
  * Processing the POST parts
@@ -172,7 +185,6 @@ if (isset($_POST['type'])) {
     }
 }
 
-
 /*
  * Set defaults, common vars and figuring out existing settings from user
  */
@@ -225,11 +237,11 @@ if (isset($_SESSION['type'])) {
 }
 $searchstring = isset($_SESSION['search']) ? "%" . $_SESSION['search'] . "%" : "%";
 
-
 /*
  * Fetch data from DB and populate vars/arrays
  */
-$query = "SELECT `hostip`, `hostname`, `hosttype`
+// Get IP-adresses, their hostname and type
+$query = "SELECT `hostip`, `hostname`
             FROM `{$database['DB_CONF']}`.`hostnames`
                  LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
                  ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
@@ -244,6 +256,7 @@ while ($dbhostnames = $hostnameresult->fetch_assoc()) {
 }
 $hostnameresult->free();
 
+// Get all the table names
 $query = "SELECT `TABLE_NAME` AS `tblnm`
             FROM `INFORMATION_SCHEMA`.`TABLES`
            WHERE `TABLE_SCHEMA` = '{$database['DB']}'";
@@ -251,7 +264,7 @@ $tablesquery = $db_link->prepare($query);
 $tablesquery->execute();
 $tablesresult = $tablesquery->get_result();
 
-// Throw all ip parts of tables in an array
+// Throw all ip parts of table names in an array
 $iplist = array();
 while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
     $thishost = explode('_DATE_', $lines['0']);
@@ -310,13 +323,14 @@ foreach ($iplist as $ip) {
     }
 }
 
-// Get list of types
+// Get list of hosttypes
 $typequery = $db_link->prepare("SELECT `id`, `name`
                                   FROM `{$database['DB_CONF']}`.`hosttype`
                                  ORDER BY `name`");
 $typequery->execute();
 $typeresult = $typequery->get_result();
 
+// Set the day option, and offset
 if (!$empty_iplist) {
     // Set the day correct in the session for the first time
     if (isset($hostdaylist[$_SESSION['showip']])) {
@@ -372,6 +386,7 @@ if (!$empty_iplist) {
     $_SESSION['pagecount'] = 1;
 }
 
+// Set the selected page and counting where we are
 if (!is_numeric($_SESSION['showpage'])) {
     if (preg_match('/^[0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
         $query = "SELECT COUNT(*) AS `cnt`
@@ -407,8 +422,7 @@ if (!is_numeric($_SESSION['showpage'])) {
 $counttolast = $_SESSION['pagecount'] - $_SESSION['showpage'];
 $offset = ($_SESSION['showpage'] - 1) * $_SESSION['showlines'];
 
-
-// Get the actual lines for the selected host
+// Get the actual lines for the selected host on the given date with the given filter and offset
 if (!$empty_iplist) {
     $fields = implode(', ', $log_fields);
     $query = "SELECT $fields
@@ -430,296 +444,294 @@ if (!$empty_iplist) {
  * Build the page
  */
 
-//var_dump($_SESSION);
-
 ?>
-<!DOCTYPE HTML>
-<html lang="en">
-<head>
-    <title>Netlog</title>
-    <?php echo "$ref\n"; ?>
-    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <script type="text/javascript" src="scripts/netlog.js"></script>
-    <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
-</head>
-<body>
+    <!DOCTYPE HTML>
+    <html lang="en">
+    <head>
+        <title>Netlog</title>
+        <?php echo "$ref\n"; ?>
+        <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <script type="text/javascript" src="scripts/netlog.js"></script>
+        <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
+    </head>
+    <body>
 
-<form name="settings" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-    <div class="container">
-        <div class="header">
-            <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
-            <div class="header_select">Select Page:</div>
-            <div class="header_nav">
-                <a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=clear">clear search</a> |
-                <a href="netalert.php?inline" title="NetAlert">netalert</a> |
-                <a href="viewlograte.php" title="Logrates">lograte</a> |
-                <a href="settings.php" title="Configuration panel">config</a> |
-                logging
-            </div>
-            <div class="header_paging">
+    <form name="settings" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <div class="container">
+            <div class="header">
+                <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
+                <div class="header_select">Select Page:</div>
+                <div class="header_nav">
+                    <a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=clear">clear search</a> |
+                    <a href="netalert.php?inline" title="NetAlert">netalert</a> |
+                    <a href="viewlograte.php" title="Logrates">lograte</a> |
+                    <a href="settings.php" title="Configuration panel">config</a> |
+                    logging
+                </div>
+                <div class="header_paging">
 
-                <table class="outline">
-                    <tr>
-                        <td>
-                            <button name="showpage_b25" type="submit" <?php if ($_SESSION['showpage'] < 26) {
-                                echo "disabled";
-                            } ?>>-25
-                            </button>
-                        </td>
-                        <td>
-                            <button name="showpage_b10" type="submit" <?php if ($_SESSION['showpage'] < 11) {
-                                echo "disabled";
-                            } ?>>-10
-                            </button>
-                        </td>
-                        <td>
-                            <button name="showpage_b1" type="submit" <?php if ($_SESSION['showpage'] < 2) {
-                                echo "disabled";
-                            } ?>>-1
-                            </button>
-                        </td>
-                        <td><b><input title="Give a number of a page in range" type="text" size="6"
-                                      name="jumptopage"
-                                      value="<?php echo $_SESSION['showpage']; ?>"
-                                      onChange="this.form.submit()"></b>
-                        </td>
-                        <td>
-                            <button name="showpage_f1"
-                                    type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 1)) {
-                                echo "disabled";
-                            } ?>>+1
-                            </button>
-                        </td>
-                        <td>
-                            <button name="showpage_f10"
-                                    type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 11)) {
-                                echo "disabled";
-                            } ?>>+10
-                            </button>
-                        </td>
-                        <td>
-                            <button name="showpage_f25"
-                                    type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 26)) {
-                                echo "disabled";
-                            } ?>>+25
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="text-align: center;">
-                            <button name="showpage_first" type="submit" <?php if ($_SESSION['showpage'] == "1") {
-                                echo "disabled";
-                            } ?>>first
-                            </button>
-                        </td>
-                        <td><span class="lpp">lpp:</span>
-                            <select title="Select a number of lines-per-page" class="lpp" name="showlines"
-                                    onChange="this.form.submit()"><?php
-                                foreach ($showlines as $log_limit) {
-                                    echo "\n                                <option value=\"" . $log_limit . "\"";
-                                    if ((isset($_SESSION['showlines'])) && ($log_limit == $_SESSION['showlines'])) {
-                                        echo " SELECTED";
+                    <table class="outline">
+                        <tr>
+                            <td>
+                                <button name="showpage_b25" type="submit" <?php if ($_SESSION['showpage'] < 26) {
+                                    echo "disabled";
+                                } ?>>-25
+                                </button>
+                            </td>
+                            <td>
+                                <button name="showpage_b10" type="submit" <?php if ($_SESSION['showpage'] < 11) {
+                                    echo "disabled";
+                                } ?>>-10
+                                </button>
+                            </td>
+                            <td>
+                                <button name="showpage_b1" type="submit" <?php if ($_SESSION['showpage'] < 2) {
+                                    echo "disabled";
+                                } ?>>-1
+                                </button>
+                            </td>
+                            <td><b><input title="Give a number of a page in range" type="text" size="6"
+                                          name="jumptopage"
+                                          value="<?php echo $_SESSION['showpage']; ?>"
+                                          onChange="this.form.submit()"></b>
+                            </td>
+                            <td>
+                                <button name="showpage_f1"
+                                        type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 1)) {
+                                    echo "disabled";
+                                } ?>>+1
+                                </button>
+                            </td>
+                            <td>
+                                <button name="showpage_f10"
+                                        type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 11)) {
+                                    echo "disabled";
+                                } ?>>+10
+                                </button>
+                            </td>
+                            <td>
+                                <button name="showpage_f25"
+                                        type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 26)) {
+                                    echo "disabled";
+                                } ?>>+25
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align: center;">
+                                <button name="showpage_first" type="submit" <?php if ($_SESSION['showpage'] == "1") {
+                                    echo "disabled";
+                                } ?>>first
+                                </button>
+                            </td>
+                            <td><span class="lpp">lpp:</span>
+                                <select title="Select a number of lines-per-page" class="lpp" name="showlines"
+                                        onChange="this.form.submit()"><?php
+                                    foreach ($showlines as $log_limit) {
+                                        echo "\n                                <option value=\"" . $log_limit . "\"";
+                                        if ((isset($_SESSION['showlines'])) && ($log_limit == $_SESSION['showlines'])) {
+                                            echo " SELECTED";
+                                        }
+                                        echo ">" . $log_limit . "</option>";
                                     }
-                                    echo ">" . $log_limit . "</option>";
-                                }
-                                echo "\n"; ?>
-                            </select>
-                        </td>
-                        <td colspan="3" style="text-align: center">
-                            <button name="showpage_last"
-                                    type="submit" <?php if (($_SESSION['showpage'] == $_SESSION['pagecount']) || ($_SESSION['pagecount'] < 2)) {
-                                echo "disabled";
-                            } ?>>last
-                            </button>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="header_refresh">
-                <a href="<?php echo $_SERVER['PHP_SELF']; ?>"
-                   onClick="document.location.href = this.href;return false"
-                   title="click to refresh the page">
-                    Refresh</a>: <?php
-                echo "\n";
-                if ((isset($_SESSION['refresh'])) && ($_SESSION['refresh'] != 'off')) {
-                    ?>
-                    <button name="stoprefresh" type="submit">stop</button><?php
-                }
-                echo "\n";
-                if ((isset($_SESSION['day'])) && ($_SESSION['day'] == $today)) { ?>
-                    <select title="Select a refreshrate" name="refresh" onChange="this.form.submit()"><?php
-                    foreach ($refresh as $value) {
-                        echo "\n                      <option value=\"" . $value . "\"";
-                        if (isset($_SESSION['refresh']) && $_SESSION['refresh'] == $value) {
-                            echo " SELECTED";
-                        }
-                        echo ">" . $value . "</option>";
-                    }
-                    echo "\n"; ?>
-                    </select><?php
-                } else {
-                    echo "                    <input type=\"hidden\" value=\"off\" name=\"refresh\">off";
-                }
-                echo "\n"; ?>
-            </div>
-            <div class="header_pagenr">
-                Page <?php echo $_SESSION['showpage'] . " of " . $_SESSION['pagecount']; ?></div>
-            <div class="header_device">
-                Device Type:
-                <select title="Select a type" name="type" onChange="this.form.submit()"><?php
-                    while ($types = $typeresult->fetch_assoc()) {
-                        echo "\n                      <option value=\"" . $types['name'] . "\"";
-                        if ($_SESSION['type'] == $types['name']) {
-                            echo " SELECTED";
-                        }
-                        echo ">" . $types['name'] . "</option>";
+                                    echo "\n"; ?>
+                                </select>
+                            </td>
+                            <td colspan="3" style="text-align: center">
+                                <button name="showpage_last"
+                                        type="submit" <?php if (($_SESSION['showpage'] == $_SESSION['pagecount']) || ($_SESSION['pagecount'] < 2)) {
+                                    echo "disabled";
+                                } ?>>last
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="header_refresh">
+                    <a href="<?php echo $_SERVER['PHP_SELF']; ?>"
+                       onClick="document.location.href = this.href;return false"
+                       title="click to refresh the page">
+                        Refresh</a>: <?php
+                    echo "\n";
+                    if ((isset($_SESSION['refresh'])) && ($_SESSION['refresh'] != 'off')) {
+                        ?>
+                        <button name="stoprefresh" type="submit">stop</button><?php
                     }
                     echo "\n";
-                    mysqli_free_result($typeresult); ?>
-                </select>
-                Device:
-                <select title="Select a device" name="showip" onChange="this.form.submit()"><?php
-                    foreach ($iplist as $ip) {
-                        if (!isset($_SESSION['showip'])) {
-                            $_SESSION['showip'] = $ip;
-                        }
-                        echo "\n                      <option value=\"" . $ip . "\"";
-                        if ($_SESSION['showip'] == $ip) {
-                            echo " SELECTED";
-                        }
-                        echo ">";
-                        if (isset($hostname[$ip])) {
-                            echo $hostname[$ip];
-                        } else {
-                            echo $ip;
-                        }
-                        echo "</option>";
-                    }
-                    echo "\n"; ?>
-                </select>
-                Day:
-                <select title="Select a day" name="day" onChange="this.form.submit()">
-                    <?php
-                    if ((isset($_SESSION['showip'])) && (isset($hostdaylist[$_SESSION['showip']]))) {
-                        usort($hostdaylist[$_SESSION['showip']], 'date_compare');
-                        get_day_option($hostdaylist[$_SESSION['showip']]);
-                    }
-                    echo "\n";
-                    if ((isset($_SESSION['showip'])) && (isset($hostmonthlist[$_SESSION['showip']]))) {
-                        get_day_option($hostmonthlist[$_SESSION['showip']]);
-                    } ?>
-                </select><br>
-                <p class="severity">&nbsp;Filter LVL:
-                    <select title="Select a severity" name="filter_LVL" onChange="this.form.submit()"><?php
-                        echo "\n                      <option value=\"none\"";
-                        if ($_SESSION['filter_LVL'] == "none") {
-                            echo " SELECTED";
-                        }
-                        echo ">none</option>";
-                        foreach ($log_levels as $log_level) {
-                            echo "\n                      <option value=\"" . $log_level . "\" class=\"" . $log_level . "\"";
-                            if ($_SESSION['filter_LVL'] == $log_level) {
+                    if ((isset($_SESSION['day'])) && ($_SESSION['day'] == $today)) { ?>
+                        <select title="Select a refreshrate" name="refresh" onChange="this.form.submit()"><?php
+                        foreach ($refresh as $value) {
+                            echo "\n                      <option value=\"" . $value . "\"";
+                            if (isset($_SESSION['refresh']) && $_SESSION['refresh'] == $value) {
                                 echo " SELECTED";
                             }
-                            echo ">" . $log_level . "</option>";
+                            echo ">" . $value . "</option>";
                         }
                         echo "\n"; ?>
-                    </select></p>
-            </div>
-            <div class="header_search">
-                <input title="Filter based on your input" name="search" type="text" onKeyPress="checkEnter(event)"
-                       value="<?php if (isset($_SESSION['search'])) {
-                           echo $_SESSION['search'];
-                       } ?>" autofocus placeholder="Search" style="width: 80%;">
-                <br><span class="search_button"><button style="width: 50px;" type="submit">Go</button><span>
-            </div>
-            <div class="header_lines">Total lines: <?php echo $linecount; ?></div>
-        </div>
-        <div class="results">
-
-            <table class="none" style="width: 100%">
-                <tr><?php echo "\n";
-                    foreach ($log_fields as $column) {
-                        switch ($column) {
-                            case "HOST":
-                            case "TIME":
-                            case "DAY":
-                            case "PROG":
-                                echo "                    <th style=\"min-width: 100px;\">" . $column . "</th>";
-                                break;
-                            case "MSG":
-                                echo "                    <th>" . $column . "</th>";
-                                break;
-                            default:
-                                echo "                    <th style=\"min-width: 50px;\">" . $column . "</th>";
+                        </select><?php
+                    } else {
+                        echo "                    <input type=\"hidden\" value=\"off\" name=\"refresh\">off";
+                    }
+                    echo "\n"; ?>
+                </div>
+                <div class="header_pagenr">
+                    Page <?php echo $_SESSION['showpage'] . " of " . $_SESSION['pagecount']; ?></div>
+                <div class="header_device">
+                    Device Type:
+                    <select title="Select a type" name="type" onChange="this.form.submit()"><?php
+                        while ($types = $typeresult->fetch_assoc()) {
+                            echo "\n                      <option value=\"" . $types['name'] . "\"";
+                            if ($_SESSION['type'] == $types['name']) {
+                                echo " SELECTED";
+                            }
+                            echo ">" . $types['name'] . "</option>";
                         }
                         echo "\n";
-                    } ?>
-                </tr>
-                <?php
-                $linetag = "0";
-                if ($loglines) {
-                    while ($logline = mysqli_fetch_assoc($loglines)) {
-                        if ($linetag == "0") {
-                            $linetag = "1";
-                        } else {
-                            $linetag = "0";
-                        }
-                        echo "<tr>\n                  ";
-                        foreach ($log_fields as $column) {
-                            if ($column == "LVL") {
-                                echo "<td ";
-                                switch ($logline[$column]) {
-                                    case "debug":
-                                        echo "class=\"debug\">";
-                                        break;
-                                    case "info":
-                                        echo "class=\"info\">";
-                                        break;
-                                    case "notice":
-                                        echo "class=\"notice\">";
-                                        break;
-                                    case "warning":
-                                        echo "class=\"warning\">";
-                                        break;
-                                    case "err":
-                                        echo "class=\"error\">";
-                                        break;
-                                    case "crit":
-                                        echo "class=\"critical\">";
-                                        break;
-                                    case "alert":
-                                        echo "class=\"alert\">";
-                                        break;
-                                    case "emergency":
-                                        echo "class=\"emergency\">";
-                                        break;
-                                    case "panic":
-                                        echo "class=\"panic\">";
-                                        break;
-                                    default:
-                                        echo ">";
-                                }
-                                echo $logline[$column] . "</td>";
-                            } elseif ($linetag == "0") {
-                                echo "<td>" . $logline[$column] . "</td>";
-                            } else {
-                                echo "<td class=\"grey\">" . $logline["$column"] . "</td>";
+                        mysqli_free_result($typeresult); ?>
+                    </select>
+                    Device:
+                    <select title="Select a device" name="showip" onChange="this.form.submit()"><?php
+                        foreach ($iplist as $ip) {
+                            if (!isset($_SESSION['showip'])) {
+                                $_SESSION['showip'] = $ip;
                             }
+                            echo "\n                      <option value=\"" . $ip . "\"";
+                            if ($_SESSION['showip'] == $ip) {
+                                echo " SELECTED";
+                            }
+                            echo ">";
+                            if (isset($hostname[$ip])) {
+                                echo $hostname[$ip];
+                            } else {
+                                echo $ip;
+                            }
+                            echo "</option>";
                         }
-                        echo "\n                </tr>\n                ";
+                        echo "\n"; ?>
+                    </select>
+                    Day:
+                    <select title="Select a day" name="day" onChange="this.form.submit()">
+                        <?php
+                        if ((isset($_SESSION['showip'])) && (isset($hostdaylist[$_SESSION['showip']]))) {
+                            usort($hostdaylist[$_SESSION['showip']], 'date_compare');
+                            get_day_option($hostdaylist[$_SESSION['showip']]);
+                        }
+                        echo "\n";
+                        if ((isset($_SESSION['showip'])) && (isset($hostmonthlist[$_SESSION['showip']]))) {
+                            get_day_option($hostmonthlist[$_SESSION['showip']]);
+                        } ?>
+                    </select><br>
+                    <p class="severity">&nbsp;Filter LVL:
+                        <select title="Select a severity" name="filter_LVL" onChange="this.form.submit()"><?php
+                            echo "\n                      <option value=\"none\"";
+                            if ($_SESSION['filter_LVL'] == "none") {
+                                echo " SELECTED";
+                            }
+                            echo ">none</option>";
+                            foreach ($log_levels as $log_level) {
+                                echo "\n                      <option value=\"" . $log_level . "\" class=\"" . $log_level . "\"";
+                                if ($_SESSION['filter_LVL'] == $log_level) {
+                                    echo " SELECTED";
+                                }
+                                echo ">" . $log_level . "</option>";
+                            }
+                            echo "\n"; ?>
+                        </select></p>
+                </div>
+                <div class="header_search">
+                    <input title="Filter based on your input" name="search" type="text" onKeyPress="checkEnter(event)"
+                           value="<?php if (isset($_SESSION['search'])) {
+                               echo $_SESSION['search'];
+                           } ?>" autofocus placeholder="Search" style="width: 80%;">
+                    <br><span class="search_button"><button style="width: 50px;" type="submit">Go</button><span>
+                </div>
+                <div class="header_lines">Total lines: <?php echo $linecount; ?></div>
+            </div>
+            <div class="results">
+
+                <table class="none" style="width: 100%">
+                    <tr><?php echo "\n";
+                        foreach ($log_fields as $column) {
+                            switch ($column) {
+                                case "HOST":
+                                case "TIME":
+                                case "DAY":
+                                case "PROG":
+                                    echo "                    <th style=\"min-width: 100px;\">" . $column . "</th>";
+                                    break;
+                                case "MSG":
+                                    echo "                    <th>" . $column . "</th>";
+                                    break;
+                                default:
+                                    echo "                    <th style=\"min-width: 50px;\">" . $column . "</th>";
+                            }
+                            echo "\n";
+                        } ?>
+                    </tr>
+                    <?php
+                    $linetag = "0";
+                    if ($loglines) {
+                        while ($logline = mysqli_fetch_assoc($loglines)) {
+                            if ($linetag == "0") {
+                                $linetag = "1";
+                            } else {
+                                $linetag = "0";
+                            }
+                            echo "<tr>\n                  ";
+                            foreach ($log_fields as $column) {
+                                if ($column == "LVL") {
+                                    echo "<td ";
+                                    switch ($logline[$column]) {
+                                        case "debug":
+                                            echo "class=\"debug\">";
+                                            break;
+                                        case "info":
+                                            echo "class=\"info\">";
+                                            break;
+                                        case "notice":
+                                            echo "class=\"notice\">";
+                                            break;
+                                        case "warning":
+                                            echo "class=\"warning\">";
+                                            break;
+                                        case "err":
+                                            echo "class=\"error\">";
+                                            break;
+                                        case "crit":
+                                            echo "class=\"critical\">";
+                                            break;
+                                        case "alert":
+                                            echo "class=\"alert\">";
+                                            break;
+                                        case "emergency":
+                                            echo "class=\"emergency\">";
+                                            break;
+                                        case "panic":
+                                            echo "class=\"panic\">";
+                                            break;
+                                        default:
+                                            echo ">";
+                                    }
+                                    echo $logline[$column] . "</td>";
+                                } elseif ($linetag == "0") {
+                                    echo "<td>" . $logline[$column] . "</td>";
+                                } else {
+                                    echo "<td class=\"grey\">" . $logline["$column"] . "</td>";
+                                }
+                            }
+                            echo "\n                </tr>\n                ";
+                        }
+                        $loglines->free();
                     }
-                    $loglines->free();
-                }
-                echo "\n"; ?>
-            </table>
+                    echo "\n"; ?>
+                </table>
 
+            </div>
         </div>
-    </div>
 
-</form>
-</body>
+    </form>
+    </body>
 
-</html>
+    </html>
 <?php $db_link->close();
