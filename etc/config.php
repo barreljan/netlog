@@ -207,9 +207,10 @@ $showlines_default = $config['global']['show_lines_default'];
 $refresh = explode(',', $config['global']['refresh']);
 
 // Lograte variables
-$height = $config['global']['lograte_graph_height'];
-$width = $config['global']['lograte_graph_width'];
-$graphhistory = explode(',', $config['global']['lograte_history']);
+$graph_height = $config['global']['lograte_graph_height'];
+$graph_width = $config['global']['lograte_graph_width'];
+$graph_timelimit = $config['global']['lograte_history_default'];
+$graph_history = explode(',', $config['global']['lograte_history']);
 
 // ###### Netalert variables ######
 

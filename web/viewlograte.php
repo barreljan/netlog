@@ -7,9 +7,6 @@ $today = date('Y_m_d');
 
 $session_name = "PHP_NETLOG";
 
-$graph_height = 250;
-$graph_width = 600;
-
 /*
  * Start (or not) session
  */
@@ -32,7 +29,7 @@ if (!isset($db_link)) {
 
 // Set the timing (history)
 if (!isset($_SESSION['timelimit'])) {
-    $_SESSION['timelimit'] = 30;
+    $_SESSION['timelimit'] = $graph_timelimit;
 }
 if (isset($_POST['time'])) {
     $_SESSION['timelimit'] = $_POST['time'];
@@ -47,12 +44,10 @@ $logratequery = $db_link->prepare($query);
 $logratequery->execute();
 $lograteresult = $logratequery->get_result();
 
-
 /*
  * Build the page
  */
 ?>
-
     <!DOCTYPE HTML>
     <html lang="en">
     <head>
@@ -74,9 +69,9 @@ $lograteresult = $logratequery->get_result();
             </div>
             <div class="header_settings">
                 <form method="post" action="viewlograte.php">
-                    Show last
+                    Show last&nbsp;
                     <select title="period" name="time" onChange="this.form.submit()"><?php
-                        foreach ($graphhistory as $timelimit) {
+                        foreach ($graph_history as $timelimit) {
                             echo "\n";
                             $timelimit_selected = ($timelimit == $_SESSION['timelimit'] ? " selected" : '') ?>
                             <option

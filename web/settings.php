@@ -779,6 +779,29 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                                             <?php echo "\"" . $typename . "\"" . $hosttype_selected; ?>><?php echo $typename; ?></option><?php
                                         } ?>
                                     </select></td><?php
+                                } elseif ($setting == 'lograte_history_default') { ?>
+                                    <td><select id="settings_select_global" title="Select default history"
+                                                name="global-<?php echo $setting; ?>">
+                                        <?php
+                                        foreach ($graph_history as $history) {
+                                            $history_selected = ($value == $history ? ' selected' : '');
+                                            echo "\n"; ?>
+                                            <option value=
+                                            <?php echo "\"" . $history . "\"" . $history_selected; ?>><?php echo $history; ?></option><?php
+                                        } ?>
+                                    </select></td><?php
+                                } elseif ($setting == 'show_lines_default') { ?>
+                                    <td><select id="settings_select_global" title="Select default show lines"
+                                                name="global-<?php echo $setting; ?>">
+                                        <?php
+                                        foreach ($showlines as $lines) {
+                                            $lines_selected = ($value == $lines ? ' selected' : '');
+                                            echo "\n"; ?>
+                                            <option value=
+                                            <?php echo "\"" . $lines . "\"" . $lines_selected; ?>><?php echo $lines; ?></option><?php
+                                        } ?>
+                                    </select></td><?php
+
                                 } else {
                                     ?>
                                     <td><input id="settings_input_global" type="text" title="Value for setting"
