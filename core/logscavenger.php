@@ -74,7 +74,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
     $msgsrows = $msgsresult->num_rows;
     if ($msgsrows != 0) {
         // Tablename to real IP address
-        preg_match('/HST_([0-9]{1,3})_([0-9]{1,3})_([0-9]{1,3})_([0-9]{1,3})_/', $host, $matches);
+        preg_match('/HST_(\d{1,3})_(\d{1,3})_(\d{1,3})_(\d{1,3})_/', $host, $matches);
         $hostip = sprintf("%d.%d.%d.%d", $matches[1], $matches[2], $matches[3], $matches[4]);
 
         // Get the user-submitted hostname
@@ -106,26 +106,27 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
         }
         // Loop through the found rows of the current host
         while ($row = $msgsresult->fetch_assoc()) {
+            $MSG = "$hostname: {$row['MSG']}";
 
             // Evil thingy to skip certain words/bogus filter.
-            if (file_exists('scavengerfilter.inc.php')) {
-                include('scavengerfilter.inc.php');
-            }
+            // if (file_exists('scavengerfilter.inc.php')) {
+            //     include('scavengerfilter.inc.php');
+            // }
 
             // Compare message with cache, if not in cache, process it
-            if (!in_array($row['MSG'], $host_cache_arr, true)) {
+            if (!in_array($MSG, $host_cache_arr, true)) {
                 // Fill the cache with new entry
                 $query = "INSERT INTO `{$database['DB_CONF']}`.`logcache` (`HOST`, `MSG`)
                           VALUES (\"$hostip\", ?)";
                 $logcachequery = $db_link->prepare($query);
-                $logcachequery->bind_param('s', $row['MSG']);
+                $logcachequery->bind_param('s', $MSG);
                 $logcachequery->execute();
 
                 // Prevent doubles from same host in this run
-                $host_cache_arr[] = $row['MSG'];
+                $host_cache_arr[] = $MSG;
 
                 // Push message out to system to be fetched by the logparser
-                syslog(LOG_WARNING, "$hostname: {$row['MSG']}");
+                syslog(LOG_WARNING, $MSG);
 
                 // If true push message as-is to remote NMS host
                 if ($netalert_to_nms) {
@@ -135,6 +136,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 // Send email to recipient(s), for selected keywords if group is active
                 if ((strpos($hostname, "coresw01") !== false) && (strpos($row['MSG'], "PSECURE_VIOLATION") !== false)) {
                     send_email($hostname, $from, $row['MSG']);
+
                 }
             }
         }
