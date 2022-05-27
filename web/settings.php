@@ -915,9 +915,16 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                         </tr>
                         <tr>
                             <td colspan="2">
-                                <button type="submit"<?php if (($_SESSION['viewitem'] == "Unnamed") && (sizeof($unnamed_hosts) == 0)) {
-                                    echo " disabled";
-                                } ?>>submit
+                                <button type="submit"<?php
+                                if ($_SESSION['viewitem'] == "Unnamed") {
+                                    $disabled = (sizeof($unnamed_hosts) == 0) ?? ' disabled';
+                                } elseif ($_SESSION['viewitem'] == "Unused") {
+                                    $disabled = (sizeof($unused_hosts) == 0) ?? ' disabled';
+                                } else {
+                                    $disabled = '';
+                                }
+                                echo $disabled;
+                                ?>>submit
                                 </button>
                             </td>
                         </tr>
