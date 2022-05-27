@@ -65,7 +65,7 @@ function get_day_option(array $input)
 {
     foreach ($input as $dayoption) {
         $dayoption_selected = ($dayoption == $_SESSION['day'] ? ' selected' : ''); ?>
-        <option value="<?php echo $dayoption; ?>" <?php echo $dayoption_selected; ?>><?php echo $dayoption; ?></option>
+        <option value="<?php echo $dayoption; ?>" <?php echo $dayoption_selected; ?>><?php echo str_replace('_', '-', $dayoption); ?></option>
         <?php
     }
 }
