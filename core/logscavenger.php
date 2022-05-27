@@ -15,9 +15,6 @@ check_cli_sapi();
 
 $lock = aquire_lock();
 
-// Start a logging session with the appropriate PROG-name
-openlog('%LOGSCAVENGER%', LOG_PID, LOG_USER);
-
 // Determine today's date in the table name format and set timing
 $today = date('Y_m_d');
 $adjusted_datetime = (time() - $config['global']['scavenger_history']);
@@ -125,8 +122,13 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 // Prevent doubles from same host in this run
                 $host_cache_arr[] = $MSG;
 
+                // Start a logging session with the appropriate PROG-name
+                openlog('%LOGSCAVENGER%', LOG_PID, LOG_USER);
+
                 // Push message out to system to be fetched by the logparser
                 syslog(LOG_WARNING, $MSG);
+
+                closelog();
 
                 // If true push message as-is to remote NMS host
                 if ($netalert_to_nms) {
@@ -152,5 +154,4 @@ if (isset($hstnmresult)) {
 }
 $kwresult->free_result();
 
-closelog();
 $db_link->close();
