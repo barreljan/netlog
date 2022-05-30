@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 # Make sure this path is set correctly if this is not working:
 DATADIR="$(mysqld --verbose --help | grep ^datadir | awk '{print $2}')/syslog"
