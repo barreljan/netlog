@@ -40,6 +40,7 @@ if ($loglinequery) {
         <meta http-equiv="refresh" content="15">
         <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
     </head><?php
+    echo "\n";
     if ((sizeof($_GET) >= 0) && (isset($_GET['inline']))) { ?>
     <body style="background-color: #ffffff;">
     <div class="container">
@@ -55,7 +56,7 @@ if ($loglinequery) {
         <div class="results">
             <?php
             } else {
-            echo "\n"; ?>
+            ?>
             <body style="background-color: #161616"><?php
             }
             echo "\n"; ?>

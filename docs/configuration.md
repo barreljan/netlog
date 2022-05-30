@@ -77,6 +77,7 @@ page.
 normalized.
 - **[refresh](configuration.md#refresh)** - Set the option-list to your need to be used in viewing the 
 logging. Use integer comma separated values.
+- **[retention](configuration.md#retention)** - Set the number of months to keep and older to drop.
 - **[scavenger_history](configuration.md#scavenger_history)** - Set the time threshold of syslog messages to be 
 found in the logscavenger module
 - **[show_lines](configuration.md#show_lines)** - Sets the option-list of the number of lines per page to be 
@@ -182,6 +183,15 @@ the lines are not colored anymore.
 - **Default**: 'off,1,2,5,10'
 
 The 'off' is a special value and should be kept in the values.
+
+###### retention
+
+- **Value**: single integer
+- **Default**: 3 (months)
+- 
+Set the number of months to keep and older to drop. This is calculated of
+the first day of the month so when ran at 25th May it will drop tables
+from Feb.
 
 ###### scavenger_history
 

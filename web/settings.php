@@ -885,7 +885,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                             <th id="settings">Log client hostnames:</th>
                         </tr>
                         <tr>
-                            <td>&nbsp;</td>
+                            <td id="settings">&nbsp;</td>
                         </tr>
                         <tr>
                             <th id="settings">IP</th>
