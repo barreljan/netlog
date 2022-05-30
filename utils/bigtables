@@ -2,7 +2,7 @@
 
 # Make sure this path is set correctly if this is not working:
 DATADIR="$(mysqld --verbose --help | grep ^datadir | awk '{print $2}')/syslog"
-ESCAPED=$(echo "$DATADIR" | sed 's/\//\\\//g')
+ESCAPED=$(printf "" "$DATADIR" | sed 's/\//\\\//g')
 
 function show_help() {
   printf "bigtables: Show the biggest tables\n\nUsage: bigtables <int>\t\tWhere int represents the top 'x' of the list\n"
@@ -21,7 +21,7 @@ else
   top="$1"
 fi
 if ! [[ "$top" =~ ^[0-9]+$ ]]; then
-  echo -e "Sorry, not a valid number\n"
+  printf "Sorry, not a valid number\n"
   show_help
 fi
 
