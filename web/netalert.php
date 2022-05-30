@@ -68,7 +68,8 @@ if ($loglinequery) {
                                 foreach ($alert_fields as $column) {
                                     switch ($column) {
                                         case "TIME":
-                                            echo "<th class=\"aqua\">$column</th>";
+                                        case "LVL":
+                                            echo "<th class=\"aqua\" width=\"55\">$column</th>";
                                             break;
                                         case "DAY":
                                             echo "<th class=\"aqua\" width=\"75\">$column</th>";
