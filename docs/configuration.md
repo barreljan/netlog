@@ -188,7 +188,7 @@ The 'off' is a special value and should be kept in the values.
 
 - **Value**: single integer
 - **Default**: 3 (months)
-- 
+
 Set the number of months to keep and older to drop. This is calculated of
 the first day of the month so when ran at 25th May it will drop tables
 from Feb.

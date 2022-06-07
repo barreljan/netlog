@@ -15,6 +15,61 @@ check_cli_sapi();
 
 $lock = aquire_lock();
 
+// Start a logging session with the appropriate PROG-name
+openlog('logscavenger', LOG_PID, LOG_USER);
+
+// Get the bogus filter, if there is any
+if (file_exists('scavengerfilter.inc.php')) {
+    include('scavengerfilter.inc.php');
+}
+// Double check precence
+if (isset($filter)) {
+    if (!is_array($filter)) {
+        syslog(LOG_WARNING, "scavenger filter preset but no '\$filter' array found");
+        $filter = array();
+    }
+} else {
+    $filter = array();
+}
+
+/**
+ * It takes the $filter as an array that contains the keywords
+ * that needs to be filtered. When '%any_host%' as key is used
+ * the keyword is for all hosts. If a specific hostname as key
+ * is used, it is only filtered for that host. You can make
+ * variations:
+ *
+ * $filter['%any_host%'] = 'foo'
+ *
+ * $filter['%any_host%'] = 'bar'
+ *
+ * $filter['coreswitch'] = 'baz'
+ *
+ * Only messaged with 'baz' is filtered when it comes from
+ * 'coreswitch'. 'foo' and 'bar' are, including the coreswitch,
+ * filtered when a message contains one of them.
+ *
+ * @param string $msg The original syslog MSG where to look in
+ * @param string $host The hostname as configured in Netlog
+ * @return bool true if message needs to be filtered, false otherwise
+ *
+ */
+function filter_msg(string $msg, string $host): bool
+{
+    global $filter;
+
+    foreach ($filter as $k => $v) {
+        if (($host == $k) && (strpos($msg, $v) !== false)) {
+            // same host and needle found in haystack
+            return true;
+        } elseif (($k == '%any_host%') && (strpos($msg, $v) !== false)) {
+            // any host and needle found in haystack
+            return true;
+        }
+    }
+    return false;
+}
+
 // Determine today's date in the table name format and set timing
 $today = date('Y_m_d');
 $adjusted_datetime = (time() - $config['global']['scavenger_history']);
@@ -105,10 +160,10 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
         while ($row = $msgsresult->fetch_assoc()) {
             $MSG = "$hostname: {$row['MSG']}";
 
-            // Evil thingy to skip certain words/bogus filter.
-            // if (file_exists('scavengerfilter.inc.php')) {
-            //     include('scavengerfilter.inc.php');
-            // }
+            // Pass to the filter to skip certain words/bogus filter.
+            if (filter_msg($row['MSG'], $hostname)) {
+                continue;
+            }
 
             // Compare message with cache, if not in cache, process it
             if (!in_array($MSG, $host_cache_arr, true)) {
@@ -122,13 +177,26 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 // Prevent doubles from same host in this run
                 $host_cache_arr[] = $MSG;
 
-                // Start a logging session with the appropriate PROG-name
-                openlog('%LOGSCAVENGER%', LOG_PID, LOG_USER);
+                // Construct tablename
+                $DAY_us = str_replace('-', '_', date('Y-m-d'));
+                $tablename = 'HST_127_0_0_2_DATE_' . $DAY_us;
 
                 // Push message out to system to be fetched by the logparser
-                syslog(LOG_WARNING, $MSG);
+                $facilty = $row['FAC'];
+                $priority = $row['PRIO'];
+                $level = 'warning';
+                $tag = $row['TAG'];
+                $day = $row['DAY'];
+                $time = $row['TIME'];
+                $program = '%LOGSCAVENGER%';
+                $msg = $MSG;
 
-                closelog();
+                $query = "INSERT INTO `$tablename` (`HOST`,`FAC`,`PRIO`,`LVL`,`TAG`,`DAY`,`TIME`,`PROG`,`MSG`)
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                $insertquery = $db_link->prepare($query);
+                $insertquery->bind_param('sssssssss', $hostip, $facilty, $priority, $level, $tag, $day, $time, $program, $msg);
+                $insertquery->execute();
+
 
                 // If true push message as-is to remote NMS host
                 if ($netalert_to_nms) {
@@ -154,4 +222,5 @@ if (isset($hstnmresult)) {
 }
 $kwresult->free_result();
 
+closelog();
 $db_link->close();

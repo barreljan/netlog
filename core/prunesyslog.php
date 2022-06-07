@@ -18,7 +18,7 @@ $date = date("Y_M", strtotime("first day of this month 00:00:00 -$retention mont
 // Get syslog tables older than is set
 $query = "SELECT `TABLE_NAME`
             FROM `information_schema`.`TABLES`
-           WHERE `table_schema` = 'syslog'
+           WHERE `TABLE_SCHEMA` = 'syslog'
              AND `TABLE_NAME` LIKE ?";
 $prunequery = $db_link->prepare($query);
 $_date = "%" . $date;
