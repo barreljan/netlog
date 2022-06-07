@@ -169,7 +169,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
             if (!in_array($MSG, $host_cache_arr, true)) {
                 // Fill the cache with new entry
                 $query = "INSERT INTO `{$database['DB_CONF']}`.`logcache` (`HOST`, `MSG`)
-                          VALUES (\"$hostip\", ?)";
+                               VALUES (\"$hostip\", ?)";
                 $logcachequery = $db_link->prepare($query);
                 $logcachequery->bind_param('s', $MSG);
                 $logcachequery->execute();
@@ -192,11 +192,10 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 $msg = $MSG;
 
                 $query = "INSERT INTO `$tablename` (`HOST`,`FAC`,`PRIO`,`LVL`,`TAG`,`DAY`,`TIME`,`PROG`,`MSG`)
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 $insertquery = $db_link->prepare($query);
                 $insertquery->bind_param('sssssssss', $hostip, $facilty, $priority, $level, $tag, $day, $time, $program, $msg);
                 $insertquery->execute();
-
 
                 // If true push message as-is to remote NMS host
                 if ($netalert_to_nms) {
