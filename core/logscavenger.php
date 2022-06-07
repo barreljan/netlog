@@ -177,11 +177,9 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 // Prevent doubles from same host in this run
                 $host_cache_arr[] = $MSG;
 
-                // Construct tablename
-                $DAY_us = str_replace('-', '_', date('Y-m-d'));
-                $tablename = 'HST_127_0_0_2_DATE_' . $DAY_us;
+                // Push message out to the Netalert table
+                $tablename = "HST_127_0_0_2_DATE_$today";
 
-                // Push message out to system to be fetched by the logparser
                 $facilty = $row['FAC'];
                 $priority = $row['PRIO'];
                 $level = 'warning';
@@ -189,12 +187,11 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 $day = $row['DAY'];
                 $time = $row['TIME'];
                 $program = '%LOGSCAVENGER%';
-                $msg = $MSG;
 
                 $query = "INSERT INTO `$tablename` (`HOST`,`FAC`,`PRIO`,`LVL`,`TAG`,`DAY`,`TIME`,`PROG`,`MSG`)
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 $insertquery = $db_link->prepare($query);
-                $insertquery->bind_param('sssssssss', $hostip, $facilty, $priority, $level, $tag, $day, $time, $program, $msg);
+                $insertquery->bind_param('sssssssss', $hostip, $facilty, $priority, $level, $tag, $day, $time, $program, $MSG);
                 $insertquery->execute();
 
                 // If true push message as-is to remote NMS host
@@ -203,10 +200,9 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 }
 
                 // Send email to recipient(s), for selected keywords if group is active
-                if ((strpos($hostname, "coresw01") !== false) && (strpos($row['MSG'], "PSECURE_VIOLATION") !== false)) {
-                    send_email($hostname, $from, $row['MSG']);
-
-                }
+                // if ((strpos($hostname, "coresw01") !== false) && (strpos($row['MSG'], "PSECURE_VIOLATION") !== false)) {
+                //     send_email($hostname, $from, $row['MSG']);
+                // }
             }
         }
     }
