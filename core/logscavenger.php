@@ -19,13 +19,14 @@ $lock = aquire_lock();
 openlog('logscavenger', LOG_PID, LOG_USER);
 
 // Get the bogus filter, if there is any
-if (file_exists('scavengerfilter.inc.php')) {
-    include('scavengerfilter.inc.php');
+if (file_exists(dirname(__DIR__) . "scavengerfilter.inc.php")) {
+    include(dirname(__DIR__) . "scavengerfilter.inc.php");
 }
 // Double check precence
 if (isset($filter)) {
     if (!is_array($filter)) {
-        syslog(LOG_WARNING, "scavenger filter preset but no '\$filter' array found");
+        syslog(LOG_WARNING, "Scavenger filter preset but no '\$filter' array found");
+        unset($filter);
         $filter = array();
     }
 } else {

@@ -429,7 +429,7 @@ if (!$empty_iplist) {
     $fields = implode(', ', $log_fields);
     $query = "SELECT $fields
                 FROM `$tablename`
-               WHERE `MSG` LIKE ?";
+               WHERE `MSG` LIKE ? ";
     if (isset ($lvl_filter)) {
         $query .= "AND `LVL` IN (" . $lvl_filter . ") ";
     }
