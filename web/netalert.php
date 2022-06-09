@@ -15,7 +15,7 @@ $fields = implode(', ', $alert_fields);
 // Get the Netalerts
 $query = "SELECT $fields
             FROM $tablename 
-           ORDER BY `id` DESC
+           ORDER BY `TIME` DESC
            LIMIT $showlines_alert";
 $loglinequery = $db_link->prepare($query);
 // If there is a table for today, get results

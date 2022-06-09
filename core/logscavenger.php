@@ -1,7 +1,7 @@
 <?php
 // NetLog scavenger
 // For continuous, rapid searching of specific keywords (and thus events). Every found keyword
-// will be pushed into a separate 'Netalert' table: HST_127_0_0_1_DATE_YYYY_MM_DD'. See the
+// will be pushed into a separate 'Netalert' table: HST_127_0_0_2_DATE_YYYY_MM_DD'. See the
 // logparser.php module where distinction is made by the PROG name.
 
 // Including Netlog config and variables
@@ -33,17 +33,40 @@ if (isset($filter)) {
 }
 
 /**
+ * Creates the host table if this not exists.
+ *
+ * @param string $tablename A composed name for the table
+ * @return void
+ */
+function create_table(string $tablename)
+{
+    global $db_link;
+    global $database;
+
+    $query = "CREATE TABLE IF NOT EXISTS `{$database['DB']}`.`$tablename` LIKE template";
+    $createquery = $db_link->prepare($query);
+    $result = $createquery->execute();
+    if (!$result) {
+        // There is a posible serious issue with SQL
+        syslog(LOG_CRIT, "Failed to create table $tablename");
+        die();
+    }
+}
+
+/**
  * It takes the $filter as an array that contains the keywords
  * that needs to be filtered. When '%any_host%' as key is used
  * the keyword is for all hosts. If a specific hostname as key
- * is used, it is only filtered for that host. You can make
- * variations:
+ * is used, it is only filtered for that host. The keywords
+ * need to be in an array. You can make variations:
  *
- * $filter['%any_host%'] = 'foo'
+ * $filter['%any_host%'] = ['foo']
  *
- * $filter['%any_host%'] = 'bar'
+ * $filter['%any_host%'] = ['foo', 'bar']
  *
- * $filter['coreswitch'] = 'baz'
+ * $filter['coreswitch'] = ['baz']
+ *
+ * $filter['coreswitch'] = ['foo', 'baz']
  *
  * Only messaged with 'baz' is filtered when it comes from
  * 'coreswitch'. 'foo' and 'bar' are, including the coreswitch,
@@ -59,12 +82,20 @@ function filter_msg(string $msg, string $host): bool
     global $filter;
 
     foreach ($filter as $k => $v) {
-        if (($host == $k) && (strpos($msg, $v) !== false)) {
-            // same host and needle found in haystack
-            return true;
-        } elseif (($k == '%any_host%') && (strpos($msg, $v) !== false)) {
-            // any host and needle found in haystack
-            return true;
+        if ($host == $k) {
+            foreach ($v as $m) {
+                if (strpos($msg, $m) !== false) {
+                    // any host and needle found in haystack
+                    return true;
+                }
+            }
+        } elseif ($k == '%any_host%') {
+            foreach ($v as $m) {
+                if (strpos($msg, $m) !== false) {
+                    // any host and needle found in haystack
+                    return true;
+                }
+            }
         }
     }
     return false;
@@ -162,6 +193,8 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
 
             // Pass to the filter to skip certain words/bogus filter.
             if (filter_msg($row['MSG'], $hostname)) {
+                // Add to cache to flag it as 'seen'
+                $host_cache_arr[] = $MSG;
                 continue;
             }
 
@@ -178,7 +211,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 $host_cache_arr[] = $MSG;
 
                 // Push message out to the Netalert table
-                $tablename = "HST_127_0_0_2_DATE_$today";
+                $tablename = 'HST_127_0_0_2_DATE_' . $today;
 
                 $facilty = $row['FAC'];
                 $priority = $row['PRIO'];
@@ -190,6 +223,10 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
 
                 $query = "INSERT INTO `$tablename` (`HOST`,`FAC`,`PRIO`,`LVL`,`TAG`,`DAY`,`TIME`,`PROG`,`MSG`)
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                if (!$db_link->prepare($query)) {
+                    // Failed to insert as the table does not exist, lets create it
+                    create_table($tablename);
+                }
                 $insertquery = $db_link->prepare($query);
                 $insertquery->bind_param('sssssssss', $hostip, $facilty, $priority, $level, $tag, $day, $time, $program, $MSG);
                 $insertquery->execute();

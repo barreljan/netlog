@@ -429,11 +429,11 @@ if (!$empty_iplist) {
     $fields = implode(', ', $log_fields);
     $query = "SELECT $fields
                 FROM `$tablename`
-               WHERE `MSG` LIKE ? ";
+               WHERE `MSG` LIKE ?";
     if (isset ($lvl_filter)) {
-        $query .= "AND LVL IN (" . $lvl_filter . ") ";
+        $query .= "AND `LVL` IN (" . $lvl_filter . ") ";
     }
-    $query .= "ORDER BY id DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
+    $query .= "ORDER BY `TIME` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
     $linesquery = $db_link->prepare($query);
     $linesquery->bind_param('s', $searchstring);  // $searchstring is already given the % tags
     $linesquery->execute();
