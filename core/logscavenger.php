@@ -19,8 +19,8 @@ $lock = aquire_lock();
 openlog('logscavenger', LOG_PID, LOG_USER);
 
 // Get the bogus filter, if there is any
-if (file_exists(dirname(__DIR__) . "scavengerfilter.inc.php")) {
-    include(dirname(__DIR__) . "scavengerfilter.inc.php");
+if (file_exists(dirname(__DIR__) . "/core/scavengerfilter.inc.php")) {
+    include(dirname(__DIR__) . "/core/scavengerfilter.inc.php");
 }
 // Double check precence
 if (isset($filter)) {
