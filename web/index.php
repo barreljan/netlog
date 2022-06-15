@@ -112,10 +112,8 @@ if (isset($_POST['type'])) {
     // Process showlines before cleansearch because we want to reset lines to default on cleansearch
     if (isset($_POST['showlines'])) {
         if ($_SESSION['showlines'] != $_POST['showlines']) {
-            if (is_int($_POST['showlines'])) {
-                $_SESSION['showlines'] = $_POST['showlines'];
-                unset($_SESSION['showpage']);
-            }
+            $_SESSION['showlines'] = intval($_POST['showlines']);
+            unset($_SESSION['showpage']);
         }
     }
     // Set level filter
