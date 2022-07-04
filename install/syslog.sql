@@ -22,7 +22,7 @@ CREATE TABLE `template`
     PRIMARY KEY (`id`),
     KEY `HOST` (`HOST`),
     KEY `DAY` (`DAY`),
-    KEY `TIME` (`TIME`)
+    KEY `TIME` (`TIME`),
+    KEY `LVL` (`LVL`)
 ) ENGINE = MyISAM
   DEFAULT CHARSET = latin1;
- 
