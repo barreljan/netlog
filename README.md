@@ -44,5 +44,8 @@ The hostname table can be modified with ease to keep it in sync with your NMS (e
 ![Screenshot](docs/images/netlog_2.png)
 
 
+![Screenshot](docs/images/netlog_4.png)
+
+
 ![Screenshot](docs/images/netlog_3.png)
 
