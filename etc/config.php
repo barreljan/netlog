@@ -109,7 +109,9 @@ function codedebug()
 }
 
 /**
- * Send an HTML email to the admin. This function is primarily used within the Logscavenger module
+ * Send an HTML email to the admin. This function is primarily used within the Logscavenger module.
+ * No current use, keep it for future use.
+ *
  * @param string $hostname
  * @param string $from
  * @param string $message
