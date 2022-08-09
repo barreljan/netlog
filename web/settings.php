@@ -353,15 +353,49 @@ if (isset($_POST)) {
                         // no change
                         continue;
                     } elseif ($value != "") {
-                        $query = "UPDATE `{$database['DB_CONF']}`.`global`
+                        $valid = false;
+                        switch ($setting) {
+                            // validate some settings
+
+                            // These needs to be formatted like 'int,int,int' or a single 'int'
+                            // or, with 'off' in it, for the refresh
+                            case "lograte_history":
+                            case "refresh":
+                            case "show_lines":
+                                if (preg_match('/^(off,)?[0-9]+(,[0-9]+)+$/', $value)) {
+                                    $valid = true;
+                                }
+                                break;
+                            // These needs to be an integer.
+                            case "logarchive_interval":
+                            case "lograte_days":
+                            case "lograte_graph_height":
+                            case "lograte_graph_width":
+                            case "netalert_show_lines":
+                            case "netalert_time_threshold":
+                            case "retention":
+                            case "scavenger_history":
+                                if (preg_match('/^[0-9]+$/', $value)) {
+                                    $valid = true;
+                                }
+                                break;
+
+                            default:
+                                $valid = true;
+                        }
+                        if ($valid) {
+                            $query = "UPDATE `{$database['DB_CONF']}`.`global`
                                      SET `value` = ?
                                    WHERE `setting` = ?";
-                        $updatequery = $db_link->prepare($query);
-                        $updatequery->bind_param('ss', $value, $setting);
+                            $updatequery = $db_link->prepare($query);
+                            $updatequery->bind_param('ss', $value, $setting);
 
-                        $updatequery->execute();
+                            $updatequery->execute();
 
-                        $_SESSION['updated'] = 'true';
+                            $_SESSION['updated'] = 'true';
+                        } else {
+                            $_SESSION['updated'] = 'false';
+                        }
                     }
                 }
             }
@@ -565,7 +599,8 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                     <button type="submit" <?php echo $names_view; ?> name="names">Host names</button>
                     <button type="submit" <?php echo $types_view; ?> name="types">Host types</button>
                     <button type="submit" <?php echo $scavenger_view; ?> name="scavenger">Scavenger</button>
-<!--                    <button type="submit" --><?php //echo $contacts_view; ?><!-- name="contacts">Contacts</button>-->
+                    <!--                    <button type="submit" -->
+                    <?php //echo $contacts_view; ?><!-- name="contacts">Contacts</button>-->
                     <button type="submit" <?php echo $global_view; ?> name="global">Global</button>
                 </form>
             </div>
@@ -677,20 +712,20 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
 //                } elseif ($_SESSION['view'] == "contacts") {
 //                    // Email contacts
 //                    ?>
-<!--                    <table class="none">-->
-<!--                        <tr>-->
-<!--                            <th id="settings">Contacts:</th>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>&nbsp;</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <th id="settings_hostname">Groupname</th>-->
-<!--                            <th id="settings_hostname">Recipients</th>-->
-<!--                            <th id="settings_checkbox">Active</th>-->
-<!--                            <th id="settings_checkbox">Delete?</th>-->
-<!--                        </tr>-->
-<!--                        --><?php
+                    <!--                    <table class="none">-->
+                    <!--                        <tr>-->
+                    <!--                            <th id="settings">Contacts:</th>-->
+                    <!--                        </tr>-->
+                    <!--                        <tr>-->
+                    <!--                            <td>&nbsp;</td>-->
+                    <!--                        </tr>-->
+                    <!--                        <tr>-->
+                    <!--                            <th id="settings_hostname">Groupname</th>-->
+                    <!--                            <th id="settings_hostname">Recipients</th>-->
+                    <!--                            <th id="settings_checkbox">Active</th>-->
+                    <!--                            <th id="settings_checkbox">Delete?</th>-->
+                    <!--                        </tr>-->
+                    <!--                        --><?php
 //                        foreach ($emailgroups as $row) {
 //                            $id = $row['id'];
 //                            $rec = $row['recipients'];
@@ -699,54 +734,54 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
 //                                continue;
 //                            }
 //                            ?>
-<!--                            <tr>-->
-<!--                                <td>--><?php //echo $row['groupname']; ?><!--</td>-->
-<!--                                <td><input id="settings_input_hostname" type="text" title="Recipients, comma separated"-->
-<!--                                           name="grouprecipients---><?php //echo $id; ?><!--"-->
-<!--                                           value=--><?php //echo "\"" . $rec . "\"" . $disabled; ?><!-->-->
-<!--                                </td>-->
-<!--                                <td id="settings_checkbox">-->
-<!--                                    <input type="hidden" value="off" name="groupactive---><?php //echo $row['id']; ?><!--">-->
-<!--                                    <input type="checkbox" title="Enable or disable this group"-->
-<!--                                           name="groupactive---><?php //echo $row['id']; ?><!--" --><?php //echo $active; ?><!-->-->
-<!--                                </td>-->
-<!--                                <td id="settings_checkbox">-->
-<!--                                    <input type="hidden" value="off" name="groupdelete---><?php //echo $row['id']; ?><!--">-->
-<!--                                    <input type="checkbox" title="Delete this group"-->
-<!--                                           name="groupdelete---><?php //echo $row['id']; ?><!--">-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            --><?php
+                    <!--                            <tr>-->
+                    <!--                                <td>--><?php //echo $row['groupname']; ?><!--</td>-->
+                    <!--                                <td><input id="settings_input_hostname" type="text" title="Recipients, comma separated"-->
+                    <!--                                           name="grouprecipients---><?php //echo $id; ?><!--"-->
+                    <!--                                           value=--><?php //echo "\"" . $rec . "\"" . $disabled; ?><!-->-->
+                    <!--                                </td>-->
+                    <!--                                <td id="settings_checkbox">-->
+                    <!--                                    <input type="hidden" value="off" name="groupactive---><?php //echo $row['id']; ?><!--">-->
+                    <!--                                    <input type="checkbox" title="Enable or disable this group"-->
+                    <!--                                           name="groupactive---><?php //echo $row['id']; ?><!--" --><?php //echo $active; ?><!-->-->
+                    <!--                                </td>-->
+                    <!--                                <td id="settings_checkbox">-->
+                    <!--                                    <input type="hidden" value="off" name="groupdelete---><?php //echo $row['id']; ?><!--">-->
+                    <!--                                    <input type="checkbox" title="Delete this group"-->
+                    <!--                                           name="groupdelete---><?php //echo $row['id']; ?><!--">-->
+                    <!--                                </td>-->
+                    <!--                            </tr>-->
+                    <!--                            --><?php
 //                        }
 //                        ?>
-<!--                        <tr>-->
-<!--                            <td>&nbsp;</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>-->
-<!--                                Enter a new group:<br/>-->
-<!--                                <input title="Enter a new group" type="text" name="new_group">-->
-<!--                            </td>-->
-<!--                            <td>-->
-<!--                                Enter one or more recipients:<br/>-->
-<!--                                <input id="settings_input_hostname" title="Enter recipients, comma separated"-->
-<!--                                       type="text"-->
-<!--                                       name="new_recipients">-->
-<!--                            </td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td>&nbsp;</td>-->
-<!--                        </tr>-->
-<!--                        <tr>-->
-<!--                            <td colspan="2">-->
-<!--                                <button type="submit">submit-->
-<!--                                </button>-->
-<!--                            </td>-->
-<!--                        </tr>-->
-<!---->
-<!---->
-<!--                    </table>-->
-<!--                    --><?php
+                    <!--                        <tr>-->
+                    <!--                            <td>&nbsp;</td>-->
+                    <!--                        </tr>-->
+                    <!--                        <tr>-->
+                    <!--                            <td>-->
+                    <!--                                Enter a new group:<br/>-->
+                    <!--                                <input title="Enter a new group" type="text" name="new_group">-->
+                    <!--                            </td>-->
+                    <!--                            <td>-->
+                    <!--                                Enter one or more recipients:<br/>-->
+                    <!--                                <input id="settings_input_hostname" title="Enter recipients, comma separated"-->
+                    <!--                                       type="text"-->
+                    <!--                                       name="new_recipients">-->
+                    <!--                            </td>-->
+                    <!--                        </tr>-->
+                    <!--                        <tr>-->
+                    <!--                            <td>&nbsp;</td>-->
+                    <!--                        </tr>-->
+                    <!--                        <tr>-->
+                    <!--                            <td colspan="2">-->
+                    <!--                                <button type="submit">submit-->
+                    <!--                                </button>-->
+                    <!--                            </td>-->
+                    <!--                        </tr>-->
+                    <!---->
+                    <!---->
+                    <!--                    </table>-->
+                    <!--                    --><?php
                 } elseif ($_SESSION['view'] == "global") {
                     // Global settings
                     ?>
