@@ -112,9 +112,9 @@ if (isset($_POST)) {
     if (isset($_POST['scavenger'])) {
         $_SESSION['view'] = "scavenger";
     }
-    if (isset($_POST['contacts'])) {
-        $_SESSION['view'] = "contacts";
-    }
+//    if (isset($_POST['contacts'])) {
+//        $_SESSION['view'] = "contacts";
+//    }
     if (isset($_POST['global'])) {
         $_SESSION['view'] = "global";
     }
@@ -242,53 +242,53 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (isset($_SESSION['email_config'][$key])) {
-                // Existing email contact group
-                if ($_POST[$key] != $_SESSION['email_config'][$key]) {
-                    // Change detected
-                    $column = str_replace('group', '', $readkey[0]);
-                    $id = $readkey[1];
-                    $query = "UPDATE `{$database['DB_CONF']}`.`emailgroup`
-                                     SET $column = ?
-                                   WHERE `id` = ?";
-                    $updatequery = $db_link->prepare($query);
-                    if ($column == "active") {
-                        $updatequery->bind_param('si', $checkbox, $id);
-                    } else {
-                        $updatequery->bind_param('si', $value, $id);
-                    }
-                    $updatequery->execute();
-
-                    $_SESSION['updated'] = 'true';
-                }
-            } elseif (preg_match('/^new_group/', $key)) {
-                // Contact group
-                if ($value != "" && $_POST['new_recipients'] != "") {
-                    // Add a new group
-                    $name = $value;
-                    $recipients = $_POST['new_recipients'];
-
-                    $query = "INSERT INTO `{$database['DB_CONF']}`.`emailgroup` (groupname, recipients)
-                                   VALUES (?, ?)";
-                    $insertquery = $db_link->prepare($query);
-                    $insertquery->bind_param('ss', $name, $recipients);
-                    $insertquery->execute();
-
-                    $_SESSION['updated'] = 'true';
-                }
-            } elseif (preg_match('/^groupdelete/', $key)) {
-                // Deletion of configured group
-                if ($checkbox == 1) {
-                    $id = $readkey[1];
-                    $query = "DELETE
-                                FROM `{$database['DB_CONF']}`.`emailgroup`
-                               WHERE `id` = ?";
-                    $deletequery = $db_link->prepare($query);
-                    $deletequery->bind_param('s', $id);
-                    $deletequery->execute();
-
-                    $_SESSION['updated'] = 'true';
-                }
+//            } elseif (isset($_SESSION['email_config'][$key])) {
+//                // Existing email contact group
+//                if ($_POST[$key] != $_SESSION['email_config'][$key]) {
+//                    // Change detected
+//                    $column = str_replace('group', '', $readkey[0]);
+//                    $id = $readkey[1];
+//                    $query = "UPDATE `{$database['DB_CONF']}`.`emailgroup`
+//                                     SET $column = ?
+//                                   WHERE `id` = ?";
+//                    $updatequery = $db_link->prepare($query);
+//                    if ($column == "active") {
+//                        $updatequery->bind_param('si', $checkbox, $id);
+//                    } else {
+//                        $updatequery->bind_param('si', $value, $id);
+//                    }
+//                    $updatequery->execute();
+//
+//                    $_SESSION['updated'] = 'true';
+//                }
+//            } elseif (preg_match('/^new_group/', $key)) {
+//                // Contact group
+//                if ($value != "" && $_POST['new_recipients'] != "") {
+//                    // Add a new group
+//                    $name = $value;
+//                    $recipients = $_POST['new_recipients'];
+//
+//                    $query = "INSERT INTO `{$database['DB_CONF']}`.`emailgroup` (groupname, recipients)
+//                                   VALUES (?, ?)";
+//                    $insertquery = $db_link->prepare($query);
+//                    $insertquery->bind_param('ss', $name, $recipients);
+//                    $insertquery->execute();
+//
+//                    $_SESSION['updated'] = 'true';
+//                }
+//            } elseif (preg_match('/^groupdelete/', $key)) {
+//                // Deletion of configured group
+//                if ($checkbox == 1) {
+//                    $id = $readkey[1];
+//                    $query = "DELETE
+//                                FROM `{$database['DB_CONF']}`.`emailgroup`
+//                               WHERE `id` = ?";
+//                    $deletequery = $db_link->prepare($query);
+//                    $deletequery->bind_param('s', $id);
+//                    $deletequery->execute();
+//
+//                    $_SESSION['updated'] = 'true';
+//                }
             } elseif (isset($_SESSION['scav_config'][$key])) {
                 // Existing scavenger keyword
                 if ($_POST[$key] != $_SESSION['scav_config'][$key]) {
@@ -383,7 +383,7 @@ unset($_SESSION['names_config']);
 unset($_SESSION['scav_config']);
 unset($_SESSION['typelist']);
 unset($_SESSION['hosttypes']);
-unset($_SESSION['emailgrp']);
+//unset($_SESSION['emailgrp']);
 unset($_SESSION['globalsetting']);
 unset($query, $hostnameresult, $tablesresult, $typeresult, $kwresults, $emailgrpresults, $globalsetresult);
 
@@ -489,27 +489,27 @@ while ($kw = $kwresults->fetch_assoc()) {
 $kwresults->free_result();
 
 // Get the email groups and put it in a list
-$query = "SELECT *
-            FROM `{$database['DB_CONF']}`.`emailgroup`
-           ORDER BY `id`";
-$emailgrquery = $db_link->prepare($query);
-$emailgrquery->execute();
-$emailgrpresults = $emailgrquery->get_result();
-$emailgroups = array();
-while ($emailgrp = $emailgrpresults->fetch_assoc()) {
-    $emailgroups[] = $emailgrp;
-    $id = $emailgrp['id'];
-    $groupname = $emailgrp['groupname'];
-    $recipients = $emailgrp['recipients'];
-    $active = ($emailgrp['active'] == 1) ? 'on' : 'off';
-    // Make list of groupnames for the selection box
-    $_SESSION['emailgrp'][$groupname] = $emailgrp['id'];
-    // Make a list of configurated items
-    $_SESSION['email_config']["groupname-$id"] = $groupname;
-    $_SESSION['email_config']["grouprecipients-$id"] = $recipients;
-    $_SESSION['email_config']["groupactive-$id"] = $active;
-}
-$emailgrpresults->free_result();
+//$query = "SELECT *
+//            FROM `{$database['DB_CONF']}`.`emailgroup`
+//           ORDER BY `id`";
+//$emailgrquery = $db_link->prepare($query);
+//$emailgrquery->execute();
+//$emailgrpresults = $emailgrquery->get_result();
+//$emailgroups = array();
+//while ($emailgrp = $emailgrpresults->fetch_assoc()) {
+//    $emailgroups[] = $emailgrp;
+//    $id = $emailgrp['id'];
+//    $groupname = $emailgrp['groupname'];
+//    $recipients = $emailgrp['recipients'];
+//    $active = ($emailgrp['active'] == 1) ? 'on' : 'off';
+//    // Make list of groupnames for the selection box
+//    $_SESSION['emailgrp'][$groupname] = $emailgrp['id'];
+//    // Make a list of configurated items
+//    $_SESSION['email_config']["groupname-$id"] = $groupname;
+//    $_SESSION['email_config']["grouprecipients-$id"] = $recipients;
+//    $_SESSION['email_config']["groupactive-$id"] = $active;
+//}
+//$emailgrpresults->free_result();
 
 // Get the default (global) settings and put it in a list
 $query = "SELECT *
@@ -533,7 +533,7 @@ $globalsetresult->free_result();
 $names_view = ($_SESSION['view'] == "names") ? 'id="button_active"' : '';
 $types_view = ($_SESSION['view'] == "types") ? ' id="button_active"' : '';
 $scavenger_view = ($_SESSION['view'] == "scavenger") ? ' id="button_active"' : '';
-$contacts_view = ($_SESSION['view'] == "contacts") ? ' id="button_active"' : '';
+//$contacts_view = ($_SESSION['view'] == "contacts") ? ' id="button_active"' : '';
 $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
 
 /*
@@ -565,7 +565,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                     <button type="submit" <?php echo $names_view; ?> name="names">Host names</button>
                     <button type="submit" <?php echo $types_view; ?> name="types">Host types</button>
                     <button type="submit" <?php echo $scavenger_view; ?> name="scavenger">Scavenger</button>
-                    <button type="submit" <?php echo $contacts_view; ?> name="contacts">Contacts</button>
+<!--                    <button type="submit" --><?php //echo $contacts_view; ?><!-- name="contacts">Contacts</button>-->
                     <button type="submit" <?php echo $global_view; ?> name="global">Global</button>
                 </form>
             </div>
@@ -674,79 +674,79 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                         </tr>
                     </table>
                     <?php
-                } elseif ($_SESSION['view'] == "contacts") {
-                    // Email contacts
-                    ?>
-                    <table class="none">
-                        <tr>
-                            <th id="settings">Contacts:</th>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <th id="settings_hostname">Groupname</th>
-                            <th id="settings_hostname">Recipients</th>
-                            <th id="settings_checkbox">Active</th>
-                            <th id="settings_checkbox">Delete?</th>
-                        </tr>
-                        <?php
-                        foreach ($emailgroups as $row) {
-                            $id = $row['id'];
-                            $rec = $row['recipients'];
-                            $active = ($row['active'] == 1) ? " checked" : "";
-                            if ($row['groupname'] == "None") {
-                                continue;
-                            }
-                            ?>
-                            <tr>
-                                <td><?php echo $row['groupname']; ?></td>
-                                <td><input id="settings_input_hostname" type="text" title="Recipients, comma separated"
-                                           name="grouprecipients-<?php echo $id; ?>"
-                                           value=<?php echo "\"" . $rec . "\"" . $disabled; ?>>
-                                </td>
-                                <td id="settings_checkbox">
-                                    <input type="hidden" value="off" name="groupactive-<?php echo $row['id']; ?>">
-                                    <input type="checkbox" title="Enable or disable this group"
-                                           name="groupactive-<?php echo $row['id']; ?>" <?php echo $active; ?>>
-                                </td>
-                                <td id="settings_checkbox">
-                                    <input type="hidden" value="off" name="groupdelete-<?php echo $row['id']; ?>">
-                                    <input type="checkbox" title="Delete this group"
-                                           name="groupdelete-<?php echo $row['id']; ?>">
-                                </td>
-                            </tr>
-                            <?php
-                        }
-                        ?>
-                        <tr>
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Enter a new group:<br/>
-                                <input title="Enter a new group" type="text" name="new_group">
-                            </td>
-                            <td>
-                                Enter one or more recipients:<br/>
-                                <input id="settings_input_hostname" title="Enter recipients, comma separated"
-                                       type="text"
-                                       name="new_recipients">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <button type="submit">submit
-                                </button>
-                            </td>
-                        </tr>
-
-
-                    </table>
-                    <?php
+//                } elseif ($_SESSION['view'] == "contacts") {
+//                    // Email contacts
+//                    ?>
+<!--                    <table class="none">-->
+<!--                        <tr>-->
+<!--                            <th id="settings">Contacts:</th>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td>&nbsp;</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <th id="settings_hostname">Groupname</th>-->
+<!--                            <th id="settings_hostname">Recipients</th>-->
+<!--                            <th id="settings_checkbox">Active</th>-->
+<!--                            <th id="settings_checkbox">Delete?</th>-->
+<!--                        </tr>-->
+<!--                        --><?php
+//                        foreach ($emailgroups as $row) {
+//                            $id = $row['id'];
+//                            $rec = $row['recipients'];
+//                            $active = ($row['active'] == 1) ? " checked" : "";
+//                            if ($row['groupname'] == "None") {
+//                                continue;
+//                            }
+//                            ?>
+<!--                            <tr>-->
+<!--                                <td>--><?php //echo $row['groupname']; ?><!--</td>-->
+<!--                                <td><input id="settings_input_hostname" type="text" title="Recipients, comma separated"-->
+<!--                                           name="grouprecipients---><?php //echo $id; ?><!--"-->
+<!--                                           value=--><?php //echo "\"" . $rec . "\"" . $disabled; ?><!-->-->
+<!--                                </td>-->
+<!--                                <td id="settings_checkbox">-->
+<!--                                    <input type="hidden" value="off" name="groupactive---><?php //echo $row['id']; ?><!--">-->
+<!--                                    <input type="checkbox" title="Enable or disable this group"-->
+<!--                                           name="groupactive---><?php //echo $row['id']; ?><!--" --><?php //echo $active; ?><!-->-->
+<!--                                </td>-->
+<!--                                <td id="settings_checkbox">-->
+<!--                                    <input type="hidden" value="off" name="groupdelete---><?php //echo $row['id']; ?><!--">-->
+<!--                                    <input type="checkbox" title="Delete this group"-->
+<!--                                           name="groupdelete---><?php //echo $row['id']; ?><!--">-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            --><?php
+//                        }
+//                        ?>
+<!--                        <tr>-->
+<!--                            <td>&nbsp;</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td>-->
+<!--                                Enter a new group:<br/>-->
+<!--                                <input title="Enter a new group" type="text" name="new_group">-->
+<!--                            </td>-->
+<!--                            <td>-->
+<!--                                Enter one or more recipients:<br/>-->
+<!--                                <input id="settings_input_hostname" title="Enter recipients, comma separated"-->
+<!--                                       type="text"-->
+<!--                                       name="new_recipients">-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td>&nbsp;</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td colspan="2">-->
+<!--                                <button type="submit">submit-->
+<!--                                </button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!---->
+<!---->
+<!--                    </table>-->
+<!--                    --><?php
                 } elseif ($_SESSION['view'] == "global") {
                     // Global settings
                     ?>
