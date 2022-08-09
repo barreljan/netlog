@@ -385,8 +385,8 @@ if (isset($_POST)) {
                         }
                         if ($valid) {
                             $query = "UPDATE `{$database['DB_CONF']}`.`global`
-                                     SET `value` = ?
-                                   WHERE `setting` = ?";
+                                         SET `value` = ?
+                                       WHERE `setting` = ?";
                             $updatequery = $db_link->prepare($query);
                             $updatequery->bind_param('ss', $value, $setting);
 
