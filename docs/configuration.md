@@ -5,8 +5,7 @@
 1. [Host names](configuration.md#host-names)
 2. [Host types](configuration.md#host-types)
 3. [Scavenger](configuration.md#scavenger)
-4. [Contacts](configuration.md#contacts)
-5. [Global](configuration.md#global)
+4. [Global](configuration.md#global)
 
 ### Host names
 
@@ -39,10 +38,6 @@ empty.
 ### Scavenger
 
 Add any string that can be search in the **MSG** field.
-
-### Contacts
-
-
 
 ### Global
 
@@ -219,7 +214,6 @@ Sets the option-list of the number of lines per page to be shown.
 - **Default**: 50
 
 Sets the default 'selected' as a value set in show_lines.
-
 
 ### Syslog fields
 
