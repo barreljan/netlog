@@ -616,7 +616,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                         </tr>
                         <tr>
                             <th id="settings_keyword">Keyword</th>
-                            <th id="settings_hostname">Email group</th>
+                            <!--                            <th id="settings_hostname">Email group</th>-->
                             <th id="settings_checkbox">Active</th>
                             <th id="settings_checkbox">Delete?</th>
                         </tr>
@@ -626,18 +626,21 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                                 <td>
                                     <?php echo $keyword; ?>
                                 </td>
-                                <td>
-                                    <select title="Select the email group"
-                                            name=<?php echo "\"scavemailgroupid-$kwid\""; ?>> <?php
-                                        foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
-                                            $group_selected = ($_SESSION['scav_config']["scavemailgroupid-$kwid"] == $groupname ? ' selected' : '');
-                                            echo "\n"; ?>
-                                            <option value=
-                                            <?php echo "\"" . $groupname . "\"" . $group_selected; ?>><?php echo $groupname; ?></option><?php
-                                        }
-                                        echo "\n"; ?>
-                                    </select>
-                                </td>
+                                <!--                                <td>-->
+                                <!--                                    <select title="Select the email group"-->
+                                <!--                                            name=-->
+                                <?php //echo "\"scavemailgroupid-$kwid\""; ?><!-- --><?php
+                                //                                        foreach ($_SESSION['emailgrp'] as $groupname => $groupid) {
+                                //                                            $group_selected = ($_SESSION['scav_config']["scavemailgroupid-$kwid"] == $groupname ? ' selected' : '');
+                                //                                            echo "\n"; ?>
+                                <!--                                            <option value=-->
+                                <!--                                            -->
+                                <?php //echo "\"" . $groupname . "\"" . $group_selected; ?><!-- -->
+                                <?php //echo $groupname; ?><!--</option>--><?php
+                                //                                        }
+                                //                                        echo "\n"; ?>
+                                <!--                                    </select>-->
+                                <!--                                </td>-->
                                 <td id="settings_checkbox">
                                     <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">
                                     <input type="checkbox" title="Enable or disable scavenging"
