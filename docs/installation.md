@@ -84,7 +84,7 @@ Based on your distribution or setup, this is what you need to do:
 - make sure `/var/log/syslog.fifo` is an available location
   - adjust core/logparser.php and etc/config.php if changed
 - systemd systems: copy the logparser.service to designated location
-  - adjust any location in it for your setyup
+  - adjust any location in it for your setup
 - check if 'arial' is in your font list. Usually check: `fc-list | grep arial`
   - unpack install/ext/msttcorefonts.tar.gz and move file to appropiate
     location

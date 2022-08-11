@@ -31,7 +31,7 @@ at the base of this project.
    This section covers some nifty settings, customisation and advanced
    settings outside the frontend settings.
 
-6. [Troubleshooting](troubleshoot.md#troubleshooting)
+5. [Troubleshooting](troubleshoot.md#troubleshooting)
 
 
 ### Final words
