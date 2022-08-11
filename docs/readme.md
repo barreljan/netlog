@@ -26,7 +26,7 @@ at the base of this project.
    This section describes how the configuration of Netlog is set up. Different
    settings, tips, tricks and limitations are outlined.
 
-4. [Advanced](advanced.md#Netlog Advanced)
+4. [Advanced](advanced.md#netlog-advanced)
 
    This section covers some nifty settings, customisation and advanced
    settings outside the frontend settings.

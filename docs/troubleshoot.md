@@ -2,8 +2,8 @@
 
 ## Table of contents
 
-1. [Disk usage grows rapidly](troubleshoot.md#Disk usage grows rapidly)
-2. [Issues with background jobs](troubleshoot.md#Issues with background jobs)
+1. [Disk usage grows rapidly](troubleshoot.md#disk-usage-grows-rapidly)
+2. [Issues with background jobs](troubleshoot.md#issues-with-background-jobs)
 
 
 ### Disk usage grows rapidly

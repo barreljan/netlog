@@ -2,7 +2,7 @@
 
 ## Table of contents
 
-1. [Scavenger filtering](advanced.md#Scavenger filtering)
+1. [Scavenger filtering](advanced.md#scavenger-filtering)
 
 
 ### Scavenger filtering
