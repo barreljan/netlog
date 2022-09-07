@@ -4,6 +4,7 @@
 
 1. [Disk usage grows rapidly](troubleshoot.md#disk-usage-grows-rapidly)
 2. [Issues with background jobs](troubleshoot.md#issues-with-background-jobs)
+3. [No Lograte graphs shown](troubleshoot.md#Lograte-graph-issues)
 
 
 ### Disk usage grows rapidly
@@ -60,3 +61,19 @@ Or your prefered way (phpMyAdmin, etc).
 In certain circumstances a background job will fail. These are uncommon and can happen
 when you are doing some custom work. The most core modules do log a small amount of errors
 to the system log. So you will see them in '/var/log/messages' or you Netlog system itself.
+
+### Lograte graph issues
+
+Although the basic installation comes with TrueType fonts, you may end up with a blank page
+when opening the Lograte viewer. This could be an issue with the PHP installation (review
+your log files) but most of the time this is due to the TTF definition being wrong.
+
+Open the following file with your prefered editor:
+
+```vim /usr/share/php/jpgraph/jpg-config.inc.php```
+
+And look for the line (mostly around line #39)
+
+```define(\'TTF_DIR\', <somelocation>)```
+
+Make sure this points to the correct location where the 'arial.ttf' file is located.

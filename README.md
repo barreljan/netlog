@@ -14,22 +14,23 @@ Current open items:
 - PHP 7.4 or newer
 - MySQL 8.0 or equivalent (like MariaDB 10.x)
 
-_Build and tested on Centos7.9, Apache 2.4 PHP 7.4 (Remi), MariaDB 10.6_
+_Build and tested on Centos7.9, Apache 2.4 PHP 7.4 and 8.0 (Remi), MariaDB 10.6_
 
 ### External software
 
 - TrueType (msttcore) fonts
-- JPGraph 4.3.5 (https://jpgraph.net/)
+- JpGraph 4.4.1 (https://jpgraph.net/)
 
 ### Features
 
 Netlog has a few key-features
 - stupidly easy navigation through log entries per host
-- configurable hostnames
+- configurable hostnames and groups
 - Lograte graphing for trend analysis and fast detecting of events
 - Logscavenger for early detections of issues, specific events
-- netalert dashboard page with easy coloring of new items from Logscavenger
+- Netalert dashboard page with easy coloring of new events from Logscavenger
 - archiving day-to-day tables in monthly tables after (default) 14 days
+- log2nms to send the Netalert events to your NMS
 
 And of course, most settings are present in the 'global' netlog config database table, so some customisation can be made.
 The hostname table can be modified with ease to keep it in sync with your NMS (e.g. LibreNMS) as this is a simple task between the 2 databases.

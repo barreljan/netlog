@@ -60,6 +60,7 @@ SYSLOGNG_DIR=/etc/syslog-ng/conf.d
 HTTPD_CONFD_DIR=/etc/httpd/conf.d
 CROND_DIR=/etc/cron.d
 NETLOG_PASS="$(random_pass)"
+JPGRAPH_VER="4.4.1"
 # MySQL setup
 TEMPDIR=$(mktemp -d)
 CNFFILE="/root/.my.cnf"
@@ -249,8 +250,10 @@ if [[ -d "$PHP_SHARED_DIR" ]]; then
     if [[ ! -d "$PHP_SHARED_DIR/" ]]; then
       mkdir -p "$PHP_SHARED_DIR/truetype"
     fi
-    tar -xf "$SCRIPTPATH/ext/jpgraph-4.3.5.tar.gz" -C /usr/local/src/
-    ln -s /usr/local/src/jpgraph/src /usr/share/php/jpgraph
+    tar -xf "$SCRIPTPATH/ext/jpgraph-$JPGRAPH_VER.tar.gz" -C /usr/local/src/
+    chown root:root "/usr/local/src/jpgraph-$JPGRAPH_VER"
+    ln -s /usr/local/src/jpgraph-$JPGRAPH_VER/src /usr/share/php/jpgraph
+    sed -i "40i define(\'TTF_DIR\',\'$FONTS_DIR/truetype/msttcorefonts/\');" /usr/share/php/jpgraph/jpg-config.inc.php
     printf "%b Package JPGraph unpacked\\n" "${TICK}"
   fi
 fi
