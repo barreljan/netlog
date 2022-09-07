@@ -24,7 +24,9 @@ The _unnamed_ are hosts that are actively logging but do not have an entry and
 a host type set. 
 
 The _unused_ view gives hostnames in the
-system of those that are not logging actively anymore.
+system of those that are not logging actively anymore. These only appear when (older) 
+tables are removed, for instance due to renention threshold and thus a cleanup,
+or when you manually remove all the tables of a host yourself.
 
 Deletion can only be done with _unused_ hosts. 
 
