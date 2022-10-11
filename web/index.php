@@ -1,27 +1,6 @@
 <?php
-require(dirname(__DIR__) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/global.php");
 $today = date('Y_m_d');
-
-$session_name = "PHP_NETLOG";
-
-/*
- * Start (or not) session
- */
-if (!is_session_started()) {
-    session_name($session_name);
-    session_start();
-}
-
-if (!isset($_SESSION)) {
-    die("No session set or server is not allowing PHP Sessions to be stored?");
-}
-
-/*
- * Check and if not, create database link
- */
-if (!isset($db_link)) {
-    $db_link = connect_db();
-}
 
 /*
  * Some functions

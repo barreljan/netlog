@@ -4,17 +4,10 @@
 // within the <img> tags of the HTML-code.
 // Example: <img src="drawgraph.php?hostid=1&hostname=localhost&width=600&height=250&time=30">
 
-require(dirname(__DIR__) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/global.php");
 require_once('jpgraph/jpgraph.php');
 require_once('jpgraph/jpgraph_line.php');
 require_once('jpgraph/jpgraph_date.php');
-
-/*
- * Check and if not, create database link
- */
-if (!isset($db_link)) {
-    $db_link = connect_db();
-}
 
 // Get given parameters
 $hostid = $_GET['hostid'];

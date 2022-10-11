@@ -1,13 +1,6 @@
 <?php
-require(dirname(__DIR__) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/global.php");
 $today = date('Y_m_d');
-
-/*
- * Check and if not, create database link
- */
-if (!isset($db_link)) {
-    $db_link = connect_db();
-}
 
 $tablename = 'HST_127_0_0_2_DATE_' . $today;
 $fields = implode(', ', $alert_fields);

@@ -7,6 +7,8 @@ const VERSION = 'v3.0';
 const NAME = 'Syslog-ng to MySQL parser';
 const AUTHOR = 'bartjan@pc-mania.nl';
 
+$session_name = "PHP_NETLOG";
+
 // Debug
 //$debug = true;
 $debug = false;
@@ -154,8 +156,22 @@ function connect_db()
     return $db_link;
 }
 
-// Connect to database
-$db_link = connect_db();
+/*
+ * Start (or not) session
+ */
+if (!is_session_started()) {
+    session_name($session_name);
+    if (!@session_start()) {
+        die("No session set or server is not allowing PHP Sessions to be stored?");
+    }
+}
+
+/*
+ * Check and if not, create database link
+ */
+if (!isset($db_link)) {
+    $db_link = connect_db();
+}
 
 // Fifo socket
 $log_fifo = "/var/log/syslog.fifo";

@@ -3,7 +3,7 @@
 // It will be a quick way of identifying trouble spots and trend analyses.
 
 // Including Netlog config and variables
-require(dirname(__DIR__) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/global.php");
 
 // Check if I am running from the command line
 check_cli_sapi();

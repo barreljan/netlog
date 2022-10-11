@@ -5,7 +5,7 @@
 // logparser.php module where distinction is made by the PROG name.
 
 // Including Netlog config and variables
-require(dirname(__DIR__) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/global.php");
 if ($netalert_to_nms) {
     require("log2nms.php");
 }

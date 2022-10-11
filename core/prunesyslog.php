@@ -2,7 +2,7 @@
 // This script will prune the syslog tables, or in other words drop tables older than x
 
 // Including Netlog config and variables
-require(dirname(__DIR__) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/global.php");
 
 // Check if I am running from the command line
 check_cli_sapi();

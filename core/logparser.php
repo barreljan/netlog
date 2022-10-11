@@ -6,7 +6,7 @@
 // This way the most active tables will have a reasonable size, thus queryable.
 
 // Including Netlog config and variables
-require(dirname(__DIR__) . "/etc/config.php");
+require(dirname(__DIR__) . "/etc/global.php");
 
 // Check if I am running from the command line
 check_cli_sapi();
