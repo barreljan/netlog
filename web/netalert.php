@@ -17,12 +17,13 @@ $query = "SELECT $fields
             FROM $tablename 
            ORDER BY `TIME` DESC
            LIMIT $showlines_alert";
-$loglinequery = $db_link->prepare($query);
-// If there is a table for today, get results
-if ($loglinequery) {
+try {
+    // If there is a table for today, get results
+    $loglinequery = $db_link->prepare($query);
     $loglinequery->execute();
     $loglineresult = $loglinequery->get_result();
-} else {
+} catch (Exception $e) {
+    // Table prob. does not exist so return bool
     $loglineresult = false;
 }
 
@@ -41,7 +42,7 @@ if ($loglinequery) {
         <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
     </head><?php
     echo "\n";
-    if ((sizeof($_GET) >= 0) && (isset($_GET['inline']))) { ?>
+    if ((sizeof($_GET) >= 1) && (isset($_GET['inline']))) { ?>
     <body style="background-color: #ffffff;">
     <div class="container">
         <div class="header">
