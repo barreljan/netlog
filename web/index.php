@@ -45,7 +45,7 @@ function date_compare(string $a, string $b): string
  * Is to be used with the 'clear search' button.
  * @return void
  */
-function set_defaults()
+function set_defaults(): void
 {
     global $showlines_default;
 
@@ -61,7 +61,7 @@ function set_defaults()
  * @param array $input
  * @return void
  */
-function get_day_option(array $input)
+function get_day_option(array $input): void
 {
     foreach ($input as $dayoption) {
         $dayoption_selected = ($dayoption == $_SESSION['day'] ? ' selected' : ''); ?>
