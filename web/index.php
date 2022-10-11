@@ -431,7 +431,7 @@ if (!$empty_iplist) {
     if (isset ($lvl_filter)) {
         $query .= "AND `LVL` IN (" . $lvl_filter . ") ";
     }
-    $query .= "ORDER BY `TIME` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
+    $query .= "ORDER BY `DAY` DESC, `TIME` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
     $linesquery = $db_link->prepare($query);
     $linesquery->bind_param('s', $searchstring);  // $searchstring is already given the % tags
     $linesquery->execute();
