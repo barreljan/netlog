@@ -14,7 +14,7 @@ Current open items:
 - PHP 7.4 or newer
 - MySQL 8.0 or equivalent (like MariaDB 10.x)
 
-_Build and tested on Centos7.9, Apache 2.4 PHP 7.4 and 8.0 (Remi), MariaDB 10.6_
+_Build and tested on Centos7.9, Apache 2.4 PHP 7.4 and 8.0/8.1, MariaDB 10.6_
 
 ### External software
 
