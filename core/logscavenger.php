@@ -1,7 +1,7 @@
 <?php
 // NetLog scavenger
 // For continuous, rapid searching of specific keywords (and thus events). Every found keyword
-// will be pushed into a separate 'Netalert' table: HST_127_0_0_2_DATE_YYYY_MM_DD'. See the
+// will be pushed into a separate 'Netalert' table: HST_127_0_0_2_DATE_YYYY_MM_DD. See the
 // logparser.php module where distinction is made by the PROG name.
 
 // Including Netlog config and variables
@@ -221,7 +221,9 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
 
                 $query = "INSERT INTO `$tablename` (`HOST`,`FAC`,`PRIO`,`LVL`,`TAG`,`DAY`,`TIME`,`PROG`,`MSG`)
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                if (!$db_link->prepare($query)) {
+                try {
+                    $db_link->prepare($query);
+                } catch (Exception $e) {
                     // Failed to insert as the table does not exist, lets create it
                     create_table($tablename);
                 }
