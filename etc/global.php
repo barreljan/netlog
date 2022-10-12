@@ -7,16 +7,6 @@ const VERSION = 'v3.0';
 const NAME = 'Syslog-ng to MySQL parser';
 const AUTHOR = 'bartjan@pc-mania.nl';
 
-$session_name = "PHP_NETLOG";
-
-// Debug
-//$debug = true;
-$debug = false;
-
-// Load database and other local settings
-require('netlog.conf');
-$database ?? die("Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
-
 /**
  * A simple check if the PHP session is started
  * @return bool Boolean (true or false)
@@ -34,7 +24,7 @@ function is_session_started(): bool
  * Check if I am running from the cli
  * @return void
  */
-function check_cli_sapi()
+function check_cli_sapi(): void
 {
     if (php_sapi_name() !== 'cli') {
         die('Run me from the command line');
@@ -44,9 +34,9 @@ function check_cli_sapi()
 /**
  * Converts an alphabetic string into an integer.
  * @param string $a A string
- * @return false|string
+ * @return string
  */
-function alpha2num(string $a)
+function alpha2num(string $a): string
 {
     $r = 0;
     $l = strlen($a);
@@ -83,7 +73,7 @@ function aquire_lock()
  * @param $semaphore
  * @return void
  */
-function unlock($semaphore)
+function unlock($semaphore): void
 {
     sem_release($semaphore);
 }
@@ -94,7 +84,7 @@ function unlock($semaphore)
  * Can be used in conjunction with the config parameter 'debug'
  * @return void
  */
-function codedebug()
+function codedebug(): void
 {
     global $debug;
 
@@ -119,7 +109,7 @@ function codedebug()
  * @param string $message
  * @return void
  */
-function send_email(string $hostname, string $from, string $message)
+function send_email(string $hostname, string $from, string $message): void
 {
     global $mail_from, $mail_rcpt;
     $subject = "Network port violation on $hostname";
@@ -135,14 +125,27 @@ function send_email(string $hostname, string $from, string $message)
     mail($mail_rcpt, $subject, $msg, implode("\r\n", $headers), "-f $mail_from");
 }
 
-/**
- * Create and check database link
- * @return mysqli|void
- */
-function connect_db()
-{
-    global $database;
 
+// Start session
+if (!is_session_started()) {
+    session_name('PHP_NETLOG');
+    if (!@session_start()) {
+        die("No session set or server is not allowing PHP Sessions to be stored?");
+    }
+}
+
+/**
+ * for debugging set to true
+ * @var $debug
+ */
+$debug = false;
+
+// Load database settings
+require(dirname(__DIR__) . '/etc/netlog.conf');
+$database ?? die("Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
+
+// Check and if not, create database link
+if (!isset($db_link)) {
     $db_link = @new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
     if (mysqli_connect_errno()) {
         printf("Connect failed: %s\n", mysqli_connect_error());
@@ -152,29 +155,7 @@ function connect_db()
         printf("Unable to select DB: %s\n", mysqli_connect_error());
         die;
     }
-    // All ok?
-    return $db_link;
 }
-
-/*
- * Start (or not) session
- */
-if (!is_session_started()) {
-    session_name($session_name);
-    if (!@session_start()) {
-        die("No session set or server is not allowing PHP Sessions to be stored?");
-    }
-}
-
-/*
- * Check and if not, create database link
- */
-if (!isset($db_link)) {
-    $db_link = connect_db();
-}
-
-// Fifo socket
-$log_fifo = "/var/log/syslog.fifo";
 
 // Populate the global config settings
 $config = array();
@@ -186,6 +167,15 @@ $globalresults = $globalquery->get_result();
 while ($global = $globalresults->fetch_assoc()) {
     $config['global'][$global['setting']] = $global['value'];
 }
+
+// Load nms module if enabled
+if ($config['global']['netalert_to_nms'] == 1) {
+    require(dirname(__DIR__) . "/core/log2nms.php");
+}
+$nms_database ?? die("NMS Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
+
+// Fifo socket
+$log_fifo = $config['global']['log_fifo'];
 
 // Get the default view
 $query = "SELECT `setting`, `hosttype`.`name` AS `value`
@@ -230,10 +220,8 @@ $graph_width = $config['global']['lograte_graph_width'];
 $graph_timelimit = $config['global']['lograte_history_default'];
 $graph_history = explode(',', $config['global']['lograte_history']);
 
-// ###### Netalert variables ######
-
 // Change displayed fields and even order of fields
-// Do mind this page has blank space after TIME column
+// Do mind this page has blank column after TIME column
 $alert_fields = explode(',', $config['global']['netalert_fields']);
 
 // Control ammount of history lines shown

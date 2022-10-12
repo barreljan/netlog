@@ -65,6 +65,7 @@ size for the lograte page.
 in the _lograte_history_.
 - **[log_fields](configuration.md#log_fields)** - Sets the available field. For internal use in logparser 
 module. Use with care!
+- **[log_fifo](configuration.md#log_fifo)** - Set the FiFo filename
 - **[log_levels](configuration.md#log_levels)** - Set the available log levels. Sets which field to be shown.
 - **[netalert_fields](configuration.md#netalert_fields)** - Set the available fields for the Netalert page. 
 Normally a brief set of field is used.
@@ -72,6 +73,7 @@ Normally a brief set of field is used.
 page.
 - **[netalert_time_threshold](configuration.md#netalert_time_threshold)** - Sets the threshold in which time messages are 
 normalized.
+- **[netalert_to_nms](configuration.md#netalert_to_nms)** - Set the NMS module to active/disable
 - **[refresh](configuration.md#refresh)** - Set the option-list to your need to be used in viewing the 
 logging. Use integer comma separated values.
 - **[retention](configuration.md#retention)** - Set the number of months to keep and older to drop.
@@ -144,6 +146,14 @@ Best practice is to leave it at the default.
 
 The order can be changed without issues.
 
+###### log_fifo
+
+- **Value**: string
+- **Default**: '/var/log/syslog.fifo'
+
+Set the FiFo file location. The Logparser module creates this if it does not exist. If the Logparser
+module is running from a non-priviledged user (not root) make sure additional permissions are set.
+
 ###### log_levels
 
 - **Value**: strings, comma separated
@@ -173,6 +183,13 @@ Limits the lines on the Netalert page.
 
 Sets the threshold in which time messages are normalized. After the set time
 the lines are not colored anymore.
+
+###### netalert_to_nms
+
+- **Value**: single integer
+- **Default**: 0
+
+Enables or disables the Log2nms module that events are pushed directly to the LibreNMS database.
 
 ###### refresh
 

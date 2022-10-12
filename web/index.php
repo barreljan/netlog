@@ -288,10 +288,8 @@ sort($iplist);
 
 // What if, an empty hosttype is selected?
 if (empty($iplist)) {
-    $empty_iplist = True;
+    $empty_iplist = true;
     unset($_SESSION['showip']);
-} else {
-    $empty_iplist = False;
 }
 
 // Set the showip for the first time
@@ -310,7 +308,7 @@ $typequery->execute();
 $typeresult = $typequery->get_result();
 
 // Set the day option, and offset
-if (!$empty_iplist) {
+if (!isset($empty_iplist)) {
     // Set the day correct in the session for the first time
     if (isset($hostdaylist[$_SESSION['showip']])) {
         usort($hostdaylist[$_SESSION['showip']], 'date_compare');

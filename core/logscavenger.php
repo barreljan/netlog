@@ -6,9 +6,6 @@
 
 // Including Netlog config and variables
 require(dirname(__DIR__) . "/etc/global.php");
-if ($netalert_to_nms) {
-    require("log2nms.php");
-}
 
 // Check if I am running from the command line
 check_cli_sapi();

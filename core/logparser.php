@@ -22,10 +22,9 @@ openlog("logparser", 0, LOG_LOCAL0);
  * @param string $tablename A composed name for the table
  * @return void
  */
-function create_table(string $tablename)
+function create_table(string $tablename): void
 {
-    global $db_link;
-    global $database;
+    global $db_link, $database;
 
     $query = "CREATE TABLE IF NOT EXISTS `{$database['DB']}`.`$tablename` LIKE template";
     $createquery = $db_link->prepare($query);
@@ -43,7 +42,7 @@ function create_table(string $tablename)
  * @param array $logitems
  * @return void
  */
-function parse_log(array $logitems)
+function parse_log(array $logitems): void
 {
     global $db_link, $database;
 
@@ -76,7 +75,9 @@ function parse_log(array $logitems)
     // Insert the syslog message into the database
     $query = "INSERT INTO `{$database['DB']}`.`$tablename` (`HOST`, `FAC`, `PRIO`, `LVL`, `TAG`, `DAY`, `TIME`, `PROG`, `MSG`)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    if (!$db_link->prepare($query)) {
+    try {
+        $db_link->prepare($query);
+    } catch (Exception $e) {
         // Failed to insert as the table does not exist, lets create it
         create_table($tablename);
     }
@@ -92,7 +93,7 @@ function parse_log(array $logitems)
  * Reads the fifo and make an array per line which passes to the parse_log function
  * @return void
  */
-function read_fifo()
+function read_fifo(): void
 {
     global $log_fifo;
 
