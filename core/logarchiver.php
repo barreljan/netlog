@@ -19,15 +19,20 @@ openlog('logarchiver', LOG_PID, LOG_USER);
 $archinterval = date("Y_m_d", strtotime("-{$config['global']['logarchive_interval']} days"));
 
 // Get the tablenames that matter
-$query = "SELECT `TABLE_NAME`
-            FROM `information_schema`.`TABLES`
-           WHERE `TABLE_SCHEMA` = 'syslog' 
-                 AND `TABLE_NAME` NOT IN ('template') 
-                 AND `CREATE_TIME` <= '$archinterval'
-        ORDER BY `CREATE_TIME`";
-$tablequery = $db_link->prepare($query);
-$tablequery->execute();
-$tableresult = $tablequery->get_result();
+try {
+    $query = "SELECT `TABLE_NAME`
+                FROM `information_schema`.`TABLES`
+               WHERE `TABLE_SCHEMA` = 'syslog' 
+                     AND `TABLE_NAME` NOT IN ('template') 
+                     AND `CREATE_TIME` <= '$archinterval'
+            ORDER BY `CREATE_TIME`";
+    $tablequery = $db_link->prepare($query);
+    $tablequery->execute();
+    $tableresult = $tablequery->get_result();
+} catch (Exception|Error $e) {
+    syslog(LOG_CRIT, "Failed to select tables for archiving" . err($e));
+    die();
+}
 
 while ($tables = $tableresult->fetch_assoc()) {
     $table_name = $tables['TABLE_NAME'];
@@ -48,32 +53,35 @@ while ($tables = $tableresult->fetch_assoc()) {
         // Make a month-table for the host if it does not exist
         $dsttable = $host . "_DATE_" . $year . "_" . $monthname;
         $query = "CREATE TABLE IF NOT EXISTS `{$database['DB']}`.`$dsttable` LIKE `template`";
-        $createquery = $db_link->prepare($query);
-        $result = $createquery->execute();
-        if (!$result) {
-            syslog(LOG_WARNING, "Failed to create table $dsttable: " . mysqli_connect_error());
+        try {
+            $createquery = $db_link->prepare($query);
+            $result = $createquery->execute();
+            unset($query, $createquery, $result);
+        } catch (Exception|Error $e) {
+            syslog(LOG_WARNING, "Failed to create table $dsttable" . err($e));
         }
-        unset($query, $createquery, $result);
 
         // Copy all records from day-tble into month-table
         $query = "INSERT INTO `{$database['DB']}`.`$dsttable` (HOST, FAC, PRIO, LVL, TAG, DAY, TIME, PROG, MSG)
                        SELECT HOST, FAC, PRIO, LVL, TAG, DAY, TIME, PROG, MSG 
                          FROM `$table_name`";
-        $archive_query = $db_link->prepare($query);
-        $result = $archive_query->execute();
-        if (!$result) {
-            syslog(LOG_WARNING, "Failed to copy to $dsttable: " . mysqli_connect_error());
+        try {
+            $archive_query = $db_link->prepare($query);
+            $result = $archive_query->execute();
+            unset($query, $archive_query, $result);
+        } catch (Exception|Error $e) {
+            syslog(LOG_WARNING, "Failed to copy to $dsttable" . err($e));
         }
-        unset($query, $archive_query, $result);
 
         // Drop old day-table
         $query = "DROP TABLE `{$database['DB']}`.`$table_name`";
-        $dropquery = $db_link->prepare($query);
-        $result = $dropquery->execute();
-        if (!$result) {
-            syslog(LOG_WARNING, "Failed to drop table $table_name: " . mysqli_connect_error());
+        try {
+            $dropquery = $db_link->prepare($query);
+            $result = $dropquery->execute();
+            unset($query, $dropquery, $result);
+        } catch (Exception|Error $e) {
+            syslog(LOG_WARNING, "Failed to drop table $table_name" . err($e));
         }
-        unset($query, $dropquery, $result);
     }
 }
 

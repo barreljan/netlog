@@ -1,9 +1,8 @@
 <?php
 require(dirname(__DIR__) . "/etc/global.php");
-$today = date('Y_m_d');
 
 /*
- * Some functions
+ * Functions
  */
 
 /**
@@ -52,6 +51,7 @@ function get_day_option(array $input): void
 /*
  * Processing the GET parts
  */
+
 if (isset($_GET['action'])) {
     if ($_GET['action'] == 'clear') {
         set_defaults();
@@ -62,7 +62,11 @@ if (isset($_GET['action'])) {
 /*
  * Processing the POST parts
  */
+
 if (isset($_POST['type'])) {
+    // Set or stop refresh
+    $_SESSION['refresh'] = isset($_POST['stoprefresh']) ? 'off' : $_POST['refresh'];
+
     // Compare type
     if (isset($_SESSION['type'])) {
         if ($_SESSION['type'] != $_POST['type']) {
@@ -73,14 +77,17 @@ if (isset($_POST['type'])) {
     } else {
         $_SESSION['type'] = "All";
     }
+
     // Compare ip
     if (isset($_SESSION['showip'])) {
         if ($_SESSION['showip'] != $_POST['showip']) {
             $_SESSION['showip'] = $_POST['showip'];
             unset($_SESSION['day'], $_SESSION['search'], $_SESSION['refresh'], $_SESSION['showpage'], $_SESSION['filter_LVL']);
             $_SESSION['clearsearch'] = "clear";
+
         }
     }
+
     // Compare date
     if (isset($_SESSION['day'])) {
         if ($_SESSION['day'] != $_POST['day']) {
@@ -88,19 +95,22 @@ if (isset($_POST['type'])) {
             unset($_SESSION['refresh'], $_SESSION['showpage']);
         }
     }
-    // Process showlines before cleansearch because we want to reset lines to default on cleansearch
+
+    // Process showlines before clear search because we want to reset lines to default on clear search
     if (isset($_POST['showlines'])) {
         if ($_SESSION['showlines'] != $_POST['showlines']) {
             $_SESSION['showlines'] = intval($_POST['showlines']);
             unset($_SESSION['showpage']);
         }
     }
+
     // Set level filter
     if (isset($_SESSION['filter_LVL'])) {
         $_SESSION['filter_LVL'] = $_POST['filter_LVL'];
     }
+
     // Compare search
-    if ((isset($_POST['clearsearch'])) || (isset($_SESSION['clearsearch']))) {
+    if (isset($_POST['clearsearch']) || isset($_SESSION['clearsearch'])) {
         $_SESSION['showlines'] = $showlines_default;
         unset($_SESSION['search'], $_SESSION['clearsearch'], $_SESSION['showpage']);
     } else {
@@ -114,19 +124,17 @@ if (isset($_POST['type'])) {
             unset($_SESSION['showpage']);
         }
     }
-    // Compare,set or stop refresh
-    $_SESSION['refresh'] = isset($_POST['stoprefresh']) ? 'off' : $_POST['refresh'];
 
     // Default back to page 1 after changes and detect page shift
     if (isset($_SESSION['showpage'])) {
-        if ((isset($_POST['jumptopage'])) && ($_POST['jumptopage'] != "") && is_numeric($_POST['jumptopage'])) {
+        if (isset($_POST['jumptopage']) && $_POST['jumptopage'] != "" && is_numeric($_POST['jumptopage'])) {
             if ($_SESSION['showpage'] != $_POST['jumptopage']) {
-                if (($_POST['jumptopage'] > 0) && ($_POST['jumptopage'] <= $_SESSION['pagecount'])) {
+                if ($_POST['jumptopage'] > 0 && ($_POST['jumptopage'] <= $_SESSION['pagecount'])) {
                     $_SESSION['showpage'] = $_POST['jumptopage'];
                 }
             } else {
                 foreach ($_POST as $buttonname => $buttonvalue) {
-                    if (preg_match('/showpage/', $buttonname)) {
+                    if (str_contains($buttonname, 'showpage')) {
                         $bvalue = explode('_', $buttonname);
                         switch ($bvalue['1']) {
                             case "last":
@@ -158,7 +166,7 @@ if (isset($_POST['type'])) {
                     }
                 }
             }
-        } elseif ((preg_match('/[0-9][0-9]:[0-9][0-9]/', $_POST['jumptopage'])) || (preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}/', $_POST['jumptopage']))) {
+        } elseif (preg_match('/[0-9][0-9]:[0-9][0-9]/', $_POST['jumptopage']) || preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}/', $_POST['jumptopage'])) {
             $_SESSION['showpage'] = $_POST['jumptopage'];
         }
     }
@@ -167,11 +175,14 @@ if (isset($_POST['type'])) {
 /*
  * Set defaults, common vars and figuring out existing settings from user
  */
+
+$today = date('Y_m_d');
+
 $_SESSION['showlines'] = !isset($_SESSION['showlines']) ? $showlines_default : $_SESSION['showlines'];
 $_SESSION['showpage'] = !isset($_SESSION['showpage']) ? 1 : $_SESSION['showpage'];
 $_SESSION['filter_LVL'] = !isset($_SESSION['filter_LVL']) ? "none" : $_SESSION['filter_LVL'];
 
-if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
+if (isset($_SESSION['filter_LVL']) && $_SESSION['filter_LVL'] != "none") {
     switch ($_SESSION['filter_LVL']) {
         case "debug":
             $lvl_filter = "'debug'";
@@ -202,11 +213,8 @@ if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
             $lvl_filter = "'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
     }
 }
-
-$ref = "";
-if ((isset($_SESSION['refresh'])) && ($_SESSION['refresh'] != "off")) {
-    $ref = "    <meta http-equiv=\"refresh\" content=\"{$_SESSION['refresh']}\">";
-}
+// Set meta if refresh is enabled
+$ref = isset($_SESSION['refresh']) && $_SESSION['refresh'] != "off" ? "<meta http-equiv=\"refresh\" content=\"{$_SESSION['refresh']}\">" : "";
 
 if (isset($_SESSION['type'])) {
     $hosttypeselect = ($_SESSION['type'] == "All" || $_SESSION['type'] == "Unnamed") ? "%" : $_SESSION['type'];
@@ -214,39 +222,56 @@ if (isset($_SESSION['type'])) {
     $_SESSION['type'] = $default_view;
     $hosttypeselect = $default_view;
 }
+
+// Set (or not) if there is something to search, otherwise default it
 $searchstring = isset($_SESSION['search']) ? "%" . $_SESSION['search'] . "%" : "%";
 
 /*
  * Fetch data from DB and populate vars/arrays
  */
+
 // Get IP-adresses, their hostname and type
-$query = "SELECT `hostip`, `hostname`
-            FROM `{$database['DB_CONF']}`.`hostnames`
-                 LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
-                 ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
-           WHERE `name` LIKE '$hosttypeselect'";
-$hostnamequery = $db_link->prepare($query);
-$hostnamequery->execute();
-$hostnameresult = $hostnamequery->get_result();
+try {
+    $query = "SELECT `hostip`, `hostname`
+                FROM `{$database['DB_CONF']}`.`hostnames`
+                     LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
+                     ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
+               WHERE `name` LIKE '$hosttypeselect'";
+    $hostnamequery = $db_link->prepare($query);
+    $hostnamequery->execute();
+    $hostnameresult = $hostnamequery->get_result();
+    if (!$hostnameresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    die("Could not retreive any host config" . err($e));
+}
 
 while ($dbhostnames = $hostnameresult->fetch_assoc()) {
     $hostnameip = $dbhostnames['hostip'];
     $hostname[$hostnameip] = $dbhostnames['hostname'];
 }
-$hostnameresult->free();
+$hostnameresult->free_result();
 
 // Get all the table names
-$query = "SELECT `TABLE_NAME` AS `tblnm`
-            FROM `INFORMATION_SCHEMA`.`TABLES`
-           WHERE `TABLE_SCHEMA` = '{$database['DB']}'";
-$tablesquery = $db_link->prepare($query);
-$tablesquery->execute();
-$tablesresult = $tablesquery->get_result();
+try {
+    $query = "SELECT `TABLE_NAME` AS `tblnm`
+                FROM `INFORMATION_SCHEMA`.`TABLES`
+               WHERE `TABLE_SCHEMA` = '{$database['DB']}'";
+    $tablesquery = $db_link->prepare($query);
+    $tablesquery->execute();
+    $tablesresult = $tablesquery->get_result();
+    if (!$tablesresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    die("Could not retreive any host tables" . err($e));
+}
 
 // Throw all ip parts of table names in an array
 $iplist = array();
-while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
-    $thishost = explode('_DATE_', $lines['0']);
+while ($lines = $tablesresult->fetch_assoc()) {
+    $thishost = explode('_DATE_', $lines['tblnm']);
     $host = trim($thishost['0'], 'HST_');
     $ip = str_replace('_', '.', $host);
 
@@ -280,7 +305,7 @@ while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
         }
     }
 }
-$tablesresult->free();
+$tablesquery->free_result();
 
 // Deduplicate array
 $iplist = array_unique($iplist);
@@ -301,13 +326,24 @@ foreach ($iplist as $ip) {
 }
 
 // Get list of hosttypes
-$typequery = $db_link->prepare("SELECT `id`, `name`
-                                  FROM `{$database['DB_CONF']}`.`hosttype`
-                                 ORDER BY `name`");
-$typequery->execute();
-$typeresult = $typequery->get_result();
+try {
+    $typequery = $db_link->prepare("SELECT `id`, `name`
+                                      FROM `{$database['DB_CONF']}`.`hosttype`
+                                     ORDER BY `name`");
+    $typequery->execute();
+    $typeresult = $typequery->get_result();
+    if (!$typeresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+    while ($type = $typeresult->fetch_assoc()) {
+        $types[] = $type['name'];
+    }
+} catch (Exception|Error $e) {
+    // set blank array to be sure
+    $types = array('');
+}
 
-// Set the day option, and offset
+// There is data to work with, figure out counts, offsets, pagenumbers and the actual lines
 if (!isset($empty_iplist)) {
     // Set the day correct in the session for the first time
     if (isset($hostdaylist[$_SESSION['showip']])) {
@@ -328,9 +364,11 @@ if (!isset($empty_iplist)) {
         }
     }
 
-    // Counts in lines, pages and figure out the offset
+    // Set base vars
     $host = str_replace('.', '_', $_SESSION['showip']);
     $tablename = "HST_" . $host . "_DATE_" . $_SESSION['day'];
+
+    // Counts in lines
     if ($searchstring == '%') {
         $query = "SELECT COUNT(*) AS `cnt`
                     FROM `$tablename`";
@@ -346,75 +384,101 @@ if (!isset($empty_iplist)) {
             $query .= " AND LVL IN (" . $lvl_filter . ") ";
         }
     }
-    $countquery = $db_link->prepare($query);
-    if ($searchstring != '%') {
-        $countquery->bind_param('s', $searchstring);
+    try {
+        $countquery = $db_link->prepare($query);
+        if ($searchstring != '%') {
+            $countquery->bind_param('s', $searchstring);
+        }
+        $countquery->execute();
+        $countresult = $countquery->get_result();
+        $count = $countresult->fetch_assoc();
+        if ($count) {
+            $linecount = $count['cnt'];
+            $countresult->free_result();
+            try {
+                $_SESSION['pagecount'] = ceil($linecount / $_SESSION['showlines']);
+            } catch (DivisionByZeroError $e) {
+                throw new Exception();
+            }
+        } else {
+            throw new mysqli_sql_exception();
+        }
+    } catch (Exception|Error $e) {
+        $linecount = 0;
+        $_SESSION['pagecount'] = 1;
     }
-    $countquery->execute();
-    $countresult = $countquery->get_result();
-    $count = $countresult->fetch_assoc();
-    $linecount = $count['cnt'];
-    $countresult->free();
 
-    $_SESSION['pagecount'] = ceil($linecount / $_SESSION['showlines']);
-} else {
-    $linecount = 0;
-
-    $_SESSION['pagecount'] = 1;
-}
-
-// Set the selected page and counting where we are
-if (!is_numeric($_SESSION['showpage'])) {
-    if (preg_match('/^[0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
-        $query = "SELECT COUNT(*) AS `cnt`
+    // Set the selected page and counting where we are
+    if (!is_numeric($_SESSION['showpage'])) {
+        if (preg_match('/^[0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
+            $query = "SELECT COUNT(*) AS `cnt`
                     FROM `$tablename`
                    WHERE `MSG` LIKE ? ";
-        if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
-            $query .= "AND LVL IN (" . $lvl_filter . ") ";
-        }
-        $query .= "AND TIME <= '" . $_SESSION['showpage'] . "'";
-    } elseif (preg_match('/20[0-1][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
-        $query = "SELECT COUNT(*) AS `cnt`
+            if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
+                $query .= "AND LVL IN (" . $lvl_filter . ") ";
+            }
+            $query .= "AND TIME <= '" . $_SESSION['showpage'] . "'";
+        } elseif (preg_match('/20[0-1][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
+            $query = "SELECT COUNT(*) AS `cnt`
                     FROM `$tablename`
                    WHERE `MSG` LIKE ? ";
-        if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
-            $query .= "AND LVL IN (" . $lvl_filter . ") ";
+            if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
+                $query .= "AND LVL IN (" . $lvl_filter . ") ";
+            }
+            $query .= "AND CONCAT(DAY,' ',TIME) <= '" . $_SESSION['showpage'] . "'";
         }
-        $query .= "AND CONCAT(DAY,' ',TIME) <= '" . $_SESSION['showpage'] . "'";
+        try {
+            $timecountquery = $db_link->prepare($query);
+            $timecountquery->bind_param('s', $searchstring);
+            $timecountquery->execute();
+            $timecountedresult = $timecountquery->get_result();
+            $timecounted = $timecountedresult->fetch_assoc();
+            if ($timecounted) {
+                $timelinecount = $timecounted['cnt'];
+                $timecountedresult->free_result();
+            } else {
+                throw new mysqli_sql_exception();
+            }
+        } catch (Exception|Error $e) {
+            $timelinecount = 0;
+        }
+        try {
+            $timepagecount = round($timelinecount / $_SESSION['showlines']);
+            $_SESSION['showpage'] = $_SESSION['pagecount'] - $timepagecount;
+        } catch (DivisionByZeroError $e) {
+            $_SESSION['showpage'] = 1;
+        }
     }
-    $timecountquery = $db_link->prepare($query);
-    $timecountquery->bind_param('s', $searchstring);
-    $timecountquery->execute();
-    $timecountedresult = $timecountquery->get_result();
-    $timecounted = $timecountedresult->fetch_assoc();
-    if ($timecounted) {
-        $timelinecount = $timecounted['cnt'];
-        $timecountedresult->free();
-    } else {
-        $timelinecount = 0;
-    }
-    $timepagecount = round($timelinecount / $_SESSION['showlines']);
-    $_SESSION['showpage'] = $_SESSION['pagecount'] - $timepagecount;
-}
-$counttolast = $_SESSION['pagecount'] - $_SESSION['showpage'];
-$offset = ($_SESSION['showpage'] - 1) * $_SESSION['showlines'];
 
-// Get the actual lines for the selected host on the given date with the given filter and offset
-if (!$empty_iplist) {
+    // Fgure out the offset
+    $counttolast = $_SESSION['pagecount'] - $_SESSION['showpage'];
+    $offset = ($_SESSION['showpage'] - 1) * $_SESSION['showlines'];
+
+    // Get the actual lines for the selected host on the given date with the given filter and offset
     $fields = implode(', ', $log_fields);
-    $query = "SELECT $fields
-                FROM `$tablename`
-               WHERE `MSG` LIKE ? ";
-    if (isset ($lvl_filter)) {
-        $query .= "AND `LVL` IN (" . $lvl_filter . ") ";
+    try {
+        $query = "SELECT $fields
+                    FROM `$tablename`
+                   WHERE `MSG` LIKE ? ";
+        if (isset ($lvl_filter)) {
+            $query .= "AND `LVL` IN (" . $lvl_filter . ") ";
+        }
+        $query .= "ORDER BY `id` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
+        $linesquery = $db_link->prepare($query);
+        $linesquery->bind_param('s', $searchstring);  // $searchstring is already given the % tags
+        $linesquery->execute();
+        $loglines = $linesquery->get_result();
+        if (!$loglines->num_rows >= 1) {
+            throw new mysqli_sql_exception();
+        }
+    } catch (Exception|Error $e) {
+        $loglines = array();
     }
-    $query .= "ORDER BY `id` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
-    $linesquery = $db_link->prepare($query);
-    $linesquery->bind_param('s', $searchstring);  // $searchstring is already given the % tags
-    $linesquery->execute();
-    $loglines = $linesquery->get_result();
 } else {
+    // Defaulting
     $loglines = array();
+    $linecount = 0;
+    $_SESSION['pagecount'] = 1;
 }
 
 /*
@@ -451,21 +515,18 @@ if (!$empty_iplist) {
                     <table class="outline">
                         <tr>
                             <td>
-                                <button name="showpage_b25" type="submit" <?php if ($_SESSION['showpage'] < 26) {
-                                    echo "disabled";
-                                } ?>>-25
+                                <button name="showpage_b25"
+                                        type="submit" <?php if ($_SESSION['showpage'] < 26) echo "disabled"; ?>>-25
                                 </button>
                             </td>
                             <td>
-                                <button name="showpage_b10" type="submit" <?php if ($_SESSION['showpage'] < 11) {
-                                    echo "disabled";
-                                } ?>>-10
+                                <button name="showpage_b10"
+                                        type="submit" <?php if ($_SESSION['showpage'] < 11) echo "disabled"; ?>>-10
                                 </button>
                             </td>
                             <td>
-                                <button name="showpage_b1" type="submit" <?php if ($_SESSION['showpage'] < 2) {
-                                    echo "disabled";
-                                } ?>>-1
+                                <button name="showpage_b1"
+                                        type="submit" <?php if ($_SESSION['showpage'] < 2) echo "disabled"; ?>>-1
                                 </button>
                             </td>
                             <td><b><input title="Give a number of a page in range" type="text" size="6"
@@ -475,31 +536,27 @@ if (!$empty_iplist) {
                             </td>
                             <td>
                                 <button name="showpage_f1"
-                                        type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 1)) {
-                                    echo "disabled";
-                                } ?>>+1
+                                        type="submit"<?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 1)) echo " disabled"; ?>>
+                                    +1
                                 </button>
                             </td>
                             <td>
                                 <button name="showpage_f10"
-                                        type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 11)) {
-                                    echo "disabled";
-                                } ?>>+10
+                                        type="submit"<?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 11)) echo " disabled"; ?>>
+                                    +10
                                 </button>
                             </td>
                             <td>
                                 <button name="showpage_f25"
-                                        type="submit" <?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 26)) {
-                                    echo "disabled";
-                                } ?>>+25
+                                        type="submit"<?php if ($_SESSION['showpage'] > ($_SESSION['pagecount'] - 26)) echo " disabled"; ?>>
+                                    +25
                                 </button>
                             </td>
                         </tr>
                         <tr>
                             <td colspan="3" style="text-align: center;">
-                                <button name="showpage_first" type="submit" <?php if ($_SESSION['showpage'] == "1") {
-                                    echo "disabled";
-                                } ?>>first
+                                <button name="showpage_first"
+                                        type="submit"<?php if ($_SESSION['showpage'] == "1") echo " disabled"; ?>>first
                                 </button>
                             </td>
                             <td><span class="lpp">lpp:</span>
@@ -507,9 +564,7 @@ if (!$empty_iplist) {
                                         onChange="this.form.submit()"><?php
                                     foreach ($showlines as $log_limit) {
                                         echo "\n                                <option value=\"" . $log_limit . "\"";
-                                        if ((isset($_SESSION['showlines'])) && ($log_limit == $_SESSION['showlines'])) {
-                                            echo " SELECTED";
-                                        }
+                                        if (isset($_SESSION['showlines']) && $log_limit == $_SESSION['showlines']) echo " selected";
                                         echo ">" . $log_limit . "</option>";
                                     }
                                     echo "\n"; ?>
@@ -517,9 +572,8 @@ if (!$empty_iplist) {
                             </td>
                             <td colspan="3" style="text-align: center">
                                 <button name="showpage_last"
-                                        type="submit" <?php if (($_SESSION['showpage'] == $_SESSION['pagecount']) || ($_SESSION['pagecount'] < 2)) {
-                                    echo "disabled";
-                                } ?>>last
+                                        type="submit"<?php if ($_SESSION['showpage'] == $_SESSION['pagecount'] || $_SESSION['pagecount'] < 2) echo " disabled"; ?>>
+                                    last
                                 </button>
                             </td>
                         </tr>
@@ -531,18 +585,16 @@ if (!$empty_iplist) {
                        title="click to refresh the page">
                         Refresh</a>: <?php
                     echo "\n";
-                    if ((isset($_SESSION['refresh'])) && ($_SESSION['refresh'] != 'off')) {
+                    if (isset($_SESSION['refresh']) && $_SESSION['refresh'] != 'off') {
                         ?>
                         <button name="stoprefresh" type="submit">stop</button><?php
                     }
                     echo "\n";
-                    if ((isset($_SESSION['day'])) && ($_SESSION['day'] == $today)) { ?>
+                    if (isset($_SESSION['day']) && $_SESSION['day'] == $today) { ?>
                         <select title="Select a refreshrate" name="refresh" onChange="this.form.submit()"><?php
                         foreach ($refresh as $value) {
                             echo "\n                      <option value=\"" . $value . "\"";
-                            if (isset($_SESSION['refresh']) && $_SESSION['refresh'] == $value) {
-                                echo " SELECTED";
-                            }
+                            if (isset($_SESSION['refresh']) && $_SESSION['refresh'] == $value) echo " selected";
                             echo ">" . $value . "</option>";
                         }
                         echo "\n"; ?>
@@ -557,15 +609,16 @@ if (!$empty_iplist) {
                 <div class="header_device">
                     Device Type:
                     <select title="Select a type" name="type" onChange="this.form.submit()"><?php
-                        while ($types = $typeresult->fetch_assoc()) {
-                            echo "\n                      <option value=\"" . $types['name'] . "\"";
-                            if ($_SESSION['type'] == $types['name']) {
-                                echo " SELECTED";
-                            }
-                            echo ">" . $types['name'] . "</option>";
+                        foreach ($types as $type) {
+                            echo "\n                      <option value=\"" . $type . "\"";
+                            if ($_SESSION['type'] == $type) echo " selected";
+                            echo ">" . $type . "</option>";
                         }
-                        echo "\n";
-                        mysqli_free_result($typeresult); ?>
+                        echo "\n"; ?>
+                        <option value="All" <?php if ($_SESSION['type'] == "All") {
+                            echo "selected";
+                        } ?> >All
+                        </option>
                     </select>
                     Device:
                     <select title="Select a device" name="showip" onChange="this.form.submit()"><?php
@@ -574,13 +627,9 @@ if (!$empty_iplist) {
                                 $_SESSION['showip'] = $ip;
                             }
                             echo "\n                      <option value=\"" . $ip . "\"";
-                            if ($_SESSION['showip'] == $ip) {
-                                echo " SELECTED";
-                            }
+                            if ($_SESSION['showip'] == $ip) echo " selected";
                             echo ">";
-                            if (isset($hostname[$ip])) {
-                                echo $hostname[$ip];
-                            } else {
+                            if (isset($hostname[$ip])) echo $hostname[$ip]; else {
                                 echo $ip;
                             }
                             echo "</option>";
@@ -590,27 +639,23 @@ if (!$empty_iplist) {
                     Day:
                     <select title="Select a day" name="day" onChange="this.form.submit()">
                         <?php
-                        if ((isset($_SESSION['showip'])) && (isset($hostdaylist[$_SESSION['showip']]))) {
+                        if (isset($_SESSION['showip']) && isset($hostdaylist[$_SESSION['showip']])) {
                             usort($hostdaylist[$_SESSION['showip']], 'date_compare');
                             get_day_option($hostdaylist[$_SESSION['showip']]);
                         }
                         echo "\n";
-                        if ((isset($_SESSION['showip'])) && (isset($hostmonthlist[$_SESSION['showip']]))) {
+                        if (isset($_SESSION['showip']) && isset($hostmonthlist[$_SESSION['showip']])) {
                             get_day_option($hostmonthlist[$_SESSION['showip']]);
                         } ?>
                     </select><br>
                     <p class="severity">&nbsp;Filter LVL:
                         <select title="Select a severity" name="filter_LVL" onChange="this.form.submit()"><?php
                             echo "\n                      <option value=\"none\"";
-                            if ($_SESSION['filter_LVL'] == "none") {
-                                echo " SELECTED";
-                            }
+                            if ($_SESSION['filter_LVL'] == "none") echo " selected";
                             echo ">none</option>";
                             foreach ($log_levels as $log_level) {
                                 echo "\n                      <option value=\"" . $log_level . "\" class=\"" . $log_level . "\"";
-                                if ($_SESSION['filter_LVL'] == $log_level) {
-                                    echo " SELECTED";
-                                }
+                                if ($_SESSION['filter_LVL'] == $log_level) echo " selected";
                                 echo ">" . $log_level . "</option>";
                             }
                             echo "\n"; ?>
@@ -618,9 +663,8 @@ if (!$empty_iplist) {
                 </div>
                 <div class="header_search">
                     <input title="Filter based on your input" name="search" type="text" onKeyPress="checkEnter(event)"
-                           value="<?php if (isset($_SESSION['search'])) {
-                               echo $_SESSION['search'];
-                           } ?>" autofocus placeholder="Search" style="width: 80%;">
+                           value="<?php if (isset($_SESSION['search'])) echo $_SESSION['search']; ?>" autofocus
+                           placeholder="Search" style="width: 80%;">
                     <br><span class="search_button"><button style="width: 50px;" type="submit">Go</button><span>
                 </div>
                 <div class="header_lines">Total lines: <?php echo $linecount; ?></div>
@@ -649,7 +693,7 @@ if (!$empty_iplist) {
                     <?php
                     $linetag = "0";
                     if ($loglines) {
-                        while ($logline = mysqli_fetch_assoc($loglines)) {
+                        while ($logline = $loglines->fetch_assoc()) {
                             if ($linetag == "0") {
                                 $linetag = "1";
                             } else {
@@ -699,7 +743,7 @@ if (!$empty_iplist) {
                             }
                             echo "\n                </tr>\n                ";
                         }
-                        $loglines->free();
+                        $loglines->free_result();
                     }
                     echo "\n"; ?>
                 </table>

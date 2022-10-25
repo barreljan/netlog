@@ -49,7 +49,7 @@ function alpha2num(string $a): string
 /**
  * Aquires a semaphore lock for cli programs that do not permit multiple threads.
  * It uses the caller's filename to make an uniq integer as key.
- * @return false|resource|void
+ * @return false|void
  */
 function aquire_lock()
 {
@@ -101,6 +101,21 @@ function codedebug(): void
 }
 
 /**
+ * Added the error message in a formatted way when debug is set to true
+ * @param $e
+ * @return string
+ */
+function err($e): string
+{
+    global $debug;
+    if (is_session_started()) {
+        // Unlock webbrowser from faulty view/session
+        session_destroy();
+    }
+    return $debug ? ": \n$e" : '';
+}
+
+/**
  * Send an HTML email to the admin. This function is primarily used within the Logscavenger module.
  * No current use, keep it for future use.
  *
@@ -125,12 +140,52 @@ function send_email(string $hostname, string $from, string $message): void
     mail($mail_rcpt, $subject, $msg, implode("\r\n", $headers), "-f $mail_from");
 }
 
+/**
+ * Creates the host table if this not exists.
+ *
+ * @param string $tablename A composed name for the table
+ * @return void
+ */
+function create_table(string $tablename): void
+{
+    global $db_link, $database;
+
+    try {
+        $query = "CREATE TABLE IF NOT EXISTS `{$database['DB']}`.`$tablename` LIKE template";
+        $createquery = $db_link->prepare($query);
+        $createquery->execute();
+    } catch (Exception|Error $e) {
+        // There is a posible serious issue with SQL
+        syslog(LOG_CRIT, "Failed to create table $tablename: $e");
+        die();
+    }
+}
+
+/*
+ * End functions
+ */
 
 // Start session
 if (!is_session_started()) {
     session_name('PHP_NETLOG');
-    if (!@session_start()) {
+    if (!session_start()) {
         die("No session set or server is not allowing PHP Sessions to be stored?");
+    }
+}
+
+/**
+ * Polyfill functions for backwards compatibility (7.4, 8.0, 8.1)
+ */
+if (!function_exists('str_starts_with')) {
+    function str_starts_with(string $haystack, string $needle): bool
+    {
+        return 0 === strncmp($haystack, $needle, \strlen($needle));
+    }
+}
+if (!function_exists('str_contains')) {
+    function str_contains(string $haystack, string $needle): bool
+    {
+        return '' === $needle || false !== strpos($haystack, $needle);
     }
 }
 
@@ -142,52 +197,58 @@ $debug = false;
 
 // Load database settings
 require(dirname(__DIR__) . '/etc/netlog.conf');
-$database ?? die("Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
+$database = $database ?? die("Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
 
 // Check and if not, create database link
 if (!isset($db_link)) {
-    $db_link = @new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
-    if (mysqli_connect_errno()) {
-        printf("Connect failed: %s\n", mysqli_connect_error());
-        die;
-    }
-    if (!$db_link->select_db($database['DB'])) {
-        printf("Unable to select DB: %s\n", mysqli_connect_error());
-        die;
+    try {
+        $db_link = new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
+    } catch (Exception|Error $e) {
+        die("Connect to the database failed!" . err($e));
     }
 }
 
 // Populate the global config settings
-$config = array();
-$query = "SELECT `setting`, `value`
-            FROM `{$database['DB_CONF']}`.`global`";
-$globalquery = $db_link->prepare($query);
-$globalquery->execute();
-$globalresults = $globalquery->get_result();
-while ($global = $globalresults->fetch_assoc()) {
-    $config['global'][$global['setting']] = $global['value'];
+try {
+    $query = "SELECT `setting`, `value`
+                FROM `{$database['DB_CONF']}`.`global`";
+    $globalquery = $db_link->prepare($query);
+    $globalquery->execute();
+    $globalresults = $globalquery->get_result();
+    while ($global = $globalresults->fetch_assoc()) {
+        $config['global'][$global['setting']] = $global['value'];
+    }
+} catch (Exception|Error $e) {
+    die("Failed to get the global config" . err($e));
 }
 
 // Load nms module if enabled
-if ($config['global']['netalert_to_nms'] == 1) {
+if ($config['global']['netalert_to_nms'] === "1") {
     require(dirname(__DIR__) . "/core/log2nms.php");
+    $nms_database = $nms_database ?? die("NMS Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
 }
-$nms_database ?? die("NMS Database settings not found! Please copy the netlog.conf.example to the 'etc' directory and fill in settings.\n");
 
 // Fifo socket
 $log_fifo = $config['global']['log_fifo'];
 
 // Get the default view
-$query = "SELECT `setting`, `hosttype`.`name` AS `value`
-            FROM `{$database['DB_CONF']}`.`global`
-           INNER JOIN `{$database['DB_CONF']}`.`hosttype`
-                 ON (`{$database['DB_CONF']}`.`global`.`value`=`{$database['DB_CONF']}`.`hosttype`.`id`)
-           WHERE `setting` = 'default_view'";
-$default_viewquery = $db_link->prepare($query);
-$default_viewquery->execute();
-$default_viewresults = $default_viewquery->get_result();
-while ($global = $default_viewresults->fetch_assoc()) {
-    $config['global'][$global['setting']] = $global['value'];
+try {
+    $query = "SELECT `setting`, `hosttype`.`name` AS `value`
+                FROM `{$database['DB_CONF']}`.`global`
+               INNER JOIN `{$database['DB_CONF']}`.`hosttype`
+                     ON (`{$database['DB_CONF']}`.`global`.`value`=`{$database['DB_CONF']}`.`hosttype`.`id`)
+               WHERE `setting` = 'default_view'";
+    $default_viewquery = $db_link->prepare($query);
+    $default_viewquery->execute();
+    $default_viewresults = $default_viewquery->get_result();
+    if ($default_viewresults->num_rows == 0) {
+        throw new mysqli_sql_exception();
+    }
+    while ($global = $default_viewresults->fetch_assoc()) {
+        $config['global'][$global['setting']] = $global['value'];
+    }
+} catch (Exception|Error $e) {
+    die("Failed to get the default view" . err($e));
 }
 
 // Set mail variables for cron purposes

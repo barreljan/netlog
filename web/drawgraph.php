@@ -9,26 +9,50 @@ require_once('jpgraph/jpgraph.php');
 require_once('jpgraph/jpgraph_line.php');
 require_once('jpgraph/jpgraph_date.php');
 
-// Get given parameters
-$hostid = $_GET['hostid'];
-$hostname = $_GET['hostname'];
-$time = $_GET['time'];
-$width = $_GET['width'];
-$height = $_GET['height'];
+// Get given parameters otherwise use defaults
+if (!isset($_GET['hostid']) || $_GET['hostid'] == '' || !is_numeric($_GET['hostid'])) {
+    die("No (valid) host id provided to graph");
+} else {
+    $hostid = $_GET['hostid'];
+}
+if (!isset($_GET['hostname']) || $_GET['hostname'] == '') {
+    $hostname = '';
+} else {
+    $hostname = $_GET['hostname'];
+}
+if (!isset($_GET['time']) || $_GET['time'] == '' || !is_numeric($_GET['time'])) {
+    $time = $config['global']['lograte_history_default'];
+} else {
+    $time = $_GET['time'];
+}
+if (!isset($_GET['width']) || $_GET['width'] == '' || !is_numeric($_GET['width'])) {
+    $width = $config['global']['lograte_graph_width'];
+} else {
+    $width = $_GET['width'];
+}
+if (!isset($_GET['height']) || $_GET['height'] == '' || !is_numeric($_GET['height'])) {
+    $height = $config['global']['lograte_graph_height'];
+} else {
+    $height = $_GET['height'];
+}
 
 // Get the samplerates of the given hostid
-$query = "SELECT `sample_timestamp`, 
-       				ROUND(1min/60,2) as min1ps,
-       				ROUND(5min/300,2) as min5ps,
-       				ROUND(10min/600,2) as min10ps
-			FROM `{$database['DB_CONF']}`.`lograte`
-           WHERE `hostnameid` = ? 
-           ORDER BY `sample_timestamp` DESC
-           LIMIT ?";
-$samplequery = $db_link->prepare($query);
-$samplequery->bind_param('ss', $hostid, $time);
-$samplequery->execute();
-$sampleresult = $samplequery->get_result();
+try {
+    $query = "SELECT `sample_timestamp`, 
+                        ROUND(1min/60,2) as min1ps,
+                        ROUND(5min/300,2) as min5ps,
+                        ROUND(10min/600,2) as min10ps
+                FROM `{$database['DB_CONF']}`.`lograte`
+               WHERE `hostnameid` = ? 
+               ORDER BY `sample_timestamp` DESC
+               LIMIT ?";
+    $samplequery = $db_link->prepare($query);
+    $samplequery->bind_param('ss', $hostid, $time);
+    $samplequery->execute();
+    $sampleresult = $samplequery->get_result();
+} catch (Exception|Error $e) {
+    die("No usable data or an error occured at database level" . err($e));
+}
 
 // Put all data in an array to be used by the graph plotter
 $logratedata = array();

@@ -14,13 +14,21 @@ if (isset($_POST['time'])) {
 }
 
 // Get the lograte-enabled hostnames and their id
-$query = "SELECT `id`, `hostname`
-            FROM `{$database['DB_CONF']}`.`hostnames`
-           WHERE lograte = 1
-           ORDER BY `id`";
-$logratequery = $db_link->prepare($query);
-$logratequery->execute();
-$lograteresult = $logratequery->get_result();
+try {
+    $query = "SELECT `id`, `hostname`
+                FROM `{$database['DB_CONF']}`.`hostnames`
+               WHERE lograte = 1
+               ORDER BY `id`";
+    $logratequery = $db_link->prepare($query);
+    $logratequery->execute();
+    $lograteresult = $logratequery->get_result();
+    if (!$lograteresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    // no data to work with or no hosts enabled with lograte
+    $lograteresult = false;
+}
 
 /*
  * Build the page
@@ -74,27 +82,32 @@ $lograteresult = $logratequery->get_result();
 
                 <tr><?php
                     $graph_count = 0;
-                    while ($drawhost = $lograteresult->fetch_assoc()) {
-                        echo "\n";
-                        $id = $drawhost['id'];
-                        $name = $drawhost['hostname'];
-                        $time = $_SESSION['timelimit']
+                    if ($lograteresult) {
+                        while ($drawhost = $lograteresult->fetch_assoc()) {
+                            echo "\n";
+                            $id = $drawhost['id'];
+                            $name = $drawhost['hostname'];
+                            $time = $_SESSION['timelimit']
 
-                        ?>
-                        <td>
-                            <img src="drawgraph.php?hostid=<?php echo "$id&hostname=$name&width=$graph_width&height=$graph_height&time=$time"; ?>"
-                                 alt="">
-                        </td>
-                        <?php
-                        $graph_count += 1;
-                        // 2 graphs max per row
-                        if ($graph_count % 2 === 0) {
-                            echo "\n\t\t\t</tr>\n\t\t\t<tr>";
+                            ?>
+                            <td>
+                                <img src="drawgraph.php?hostid=<?php echo "$id&hostname=$name&width=$graph_width&height=$graph_height&time=$time"; ?>"
+                                     alt="">
+                            </td>
+                            <?php
+                            $graph_count += 1;
+                            // 2 graphs max per row
+                            if ($graph_count % 2 === 0) {
+                                echo "\n\t\t\t</tr>\n\t\t\t<tr>";
+                            }
                         }
-                    }
-                    // End row if odd and last graph
-                    if (!$graph_count % 2 === 0) {
-                        echo "\n\t\t\t<tr>";
+
+                        // End row if odd and last graph
+                        if (!$graph_count % 2 === 0) {
+                            echo "\n\t\t\t<tr>";
+                        }
+                    } else {
+                        echo "<td>No hosts enabled with Lograte</td></tr>\n";
                     }
                     echo "\n"; ?>
             </table>
