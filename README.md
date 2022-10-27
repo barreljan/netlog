@@ -7,11 +7,12 @@ Current development work: reworking from php <5.4-style to modern php, better SQ
 
 Current open items:
 - general: documentation
+- hardening, exceptions/error handling could be improved
 
 ### Requirements
 
 - Syslog-NG 3.3 or newer
-- PHP 7.4 or newer
+- PHP 7.1 or newer, prefered 8.0/8.1
 - MySQL 8.0 or equivalent (like MariaDB 10.x)
 
 _Build and tested on Centos7.9, Apache 2.4 PHP 7.4 and 8.0/8.1, MariaDB 10.6_

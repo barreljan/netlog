@@ -31,27 +31,6 @@ if (isset($filter)) {
 }
 
 /**
- * Creates the host table if this not exists.
- *
- * @param string $tablename A composed name for the table
- * @return void
- */
-function create_table(string $tablename)
-{
-    global $db_link;
-    global $database;
-
-    $query = "CREATE TABLE IF NOT EXISTS `{$database['DB']}`.`$tablename` LIKE template";
-    $createquery = $db_link->prepare($query);
-    $result = $createquery->execute();
-    if (!$result) {
-        // There is a posible serious issue with SQL
-        syslog(LOG_CRIT, "Failed to create table $tablename");
-        die();
-    }
-}
-
-/**
  * It takes the $filter as an array that contains the keywords
  * that needs to be filtered. When '%any_host%' as key is used
  * the keyword is for all hosts. If a specific hostname as key
@@ -105,30 +84,44 @@ $adjusted_datetime = (time() - $config['global']['scavenger_history']);
 $time = date('H:i:s', $adjusted_datetime);
 
 // Clean cache
-$query = "DELETE FROM `{$database['DB_CONF']}`.`logcache`
-               WHERE `timestamp` < DATE_ADD(NOW(), INTERVAL - " . ($config['global']['scavenger_history'] * 2) . " SECOND)";
-$cleancachequery = $db_link->prepare($query);
-$cleancachequery->execute();
+try {
+    $query = "DELETE FROM `{$database['DB_CONF']}`.`logcache`
+                   WHERE `timestamp` < DATE_ADD(NOW(), INTERVAL - " . ($config['global']['scavenger_history'] * 2) . " SECOND)";
+    $cleancachequery = $db_link->prepare($query);
+    $cleancachequery->execute();
+} catch (Exception|Error $e) {
+    syslog(LOG_ERR, "Failed to clear the scavenger logcache" . err($e));
+}
 
 // Get all today's active hosts (but not Netalert nor localhost). Localhost could be included in the future
-$query = "SELECT `TABLE_NAME` AS `name`
-            FROM `information_schema`.`COLUMNS`
-           WHERE `COLUMN_NAME` = 'MSG'
-                 AND `TABLE_NAME` RLIKE 'HST_[0-9].*$today'
-                 AND `TABLE_NAME` NOT RLIKE 'HST_127_0_0_.*'";
-$hostquery = $db_link->prepare($query);
-$hostquery->execute();
-$hostresult = $hostquery->get_result();
-$hostrows = $hostresult->num_rows;
+try {
+    $query = "SELECT `TABLE_NAME` AS `name`
+                FROM `information_schema`.`COLUMNS`
+               WHERE `COLUMN_NAME` = 'MSG'
+                     AND `TABLE_NAME` RLIKE 'HST_[0-9].*$today'
+                     AND `TABLE_NAME` NOT RLIKE 'HST_127_0_0_.*'";
+    $hostquery = $db_link->prepare($query);
+    $hostquery->execute();
+    $hostresult = $hostquery->get_result();
+    $hostrows = $hostresult->num_rows;
+} catch (Exception|Error $e) {
+    syslog(LOG_CRIT, "Failed to fetch active host tables" . err($e));
+    die();
+}
 
 // Get keywords and assemble the query
-$query = "SELECT `keyword`
-            FROM `{$database['DB_CONF']}`.`logscavenger`
-           WHERE `active` = 1";
-$kwquery = $db_link->prepare($query);
-$kwquery->execute();
-$kwresult = $kwquery->get_result();
-$kwrows = $kwresult->num_rows;
+try {
+    $query = "SELECT `keyword`
+                FROM `{$database['DB_CONF']}`.`logscavenger`
+               WHERE `active` = 1";
+    $kwquery = $db_link->prepare($query);
+    $kwquery->execute();
+    $kwresult = $kwquery->get_result();
+    $kwrows = $kwresult->num_rows;
+} catch (Exception|Error $e) {
+    syslog(LOG_CRIT, "Failed to fetch scavenger keywords" . err($e));
+    die();
+}
 
 $i = 0;
 $querykw1 = "";
@@ -144,44 +137,61 @@ while ($keywords = $kwresult->fetch_assoc()) {
 while ($hosts_table = $hostresult->fetch_assoc()) {
     $host = $hosts_table['name'];
 
-    $query = "SELECT * 
-                FROM `{$database['DB']}`.`$host`
-               WHERE `TIME` >= '$time'
-                     AND ($querykw1)
-               ORDER BY `TIME` DESC";
-    $msgsquery = $db_link->prepare($query);
-    $msgsquery->execute();
-    $msgsresult = $msgsquery->get_result();
-    $msgsrows = $msgsresult->num_rows;
+    try {
+        $query = "SELECT * 
+                    FROM `{$database['DB']}`.`$host`
+                   WHERE `TIME` >= '$time'
+                         AND ($querykw1)
+                   ORDER BY `TIME` DESC";
+        $msgsquery = $db_link->prepare($query);
+        $msgsquery->execute();
+        $msgsresult = $msgsquery->get_result();
+        $msgsrows = $msgsresult->num_rows;
+    } catch (Exception|Error $e) {
+        syslog(LOG_ERR, "Failed to query table $host with scavenger keywords" . err($e));
+        $msgsrows = 0;
+    }
+
     if ($msgsrows != 0) {
         // Tablename to real IP address
         preg_match('/HST_(\d{1,3})_(\d{1,3})_(\d{1,3})_(\d{1,3})_/', $host, $matches);
         $hostip = sprintf("%d.%d.%d.%d", $matches[1], $matches[2], $matches[3], $matches[4]);
 
         // Get the user-submitted hostname
-        $query = "SELECT `hostname`
-                    FROM `{$database['DB_CONF']}`.`hostnames`
-                   WHERE `hostip` = \"$hostip\" LIMIT 1";
-        $hstnmquery = $db_link->prepare($query);
-        $hstnmquery->execute();
-        $hstnmresult = $hstnmquery->get_result();
-        $row = $hstnmresult->fetch_assoc();
-        $hostname = $row['hostname'];
-
-        if (!isset($hostname) && $hostname == '') {
+        try {
+            $query = "SELECT `hostname`
+                        FROM `{$database['DB_CONF']}`.`hostnames`
+                       WHERE `hostip` = \"$hostip\" LIMIT 1";
+            $hstnmquery = $db_link->prepare($query);
+            $hstnmquery->execute();
+            $hstnmresult = $hstnmquery->get_result();
+            $row = $hstnmresult->fetch_assoc();
+            $hostname = $row['hostname'];
+            if ($hostname == '') {
+                throw new Exception();
+            }
+        } catch (Exception|Error $e) {
             $hostname = $hostip;
         }
+
         // Reading the cache
-        $query = "SELECT `msg` 
-                    FROM `{$database['DB_CONF']}`.`logcache`
-                   WHERE `HOST` = \"$hostip\"";
-        $cachequery = $db_link->prepare($query);
-        $cachequery->execute();
-        $cacheresult = $cachequery->get_result();
-        $cachenumrows = $cacheresult->num_rows;
+        try {
+            $query = "SELECT `msg` 
+                        FROM `{$database['DB_CONF']}`.`logcache`
+                       WHERE `HOST` = \"$hostip\"";
+            $cachequery = $db_link->prepare($query);
+            $cachequery->execute();
+            $cacheresult = $cachequery->get_result();
+            $cachenumrows = $cacheresult->num_rows;
+        } catch (Exception|Error $e) {
+            // Query resulted in error somehow, default to no cache
+            syslog(LOG_ERR, "Failed to read the scavenger logcache" . err($e));
+            $cachenumrows = 0;
+        }
+
         $host_cache_arr = array();
         if (isset($cachenumrows) && ($cachenumrows > 0)) {
-            while ($cacherow = $cacheresult->fetch_array()) {
+            while ($cacherow = $cacheresult->fetch_assoc()) {
                 $host_cache_arr[] = $cacherow['msg'];
             }
         }
@@ -199,11 +209,15 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
             // Compare message with cache, if not in cache, process it
             if (!in_array($MSG, $host_cache_arr, true)) {
                 // Fill the cache with new entry
-                $query = "INSERT INTO `{$database['DB_CONF']}`.`logcache` (`HOST`, `MSG`)
-                               VALUES (\"$hostip\", ?)";
-                $logcachequery = $db_link->prepare($query);
-                $logcachequery->bind_param('s', $MSG);
-                $logcachequery->execute();
+                try {
+                    $query = "INSERT INTO `{$database['DB_CONF']}`.`logcache` (`HOST`, `MSG`)
+                                   VALUES (\"$hostip\", ?)";
+                    $logcachequery = $db_link->prepare($query);
+                    $logcachequery->bind_param('s', $MSG);
+                    $logcachequery->execute();
+                } catch (Exception|Error $e) {
+                    syslog(LOG_ERR, "Failed to insert syslog rule in scavenger logcache" . err($e));
+                }
 
                 // Prevent doubles from same host in this run
                 $host_cache_arr[] = $MSG;
@@ -222,24 +236,25 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 $query = "INSERT INTO `$tablename` (`HOST`,`FAC`,`PRIO`,`LVL`,`TAG`,`DAY`,`TIME`,`PROG`,`MSG`)
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 try {
-                    $db_link->prepare($query);
-                } catch (Exception $e) {
+                    if (!$db_link->prepare($query)) {
+                        throw new mysqli_sql_exception();
+                    }
+                } catch (Exception|Error $e) {
                     // Failed to insert as the table does not exist, lets create it
                     create_table($tablename);
                 }
-                $insertquery = $db_link->prepare($query);
-                $insertquery->bind_param('sssssssss', $hostip, $facilty, $priority, $level, $tag, $day, $time, $program, $MSG);
-                $insertquery->execute();
+                try {
+                    $insertquery = $db_link->prepare($query);
+                    $insertquery->bind_param('sssssssss', $hostip, $facilty, $priority, $level, $tag, $day, $time, $program, $MSG);
+                    $insertquery->execute();
+                } catch (Exception|Error $e) {
+                    syslog(LOG_ERR, "Failed to insert syslog rule for $HOST" . err($e));
+                }
 
                 // If true push message as-is to remote NMS host
                 if ($netalert_to_nms) {
                     remote_syslog($hostname, $hostip, $row);
                 }
-
-                // Send email to recipient(s), for selected keywords if group is active
-                // if ((strpos($hostname, "coresw01") !== false) && (strpos($row['MSG'], "PSECURE_VIOLATION") !== false)) {
-                //     send_email($hostname, $from, $row['MSG']);
-                // }
             }
         }
     }

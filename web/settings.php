@@ -5,12 +5,13 @@ $today = date('Y_m_d');
 /*
  * Some functions
  */
+
 /**
  * Makes the HTML output for the 3 options - all, unnamed, unused.
  * @param array $input
  * @return void
  */
-function gen_rows_hosts(array $input)
+function gen_rows_hosts(array $input): void
 {
     foreach ($input as $ip) {
         $hostname = $_SESSION['names_config']["hostname-$ip"] ?? '';
@@ -69,6 +70,7 @@ function gen_rows_hosts(array $input)
 /*
  * Processing the session, maybe it's a new one
  */
+
 if (!isset($_SESSION['view'])) {
     $_SESSION['view'] = "names";
 }
@@ -79,6 +81,7 @@ if (!isset($_SESSION['updated'])) {
 /*
  * Processing the POST parts
  */
+
 if (isset($_POST)) {
     // Switch views
     if (isset($_POST['names'])) {
@@ -151,7 +154,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/^hostname-/', $key)) {
+            } elseif (str_starts_with($key, 'hostname-')) {
                 // Hostname
                 if ($value != "") {
                     // A new hostname
@@ -167,7 +170,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/^delete-/', $key)) {
+            } elseif (str_starts_with($key, 'delete-')) {
                 // Deletion of (unused) configured host
                 if ($checkbox == 1) {
                     $hostip = $readseskey[1];
@@ -194,7 +197,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/^new_hosttype/', $key)) {
+            } elseif (str_starts_with($key, 'new_hosttype')) {
                 // Host type
                 if ($value != "") {
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`hosttype` (name)
@@ -205,7 +208,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/^typesdelete-/', $key)) {
+            } elseif (str_starts_with($key, 'typesdelete-')) {
                 // Deletion of configured host type
                 if ($checkbox == 1) {
                     $id = $readkey[1];
@@ -234,7 +237,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/^new_keyword/', $key)) {
+            } elseif (str_starts_with($key, 'new_keyword')) {
                 // Scavenger keyword
                 if ($value != "") {
                     // Add a new keyword
@@ -246,7 +249,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/^scavdelete/', $key)) {
+            } elseif (str_starts_with($key, 'scavdelete')) {
                 // Deletion of configured scavenger keyword
                 if ($checkbox == 1) {
                     $kwid = $readkey[1];
@@ -259,7 +262,7 @@ if (isset($_POST)) {
 
                     $_SESSION['updated'] = 'true';
                 }
-            } elseif (preg_match('/^global-/', $key)) {
+            } elseif (str_starts_with($key, 'global-')) {
                 // Global settings
                 if ($value != $_SESSION['globalset'][$readkey[1]]) {
                     // Change in a setting found
@@ -294,6 +297,7 @@ if (isset($_POST)) {
                             case "lograte_graph_width":
                             case "netalert_show_lines":
                             case "netalert_time_threshold":
+                            case "netalert_to_nms":
                             case "retention":
                             case "scavenger_history":
                                 if (preg_match('/^[0-9]+$/', $value)) {
@@ -333,6 +337,7 @@ if (isset($_POST)) {
 /*
  * Fetch data from DB and populate vars/arrays
  */
+
 // Clean, should do nothing, but hey
 unset($_SESSION['names_config']);
 unset($_SESSION['scav_config']);
@@ -348,14 +353,21 @@ $unused_hosts = array();
 $unnamed_hosts = array();
 
 // Get the IP-adresses and their hostname and type and lograte
-$query = "SELECT `hostip`, `hostname`, `name`, `lograte`
-            FROM `{$database['DB_CONF']}`.`hostnames`
-            LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
-                 ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
-           ORDER BY `hostip`, `hosttype` DESC";
-$hostnamequery = $db_link->prepare($query);
-$hostnamequery->execute();
-$hostnameresult = $hostnamequery->get_result();
+try {
+    $query = "SELECT `hostip`, `hostname`, `name`, `lograte`
+                FROM `{$database['DB_CONF']}`.`hostnames`
+                LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
+                     ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
+               ORDER BY `hostip`, `hosttype` DESC";
+    $hostnamequery = $db_link->prepare($query);
+    $hostnamequery->execute();
+    $hostnameresult = $hostnamequery->get_result();
+    if (!$hostnameresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    die("Could not retreive any host config" . err($e));
+}
 
 // Throw all config parts of hosts in an array
 while ($dbhostnames = $hostnameresult->fetch_assoc()) {
@@ -373,19 +385,26 @@ while ($dbhostnames = $hostnameresult->fetch_assoc()) {
 $hostnameresult->free_result();
 
 // Get all the table names
-$query = "SELECT TABLE_NAME AS tblnm
-            FROM INFORMATION_SCHEMA.TABLES
-           WHERE TABLE_SCHEMA = '{$database['DB']}'";
-$tablesquery = $db_link->prepare($query);
-$tablesquery->execute();
-$tablesresult = $tablesquery->get_result();
+try {
+    $query = "SELECT `TABLE_NAME` AS `tblnm`
+                FROM `INFORMATION_SCHEMA`.`TABLES`
+               WHERE `TABLE_SCHEMA` = '{$database['DB']}'";
+    $tablesquery = $db_link->prepare($query);
+    $tablesquery->execute();
+    $tablesresult = $tablesquery->get_result();
+    if (!$tablesresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    die("Could not retreive any host tables" . err($e));
+}
 
 // Throw all ip parts of table names in an array
-while ($lines = $tablesresult->fetch_array(MYSQLI_NUM)) {
-    if (strpos($lines[0], "template") !== false || strpos($lines[0], "UHO") !== false || strpos($lines[0], "criteria") !== false) {
+while ($lines = $tablesresult->fetch_assoc()) {
+    if (str_contains($lines['tblnm'], "template") || str_contains($lines['tblnm'], "HST_UHO")) {
         continue;
     }
-    $thishost = explode('_DATE_', $lines[0]);
+    $thishost = explode('_DATE_', $lines['tblnm']);
     $host = trim($thishost[0], 'HST_');
     $ip = str_replace('_', '.', $host);
     $hostdaylist[$ip][] = $thishost[1];
@@ -407,13 +426,19 @@ foreach ($current_hosts as $ip) {
 }
 
 // Make arrays of hosttypes for the selection box
-$query = "SELECT `id`, `name`
-            FROM `{$database['DB_CONF']}`.`hosttype`
-           ORDER BY `name`";
-$typequery = $db_link->prepare($query);
-$typequery->execute();
-$typeresult = $typequery->get_result();
-
+try {
+    $query = "SELECT `id`, `name`
+                FROM `{$database['DB_CONF']}`.`hosttype`
+               ORDER BY `name`";
+    $typequery = $db_link->prepare($query);
+    $typequery->execute();
+    $typeresult = $typequery->get_result();
+    if (!$typeresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    die("Could not retreive any host types" . err($e));
+}
 while ($types = $typeresult->fetch_assoc()) {
     $type_id = $types['id'];
     $_SESSION['typelist'][$types['name']] = $type_id;
@@ -423,32 +448,45 @@ while ($types = $typeresult->fetch_assoc()) {
 $typeresult->free_result();
 
 // Get the scavenger keywords
-$query = "SELECT `logscavenger`.`id`, `keyword`, `logscavenger`.`active`, `emailgroupid`, `groupname`
-            FROM `{$database['DB_CONF']}`.`logscavenger`
-            LEFT JOIN `{$database['DB_CONF']}`.`emailgroup`
-                 ON (`{$database['DB_CONF']}`.`logscavenger`.`emailgroupid`=`{$database['DB_CONF']}`.`emailgroup`.`id`)
-           ORDER BY `{$database['DB_CONF']}`.`logscavenger`.`id`";
-$kwquery = $db_link->prepare($query);
-$kwquery->execute();
-$kwresults = $kwquery->get_result();
+try {
+    $query = "SELECT `logscavenger`.`id`, `keyword`, `logscavenger`.`active`, `emailgroupid`, `groupname`
+                FROM `{$database['DB_CONF']}`.`logscavenger`
+                LEFT JOIN `{$database['DB_CONF']}`.`emailgroup`
+                     ON (`{$database['DB_CONF']}`.`logscavenger`.`emailgroupid`=`{$database['DB_CONF']}`.`emailgroup`.`id`)
+               ORDER BY `{$database['DB_CONF']}`.`logscavenger`.`id`";
+    $kwquery = $db_link->prepare($query);
+    $kwquery->execute();
+    $kwresults = $kwquery->get_result();
+    if (!$kwresults->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    die("Could not retreive any logscavenger keywords" . err($e));
+}
 $keywords = array();
 while ($kw = $kwresults->fetch_assoc()) {
     $kwid = $kw['id'];
     $kwgrp = $kw['groupname'];
     $active = ($kw['active'] == 1) ? 'on' : 'off';
-    $_SESSION['scav_config']["scavemailgroupid-$kwid"] = $kwgrp;
     $_SESSION['scav_config']["scavactive-$kwid"] = $active;
     $keywords[$kwid] = $kw['keyword'];
 }
 $kwresults->free_result();
 
 // Get the default (global) settings and put it in a list
-$query = "SELECT *
-            FROM `{$database['DB_CONF']}`.`global`
-           ORDER BY `setting`";
-$globalsetgrquery = $db_link->prepare($query);
-$globalsetgrquery->execute();
-$globalsetresult = $globalsetgrquery->get_result();
+try {
+    $query = "SELECT *
+                FROM `{$database['DB_CONF']}`.`global`
+               ORDER BY `setting`";
+    $globalsetgrquery = $db_link->prepare($query);
+    $globalsetgrquery->execute();
+    $globalsetresult = $globalsetgrquery->get_result();
+    if (!$globalsetresult->num_rows >= 1) {
+        throw new mysqli_sql_exception();
+    }
+} catch (Exception|Error $e) {
+    die("Could not retreive global configuration" . err($e));
+}
 while ($row = $globalsetresult->fetch_assoc()) {
     $setting = $row['setting'];
     if ($row['setting'] == 'default_view') {
@@ -469,6 +507,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
 /*
  * Build the page
  */
+
 ?>
     <!DOCTYPE HTML>
     <html lang="en">
@@ -504,29 +543,20 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                         ?>
                         Toggle view:
                         <input type="radio" name="toggleview" value="All" title="All items"
-                               onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "All") {
-                            echo " checked";
-                        } ?>>All
+                               onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "All") echo " checked"; ?>>All
                         <input type="radio" name="toggleview" value="Unnamed" title="Unnamed items"
-                               onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "Unnamed") {
-                            echo " checked";
-                        } ?>>Unnamed
+                               onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "Unnamed") echo " checked"; ?>>Unnamed
                         <input type="radio" name="toggleview" value="Unused"
                                title="Unused items (no log table exists for these)"
-                               onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "Unused") {
-                            echo " checked";
-                        } ?>>Unused
+                               onClick="this.form.submit()"<?php if ($_SESSION['viewitem'] == "Unused") echo " checked"; ?>>Unused
                         <?php
                     }
                     echo "\n"; ?>
                 </form>
             </div>
             <div class="header_sub">
-                <?php if ($_SESSION['updated'] == 'true') {
-                    echo "<div id=\"succMsg\">Update OK!</div>";
-                } elseif ($_SESSION['updated'] == 'false') {
-                    echo "<div id=\"failMsg\">Update failed!</div>";
-                }
+                <?php if ($_SESSION['updated'] == 'true') echo "<div id=\"succMsg\">Update OK!</div>";
+                elseif ($_SESSION['updated'] == 'false') echo "<div id=\"failMsg\">Update failed!</div>";
                 unset($_SESSION['updated']); ?>
             </div>
         </div>
@@ -558,9 +588,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                                     <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">
                                     <input type="checkbox" title="Enable or disable scavenging"
                                            name=<?php echo "\"scavactive-$kwid\"";
-                                    if ($_SESSION['scav_config']["scavactive-$kwid"] == 'on') {
-                                        echo ' checked';
-                                    } ?>>
+                                    if ($_SESSION['scav_config']["scavactive-$kwid"] == 'on') echo " checked"; ?>>
                                 </td>
                                 <td id="settings_checkbox">
                                     <input type="hidden" value="off" name="scavdelete-<?php echo $kwid; ?>">

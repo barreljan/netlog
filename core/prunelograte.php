@@ -16,11 +16,14 @@ $days = $config['global']['lograte_days'];
 
 // Delete lograte samples older than is set
 $query = "DELETE FROM `{$database['DB_CONF']}`.`lograte`
-           WHERE `timestamp` < (NOW()-INTERVAL $days DAY)";
-$prunequery = $db_link->prepare($query);
-$result = $prunequery->execute();
-if (!$result) {
-    syslog(LOG_WARNING, "Failed to delete lograte rows: " . mysqli_connect_error());
+           WHERE `sample_timestamp` < (NOW()-INTERVAL $days DAY)";
+try {
+    $prunequery = $db_link->prepare($query);
+    $prunequery->execute();
+} catch (Exception|Error $e) {
+    syslog(LOG_WARNING, "Failed to delete lograte rows" . err($e));
+} finally {
+    syslog(LOG_INFO, "Lograte samples pruned succesfully");
 }
 
 closelog();

@@ -7,27 +7,24 @@
  * @param string $hostname A hostname matching the ip address
  * @param string $hostip An ip address matching the hostname
  * @param array $message_row The complete result of the syslog message
+ * @return void
  */
-function remote_syslog(string $hostname, string $hostip, array $message_row)
+function remote_syslog(string $hostname, string $hostip, array $message_row): void
 {
     global $nms_database;
 
     // Start a logging session with the appropriate PROG-name
     openlog('log2nms', LOG_PID, LOG_USER);
 
-    /*
-    * Create and check database link to NMS
-    */
-    $nms_db_link = @new mysqli($nms_database['HOST'], $nms_database['USER'], $nms_database['PASS'], $nms_database['DB']);
-    if (mysqli_connect_errno()) {
-        // Do not die, keep the Logscavenger process running
-        syslog(LOG_WARNING, "Could not connect to LibreNMS database: " . mysqli_connect_error());
-        return;
-    }
-    if (!$nms_db_link->select_db($nms_database['DB'])) {
-        // Do not die, keep the Logscavenger process running
-        syslog(LOG_WARNING, "Could not select LibreNMS database: " . mysqli_connect_error());
-        return;
+    // Create and check database link to NMS
+    if (!isset($nms_db_link)) {
+        try {
+            $nms_db_link = new mysqli($nms_database['HOST'], $nms_database['USER'], $nms_database['PASS'], $nms_database['DB']);
+        } catch (Exception|Error $e) {
+            // Do not die, keep the Logscavenger process running
+            syslog(LOG_WARNING, "Could not connect to LibreNMS database" . err($e));
+            return;
+        }
     }
 
     // Conversion table as LibreNMS does prefer integer values
@@ -44,15 +41,21 @@ function remote_syslog(string $hostname, string $hostip, array $message_row)
     $hostname = "%$hostname%";
     $inet_pton = inet_pton($hostip);
 
-    $query = "SELECT `device_id`
-                FROM `{$nms_database['DB']}`.`devices`
-               WHERE `hostname` LIKE ?
-                  OR `ip` = ?
-               LIMIT 1";
-    $devquery = $nms_db_link->prepare($query);
-    $devquery->bind_param('ss', $hostname, $inet_pton);
-    $devquery->execute();
-    $devresult = $devquery->get_result();
+    try {
+        $query = "SELECT `device_id`
+                    FROM `{$nms_database['DB']}`.`devices`
+                   WHERE `hostname` LIKE ?
+                      OR `ip` = ?
+                   LIMIT 1";
+        $devquery = $nms_db_link->prepare($query);
+        $devquery->bind_param('ss', $hostname, $inet_pton);
+        $devquery->execute();
+        $devresult = $devquery->get_result();
+    } catch (Exception|Error $e) {
+        // Do not die, keep the Logscavenger process running
+        syslog(LOG_WARNING, "Could not fetch hosts from LibreNMS database" . err($e));
+        return;
+    }
 
     // If there is a match, make the query and execute
     if ($devresult->num_rows == 1) {
@@ -68,15 +71,21 @@ function remote_syslog(string $hostname, string $hostip, array $message_row)
         $msg = $message_row['MSG'];
 
         // Insert message
-        $query = "INSERT INTO `{$nms_database['DB']}`.`syslog` (device_id, facility, priority, level, tag, timestamp, program, msg)
-                        VALUES ($dev_id, ?, ?, ?, ?, ?, ?, ?)";
-        $insertquery = $nms_db_link->prepare($query);
-        $insertquery->bind_param('sssssss', $facilty, $priority, $level, $tag, $timestamp, $program, $msg);
-        $insertquery->execute();
+        try {
+            $query = "INSERT INTO `{$nms_database['DB']}`.`syslog` (device_id, facility, priority, level, tag, timestamp, program, msg)
+                            VALUES ($dev_id, ?, ?, ?, ?, ?, ?, ?)";
+            $insertquery = $nms_db_link->prepare($query);
+            $insertquery->bind_param('sssssss', $facilty, $priority, $level, $tag, $timestamp, $program, $msg);
+            $insertquery->execute();
 
-        $nms_db_link->commit();
+            $nms_db_link->commit();
 
-        $devresult->free_result();
-        $nms_db_link->close();
+            $devresult->free_result();
+            $nms_db_link->close();
+        } catch (Exception|Error $e) {
+            // Do not die, keep the Logscavenger process running
+            syslog(LOG_WARNING, "Could not push event to LibreNMS database" . err($e));
+            return;
+        }
     }
 }

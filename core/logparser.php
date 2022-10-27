@@ -17,26 +17,6 @@ $lock = aquire_lock();
 openlog("logparser", 0, LOG_LOCAL0);
 
 /**
- * Creates the host table if this not exists.
- *
- * @param string $tablename A composed name for the table
- * @return void
- */
-function create_table(string $tablename): void
-{
-    global $db_link, $database;
-
-    $query = "CREATE TABLE IF NOT EXISTS `{$database['DB']}`.`$tablename` LIKE template";
-    $createquery = $db_link->prepare($query);
-    $result = $createquery->execute();
-    if (!$result) {
-        // There is a posible serious issue with SQL
-        syslog(LOG_CRIT, "Failed to create table $tablename");
-        die();
-    }
-}
-
-/**
  * Parses the lines from the fifo to the database.
  *
  * @param array $logitems
@@ -76,16 +56,23 @@ function parse_log(array $logitems): void
     $query = "INSERT INTO `{$database['DB']}`.`$tablename` (`HOST`, `FAC`, `PRIO`, `LVL`, `TAG`, `DAY`, `TIME`, `PROG`, `MSG`)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     try {
-        $db_link->prepare($query);
-    } catch (Exception $e) {
+        if (!$db_link->prepare($query)) {
+            throw new mysqli_sql_exception();
+        }
+    } catch (Exception|Error $e) {
         // Failed to insert as the table does not exist, lets create it
         create_table($tablename);
     }
-    $insertquery = $db_link->prepare($query);
-    $insertquery->bind_param('sssssssss', $HOST, $FAC, $PRIO, $LVL, $TAG, $DAY, $TIME, $PROG, $MSG);
-    $result = $insertquery->execute();
-    if (!$result) {
-        syslog(LOG_ERR, "Failed to insert syslog rule for $HOST: " . implode(' _,_ ', $logitems));
+    // Proceed with insert
+    try {
+        $insertquery = $db_link->prepare($query);
+        $insertquery->bind_param('sssssssss', $HOST, $FAC, $PRIO, $LVL, $TAG, $DAY, $TIME, $PROG, $MSG);
+        $result = $insertquery->execute();
+        if (!$result) {
+            throw new mysqli_sql_exception();
+        }
+    } catch (Exception|Error $e) {
+        syslog(LOG_WARNING, "Failed to insert syslog rule for $HOST" . err($e));
     }
 }
 

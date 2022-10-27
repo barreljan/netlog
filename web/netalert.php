@@ -12,10 +12,13 @@ $query = "SELECT $fields
            LIMIT $showlines_alert";
 try {
     // If there is a table for today, get results
+    if (!$db_link->prepare($query)) {
+        throw new mysqli_sql_exception();
+    }
     $loglinequery = $db_link->prepare($query);
     $loglinequery->execute();
     $loglineresult = $loglinequery->get_result();
-} catch (Exception $e) {
+} catch (Exception|Error $e) {
     // Table prob. does not exist so return bool
     $loglineresult = false;
 }
@@ -23,6 +26,7 @@ try {
 /*
  * Build the page
  */
+
 ?>
     <!DOCTYPE HTML>
     <html lang="en">
@@ -35,7 +39,7 @@ try {
         <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
     </head><?php
     echo "\n";
-    if ((sizeof($_GET) >= 1) && (isset($_GET['inline']))) { ?>
+    if (sizeof($_GET) >= 1 && isset($_GET['inline'])) { ?>
     <body style="background-color: #ffffff;">
     <div class="container">
         <div class="header">
