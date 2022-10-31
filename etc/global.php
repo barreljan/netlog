@@ -161,18 +161,6 @@ function create_table(string $tablename): void
     }
 }
 
-/*
- * End functions
- */
-
-// Start session
-if (!is_session_started()) {
-    session_name('PHP_NETLOG');
-    if (!session_start()) {
-        die("No session set or server is not allowing PHP Sessions to be stored?");
-    }
-}
-
 /**
  * Polyfill functions for backwards compatibility (7.4, 8.0, 8.1)
  */
@@ -186,6 +174,18 @@ if (!function_exists('str_contains')) {
     function str_contains(string $haystack, string $needle): bool
     {
         return '' === $needle || false !== strpos($haystack, $needle);
+    }
+}
+
+/*
+ * End functions
+ */
+
+// Start session
+if (!is_session_started()) {
+    session_name('PHP_NETLOG');
+    if (!session_start()) {
+        die("No session set or server is not allowing PHP Sessions to be stored?");
     }
 }
 
