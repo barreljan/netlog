@@ -43,7 +43,7 @@ function parse_log(array $logitems): void
     $HOST ??= 'UHO';
 
     // NetLog Scavenger to NetAlert for visability
-    if (preg_match('/%LOGSCAVENGER%/', $PROG)) {
+    if (str_contains($PROG, '%LOGSCAVENGER%')) {
         $HOST = "127.0.0.2";
     }
 
