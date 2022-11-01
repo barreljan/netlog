@@ -1,13 +1,12 @@
 # Netlog
 A Syslog-NG to MySQL parser with no-nonsense frontend
 
-![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-development-informational.svg) ![](https://img.shields.io/badge/progress-95%25-green.svg) 
+![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-testing-informational.svg) ![](https://img.shields.io/badge/progress-75%25-yellowgreen.svg) 
 
-Current development work: reworking from php <5.4-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
+Development work in branch dev_v3.0: reworking from php <5.4-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
 
-Current open items:
-- general: documentation
-- hardening, exceptions/error handling could be improved
+Current open items for testing:
+- hardening, security, exceptions/error handling could be improved
 
 ### Requirements
 
@@ -15,7 +14,7 @@ Current open items:
 - PHP 7.4 or newer, prefered 8.0/8.1
 - MySQL 8.0 or equivalent (like MariaDB 10.x)
 
-_Build and tested on Centos7.9, Apache 2.4 PHP 7.4 and 8.0/8.1, MariaDB 10.6_
+_Build, developped and tested on Centos7.9, Syslog-NG 3.36, Apache 2.4 PHP 7.4 and 8.0/8.1, MariaDB 10.6_
 
 ### External software
 
