@@ -529,7 +529,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                 <a href="index.php" title="Back to logging">logging</a>
             </div>
             <div class="header_settings">
-                <form name="view" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+                <form name="view" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                     Category:
                     <button type="submit" <?php echo $names_view; ?> name="names">Host names</button>
                     <button type="submit" <?php echo $types_view; ?> name="types">Host types</button>
@@ -538,7 +538,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                 </form>
             </div>
             <div class="header_toggle">
-                <form name="toggleview" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>"><?php echo "\n";
+                <form name="toggleview" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"><?php echo "\n";
                     if ($_SESSION['view'] == "names") {
                         ?>
                         Toggle view:
@@ -561,7 +561,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
             </div>
         </div>
         <div class="results">
-            <form name="config" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>"><?php
+            <form name="config" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"><?php
                 echo "\n";
                 if ($_SESSION['view'] == "scavenger") {
                     //Logscavenger

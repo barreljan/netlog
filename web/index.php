@@ -55,7 +55,7 @@ function get_day_option(array $input): void
 if (isset($_GET['action'])) {
     if ($_GET['action'] == 'clear') {
         set_defaults();
-        header("Location: " . $_SERVER['PHP_SELF']);
+        header("Location: " . htmlspecialchars($_SERVER['PHP_SELF']));
     }
 }
 
@@ -498,13 +498,13 @@ if (!isset($empty_iplist)) {
     </head>
     <body>
 
-    <form name="settings" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+    <form name="settings" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
         <div class="container">
             <div class="header">
                 <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
                 <div class="header_select">Select Page:</div>
                 <div class="header_nav">
-                    <a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=clear">clear search</a> |
+                    <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>?action=clear">clear search</a> |
                     <a href="netalert.php?inline" title="NetAlert">netalert</a> |
                     <a href="viewlograte.php" title="Logrates">lograte</a> |
                     <a href="settings.php" title="Configuration panel">config</a> |
@@ -580,7 +580,7 @@ if (!isset($empty_iplist)) {
                     </table>
                 </div>
                 <div class="header_refresh">
-                    <a href="<?php echo $_SERVER['PHP_SELF']; ?>"
+                    <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"
                        onClick="document.location.href = this.href;return false"
                        title="click to refresh the page">
                         Refresh</a>: <?php
