@@ -39,8 +39,8 @@ try {
     <head>
         <title>Netlog - Lograte viewer</title>
         <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-        <script type="text/javascript" src="scripts/netlog.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $basepath; ?>css/style.css">
+        <script type="text/javascript" src="<?php echo $basepath; ?>scripts/netlog.js"></script>
         <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
     </head>
     <body>

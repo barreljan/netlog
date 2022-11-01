@@ -33,8 +33,8 @@ try {
     <head>
         <title>Netalert</title>
         <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-        <script type="text/javascript" src="scripts/netlog.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $basepath; ?>css/style.css">
+        <script type="text/javascript" src="<?php echo $basepath; ?>scripts/netlog.js"></script>
         <meta http-equiv="refresh" content="15">
         <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
     </head><?php

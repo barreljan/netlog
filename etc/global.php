@@ -189,6 +189,9 @@ if (!is_session_started()) {
     }
 }
 
+// Set basepath for Netlog GUI
+$basepath = dirname($_SERVER['SCRIPT_NAME']) . "/";
+
 /**
  * for debugging set to true
  * @var $debug

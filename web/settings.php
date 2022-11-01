@@ -1,6 +1,5 @@
 <?php
 require(dirname(__DIR__) . "/etc/global.php");
-$today = date('Y_m_d');
 
 /*
  * Some functions
@@ -334,6 +333,8 @@ if (isset($_POST)) {
     }
 }
 
+$today = date('Y_m_d');
+
 /*
  * Fetch data from DB and populate vars/arrays
  */
@@ -514,8 +515,8 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
     <head>
         <title>Netlog - Configuration panel</title>
         <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-        <script type="text/javascript" src="scripts/netlog.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $basepath; ?>css/style.css">
+        <script type="text/javascript" src="<?php echo $basepath; ?>scripts/netlog.js"></script>
         <!-- <?php echo constant('NAME') . ", " . constant('VERSION') . " -- " . constant('AUTHOR'); ?> -->
     </head>
     <body>
@@ -523,13 +524,13 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
         <div class="header">
             <div class="header_title">Netlog :: <?php echo date('Y-m-d - H:i:s'); ?></div>
             <div class="header_nav">
-                <a href="netalert.php?inline" title="NetAlert">netalert</a> |
-                <a href="viewlograte.php" title="Logrates">lograte</a> |
+                <a href="<?php echo $basepath; ?>netalert.php?inline" title="NetAlert">netalert</a> |
+                <a href="<?php echo $basepath; ?>viewlograte.php" title="Logrates">lograte</a> |
                 config |
-                <a href="index.php" title="Back to logging">logging</a>
+                <a href="<?php echo $basepath; ?>index.php" title="Back to logging">logging</a>
             </div>
             <div class="header_settings">
-                <form name="view" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
+                <form name="view" method="post" action="<?php echo $basepath; ?>settings.php">
                     Category:
                     <button type="submit" <?php echo $names_view; ?> name="names">Host names</button>
                     <button type="submit" <?php echo $types_view; ?> name="types">Host types</button>
@@ -538,7 +539,8 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
                 </form>
             </div>
             <div class="header_toggle">
-                <form name="toggleview" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"><?php echo "\n";
+                <form name="toggleview" method="post"
+                      action="<?php echo $basepath; ?>settings.php"><?php echo "\n";
                     if ($_SESSION['view'] == "names") {
                         ?>
                         Toggle view:
@@ -561,7 +563,7 @@ $global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
             </div>
         </div>
         <div class="results">
-            <form name="config" method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>"><?php
+            <form name="config" method="post" action="<?php echo $basepath; ?>settings.php"><?php
                 echo "\n";
                 if ($_SESSION['view'] == "scavenger") {
                     //Logscavenger
