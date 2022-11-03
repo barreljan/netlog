@@ -1,9 +1,10 @@
 <?php
-// This script will work together with syslog-ng to parse logging information to a MySQL database
-// We will read the logging from a fifo pipe in which syslog-ng will write the syslog data
+// This daemon will work together with syslog-ng to parse logging information to a MySQL database
+// It will read the logging from a fifo pipe in which syslog-ng will write the syslog data.
 // Standard syslog-ng - to - MySQL solutions would write all logging to one single table.
-// This script will parse and divide logging per host, per day.
-// This way the most active tables will have a reasonable size, thus queryable.
+// This script will parse and divide logging per host, per day and is a efficient way
+// and the most active tables will have a reasonable size, thus queryable.
+declare(ticks=1);
 
 // Including Netlog config and variables
 require(dirname(__DIR__) . "/etc/global.php");
@@ -17,8 +18,22 @@ $lock = aquire_lock();
 openlog("logparser", 0, LOG_LOCAL0);
 
 /**
+ * Signal handler. No complexity, just one way out.
+ * @return void
+ */
+function clean_exit(): void
+{
+    global $db_link, $lock;
+
+    syslog(LOG_INFO, "Closing the fifo and stop processing syslog messages");
+    closelog();
+    $db_link->close();
+    unlock($lock);
+    die();
+}
+
+/**
  * Parses the lines from the fifo to the database.
- *
  * @param array $logitems
  * @return void
  */
@@ -92,6 +107,11 @@ function read_fifo(): void
     }
 }
 
+// Setup signal handlers
+pcntl_signal(SIGINT, "clean_exit");
+pcntl_signal(SIGTERM, "clean_exit");
+pcntl_signal(SIGHUP, "clean_exit");
+
 // Check if fifo socket exists, otherwise create
 if (!file_exists($log_fifo)) {
     umask(0);
@@ -99,10 +119,10 @@ if (!file_exists($log_fifo)) {
     posix_mkfifo($log_fifo, $mode);
     syslog(LOG_NOTICE, "Fifo $log_fifo created");
 }
+
 // Process the incomming entries
 read_fifo();
 
-closelog();
-$db_link->close();
-
-unlock($lock);
+// Should we somehow missed some and reached this line
+syslog(LOG_ERR, "Reached abnormal shutdown of daemon");
+clean_exit();
