@@ -115,11 +115,7 @@ if (isset($_POST)) {
             $readseskey = explode('-', $seskey);
 
             // for checkboxes:
-            if ($value == "on") {
-                $checkbox = 1;
-            } elseif ($value == "off") {
-                $checkbox = 0;
-            }
+            $checkbox = ($value == "on") ? 1 : 0;
 
             if (isset($_SESSION['names_config'][$seskey])) {
                 // Existing host
