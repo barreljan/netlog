@@ -24,7 +24,7 @@ function gen_rows_hosts(array $input): void
         } else {
             $lograte_checked = ' disabled';
         }
-        $unused_disable = $_SESSION['viewitem'] == "Unused" ? ' disabled' : ''; ?>
+        $unused_disable = $_SESSION['viewitem'] == 'Unused' ? ' disabled' : ''; ?>
         <tr>
             <td><?php echo $ip; ?></td>
             <td><?php echo $hostname; ?></td>
@@ -53,7 +53,7 @@ function gen_rows_hosts(array $input): void
                 <input type="checkbox" title="Enable or disable lograte"
                        name=<?php echo "\"lograte-$ip\"" . $lograte_checked; ?>>
             </td>
-            <?php if ($_SESSION['viewitem'] == "Unused") { ?>
+            <?php if ($_SESSION['viewitem'] == 'Unused') { ?>
                 <td id="settings_checkbox">
                 <input type="hidden" value="off" name="delete-<?php echo $ip; ?>">
                 <input type="checkbox" title="Delete this entry" name="delete-<?php echo $ip; ?>">
@@ -71,7 +71,7 @@ function gen_rows_hosts(array $input): void
  */
 
 if (!isset($_SESSION['view'])) {
-    $_SESSION['view'] = "names";
+    $_SESSION['view'] = 'names';
 }
 if (!isset($_SESSION['updated'])) {
     $_SESSION['updated'] = null;
@@ -84,19 +84,19 @@ if (!isset($_SESSION['updated'])) {
 if (isset($_POST)) {
     // Switch views
     if (isset($_POST['names'])) {
-        $_SESSION['view'] = "names";
+        $_SESSION['view'] = 'names';
     }
     if (isset($_POST['types'])) {
-        $_SESSION['view'] = "types";
+        $_SESSION['view'] = 'types';
     }
     if (isset($_POST['scavenger'])) {
-        $_SESSION['view'] = "scavenger";
+        $_SESSION['view'] = 'scavenger';
     }
     if (isset($_POST['global'])) {
-        $_SESSION['view'] = "global";
+        $_SESSION['view'] = 'global';
     }
     if (!isset($_SESSION['viewitem'])) {
-        $_SESSION['viewitem'] = "Unnamed";
+        $_SESSION['viewitem'] = 'Unnamed';
     }
     if (isset($_POST['toggleview'])) {
         $_SESSION['viewitem'] = $_POST['toggleview'];
@@ -115,7 +115,7 @@ if (isset($_POST)) {
             $readseskey = explode('-', $seskey);
 
             // for checkboxes:
-            $checkbox = ($value == "on") ? 1 : 0;
+            $checkbox = ($value == 'on') ? 1 : 0;
 
             if (isset($_SESSION['names_config'][$seskey])) {
                 // Existing host
@@ -278,23 +278,23 @@ if (isset($_POST)) {
 
                             // These needs to be formatted like 'int,int,int' or a single 'int'
                             // or, with 'off' in it, for the refresh
-                            case "lograte_history":
-                            case "refresh":
-                            case "show_lines":
+                            case 'lograte_history':
+                            case 'refresh':
+                            case 'show_lines':
                                 if (preg_match('/^(off,)?[0-9]+(,[0-9]+)+$/', $value)) {
                                     $valid = true;
                                 }
                                 break;
                             // These needs to be an integer.
-                            case "logarchive_interval":
-                            case "lograte_days":
-                            case "lograte_graph_height":
-                            case "lograte_graph_width":
-                            case "netalert_show_lines":
-                            case "netalert_time_threshold":
-                            case "netalert_to_nms":
-                            case "retention":
-                            case "scavenger_history":
+                            case 'logarchive_interval':
+                            case 'lograte_days':
+                            case 'lograte_graph_height':
+                            case 'lograte_graph_width':
+                            case 'netalert_show_lines':
+                            case 'netalert_time_threshold':
+                            case 'netalert_to_nms':
+                            case 'retention':
+                            case 'scavenger_history':
                                 if (preg_match('/^[0-9]+$/', $value)) {
                                     $valid = true;
                                 }
@@ -363,7 +363,7 @@ try {
         throw new mysqli_sql_exception();
     }
 } catch (Exception|Error $e) {
-    die("Could not retreive any host config" . err($e));
+    die('Could not retreive any host config' . err($e));
 }
 
 // Throw all config parts of hosts in an array
@@ -393,12 +393,12 @@ try {
         throw new mysqli_sql_exception();
     }
 } catch (Exception|Error $e) {
-    die("Could not retreive any host tables" . err($e));
+    die('Could not retreive any host tables' . err($e));
 }
 
 // Throw all ip parts of table names in an array
 while ($lines = $tablesresult->fetch_assoc()) {
-    if (str_contains($lines['tblnm'], "template") || str_contains($lines['tblnm'], "HST_UHO")) {
+    if (str_contains($lines['tblnm'], 'template') || str_contains($lines['tblnm'], 'HST_UHO')) {
         continue;
     }
     $thishost = explode('_DATE_', $lines['tblnm']);
@@ -434,7 +434,7 @@ try {
         throw new mysqli_sql_exception();
     }
 } catch (Exception|Error $e) {
-    die("Could not retreive any host types" . err($e));
+    die('Could not retreive any host types' . err($e));
 }
 while ($types = $typeresult->fetch_assoc()) {
     $type_id = $types['id'];
@@ -458,7 +458,7 @@ try {
         throw new mysqli_sql_exception();
     }
 } catch (Exception|Error $e) {
-    die("Could not retreive any logscavenger keywords" . err($e));
+    die('Could not retreive any logscavenger keywords' . err($e));
 }
 $keywords = array();
 while ($kw = $kwresults->fetch_assoc()) {
@@ -482,7 +482,7 @@ try {
         throw new mysqli_sql_exception();
     }
 } catch (Exception|Error $e) {
-    die("Could not retreive global configuration" . err($e));
+    die('Could not retreive global configuration' . err($e));
 }
 while ($row = $globalsetresult->fetch_assoc()) {
     $setting = $row['setting'];
@@ -496,10 +496,10 @@ while ($row = $globalsetresult->fetch_assoc()) {
 $globalsetresult->free_result();
 
 // Set CSS id for category button
-$names_view = ($_SESSION['view'] == "names") ? 'id="button_active"' : '';
-$types_view = ($_SESSION['view'] == "types") ? ' id="button_active"' : '';
-$scavenger_view = ($_SESSION['view'] == "scavenger") ? ' id="button_active"' : '';
-$global_view = ($_SESSION['view'] == "global") ? ' id="button_active"' : '';
+$names_view = ($_SESSION['view'] == 'names') ? 'id="button_active"' : '';
+$types_view = ($_SESSION['view'] == 'types') ? ' id="button_active"' : '';
+$scavenger_view = ($_SESSION['view'] == 'scavenger') ? ' id="button_active"' : '';
+$global_view = ($_SESSION['view'] == 'global') ? ' id="button_active"' : '';
 
 /*
  * Build the page
