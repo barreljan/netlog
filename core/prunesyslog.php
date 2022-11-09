@@ -12,7 +12,8 @@ $lock = aquire_lock();
 // Start a logging session with the appropriate PROG-name
 openlog('prunesyslog', LOG_PID, LOG_USER);
 
-$retention = $config['global']['retention'];
+// Add 1, so you actually keep the months you configured
+$retention = $config['global']['retention'] + 1;
 $date = date("Y_M", strtotime("first day of this month 00:00:00 -$retention month"));
 
 // Get syslog tables older than is set
@@ -40,7 +41,7 @@ if ($cnt >= 1) {
     try {
         $query = "DROP TABLE " . implode(',', $result) . ";";
         $dropquery = $db_link->prepare($query);
-        $result = $prunequery->execute();
+        $result = $dropquery->execute();
         if ($result) {
             syslog(LOG_NOTICE, "Drop of $cnt tables for '$date' successfull");
         }
