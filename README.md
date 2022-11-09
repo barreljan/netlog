@@ -1,7 +1,7 @@
 # Netlog
 A Syslog-NG to MySQL parser with no-nonsense frontend
 
-![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-testing-informational.svg) ![](https://img.shields.io/badge/progress-75%25-yellowgreen.svg) 
+![](https://img.shields.io/badge/project-active-green.svg) ![](https://img.shields.io/badge/state-testing-informational.svg) ![](https://img.shields.io/badge/progress-85%25-yellowgreen.svg) 
 
 Development work in branch dev_v3.0: reworking from php <5.4-style to modern php, better SQL (prepared) queries, efficiency, code readability, css and code styling, adjustability (more settings to DB), etc. 
 
