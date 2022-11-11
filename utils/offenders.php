@@ -22,13 +22,13 @@ function show_help(): void
     global $argv;
 
     echo "$argv[0] [arguments] [optional argument(s)]\n
- required:
+ Required:
  -H host (IPv4 notation)
  -s part containing the ip string, where to group on
  -D delimiter of src/dst string, usually : or =
  -m messages to focus on containing -s (denies etc)
 
- optional:
+ Rptional:
  -d date {YYYY-MM-DD}, default is today
  -n number to present (top n), default is 10
  -t time in minutes to look back, default is 15
