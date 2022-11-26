@@ -29,37 +29,50 @@ try {
     die();
 }
 
+// Put the hosts in an array
+while ($row = $hostresult->fetch_assoc()) {
+    $hosts[] = $row;
+}
+
 // Loop through the hosts and run the counts
-while ($host = $hostresult->fetch_assoc()) {
+foreach ($hosts as $host) {
     // Assemble table name
     $convertedhost = str_replace('.', '_', $host['hostip']);
     $tablename = "HST_" . $convertedhost . "_DATE_" . $today;
 
     // Select the 1,5 and 10 min rate and insert into lograte table
-    $query = "SELECT COUNT(*) AS 1min,
-                     (SELECT COUNT(*) 
-                        FROM `{$database['DB']}`.`$tablename` 
+    try {
+        $query = "SELECT COUNT(*) AS 1min,
+                     (SELECT COUNT(*)
+                        FROM `{$database['DB']}`.`$tablename`
                        WHERE TIME > SUBTIME(CURTIME(), '00:05:00')) AS 5min,
                      (SELECT COUNT(*)
                         FROM `{$database['DB']}`.`$tablename`
-                       WHERE TIME > SUBTIME(CURTIME(), '00:10:00')) as 10min 
+                       WHERE TIME > SUBTIME(CURTIME(), '00:10:00')) as 10min
                 FROM `{$database['DB']}`.`$tablename`
                WHERE TIME > SUBTIME(CURTIME(), '00:01:00')";
-    try {
-        $db_link->prepare($query);
-    } catch (Exception|Error $e) {
+        if (!$db_link->prepare($query)) {
+            throw new mysqli_sql_exception();
+        }
+        $ratequery = $db_link->prepare($query);
+        $ratequery->execute();
+        $rateresult = $ratequery->get_result();
+    } catch (Exception|Error|mysqli_sql_exception $e) {
         // No logging today for current host as the tablename fails
+        syslog(LOG_WARNING, "Failed to get rates for $tablename" . err($e));
+
+        // Stop processing and continue in the hosts array
         continue;
     }
-    $ratequery = $db_link->prepare($query);
-    $ratequery->execute();
-    $rateresult = $ratequery->get_result();
 
     // Insert the rates into the database
     while ($rates = $rateresult->fetch_assoc()) {
         $query = "INSERT INTO `{$database['DB_CONF']}`.`lograte` (hostnameid, 1min, 5min, 10min)
                        VALUES (?, ?, ?, ?)";
         try {
+            if (!$db_link->prepare($query)) {
+                throw new mysqli_sql_exception();
+            }
             $logratequery = $db_link->prepare($query);
             $logratequery->bind_param('iiii', $host['id'], $rates['1min'], $rates['5min'], $rates['10min']);
             $result = $logratequery->execute();
