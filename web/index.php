@@ -375,7 +375,7 @@ if (!isset($empty_iplist)) {
     } else {
         $query = "SELECT COUNT(*) AS `cnt`
                     FROM `$tablename`
-                   WHERE `MSG` LIKE ?";
+                   WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
     }
     if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
         if ($searchstring == '%') {
@@ -387,7 +387,7 @@ if (!isset($empty_iplist)) {
     try {
         $countquery = $db_link->prepare($query);
         if ($searchstring != '%') {
-            $countquery->bind_param('s', $searchstring);
+            $countquery->bind_param('ss', $searchstring, $searchstring);
         }
         $countquery->execute();
         $countresult = $countquery->get_result();
@@ -413,23 +413,23 @@ if (!isset($empty_iplist)) {
         if (preg_match('/^[0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
             $query = "SELECT COUNT(*) AS `cnt`
                     FROM `$tablename`
-                   WHERE `MSG` LIKE ? ";
+                   WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
             if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
-                $query .= "AND LVL IN (" . $lvl_filter . ") ";
+                $query .= " AND LVL IN (" . $lvl_filter . ") ";
             }
             $query .= "AND TIME <= '" . $_SESSION['showpage'] . "'";
         } elseif (preg_match('/20[0-1][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
             $query = "SELECT COUNT(*) AS `cnt`
                     FROM `$tablename`
-                   WHERE `MSG` LIKE ? ";
+                   WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
             if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
-                $query .= "AND LVL IN (" . $lvl_filter . ") ";
+                $query .= " AND LVL IN (" . $lvl_filter . ") ";
             }
-            $query .= "AND CONCAT(DAY,' ',TIME) <= '" . $_SESSION['showpage'] . "'";
+            $query .= " AND CONCAT(DAY,' ',TIME) <= '" . $_SESSION['showpage'] . "'";
         }
         try {
             $timecountquery = $db_link->prepare($query);
-            $timecountquery->bind_param('s', $searchstring);
+            $timecountquery->bind_param('ss', $searchstring, $searchstring);
             $timecountquery->execute();
             $timecountedresult = $timecountquery->get_result();
             $timecounted = $timecountedresult->fetch_assoc();
@@ -459,13 +459,13 @@ if (!isset($empty_iplist)) {
     try {
         $query = "SELECT $fields
                     FROM `$tablename`
-                   WHERE `MSG` LIKE ? ";
+                   WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
         if (isset ($lvl_filter)) {
-            $query .= "AND `LVL` IN (" . $lvl_filter . ") ";
+            $query .= " AND `LVL` IN (" . $lvl_filter . ") ";
         }
         $query .= "ORDER BY `id` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
         $linesquery = $db_link->prepare($query);
-        $linesquery->bind_param('s', $searchstring);  // $searchstring is already given the % tags
+        $linesquery->bind_param('ss', $searchstring, $searchstring);  // $searchstring is already given the % tags
         $linesquery->execute();
         $loglines = $linesquery->get_result();
         if (!$loglines->num_rows >= 1) {

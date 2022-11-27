@@ -29,8 +29,8 @@ configuring these in the [config](configuration.md#netlog-configuration)
 section. You can easilly navigate to your group of devices and the specific
 device you want. 
 There is also a 'UHO' device. This is a specific table where log entries
-can emerge if something in udp or syslog-level went wrong and the host-ip
-field is somehow missing.
+can emerge if something in tcp/udp or syslog-level went wrong and the 
+host-ip field is somehow missing.
 
 The day option is self explainatory. Select the appropriate day you want. 
 Or select the month. The aggregation is done in the background and can be
@@ -43,8 +43,8 @@ warnings, errors, critical and worse are displayed. The notice, info and
 debug are not displayed. 
 
 The search field is a user-input field. This searches for any string in
-the 'MSG' (message) field. This is a SQL `LIKE %your string%` based input
-so 'down' also finds 'DOWN'.
+the 'PROG' and 'MSG' (message) field. This is a SQL `LIKE %your string%` 
+based input so 'down' also finds 'DOWN'.
 
 The page navigation and lines per page are self explainatory. Navigate
 easilly through the found lines and your desired lines per page. The latter
