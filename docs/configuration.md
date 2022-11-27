@@ -39,7 +39,7 @@ empty.
 
 ### Scavenger
 
-Add any string that can be search in the **MSG** field.
+Add any string that can be searched in the **MSG** field to add these events to the Netalert page or your NMS.
 
 ### Global
 
