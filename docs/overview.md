@@ -48,8 +48,12 @@ based input so 'down' also finds 'DOWN'.
 
 The page navigation and lines per page are self explainatory. Navigate
 easilly through the found lines and your desired lines per page. The latter
-is regulated by the global setting `show_lines`. See 
-[show_lines](configuration.md#show_lines) for more detail.
+is regulated by the global setting `show_lines`. There is also a shortcut
+possible to use a time to navigate as a page-search. Use the format 
+_"hh:mm"_ to go to the corresponding page. Another possibility is to use 
+the format _"yyyy-mm-dd hh:mm"_. This can be useful in the aggregated 
+months but also works in a day view. 
+See also [show_lines](configuration.md#show_lines) for more detail.
 
 If you have selected the currect day (as in; today) then the refresh option
 will be available. Here you can let the page refresh every # seconds to 

@@ -127,10 +127,15 @@ if (isset($_POST['type'])) {
 
     // Default back to page 1 after changes and detect page shift
     if (isset($_SESSION['showpage'])) {
-        if (isset($_POST['jumptopage']) && $_POST['jumptopage'] != "" && is_numeric($_POST['jumptopage'])) {
+
+        if (isset($_POST['jumptopage']) && $_POST['jumptopage'] != "") {
             if ($_SESSION['showpage'] != $_POST['jumptopage']) {
                 if ($_POST['jumptopage'] > 0 && ($_POST['jumptopage'] <= $_SESSION['pagecount'])) {
                     $_SESSION['showpage'] = $_POST['jumptopage'];
+                } elseif (date('H:i', strtotime($_POST['jumptopage'])) == $_POST['jumptopage'] || date('Y-m-d H:i', strtotime($_POST['jumptopage'])) == $_POST['jumptopage']) {
+                    $_SESSION['showpage'] = htmlspecialchars($_POST['jumptopage']);
+                } else {
+                    $_SESSION['showpage'] = 1;
                 }
             } else {
                 foreach ($_POST as $buttonname => $buttonvalue) {
@@ -166,8 +171,6 @@ if (isset($_POST['type'])) {
                     }
                 }
             }
-        } elseif (preg_match('/[0-9][0-9]:[0-9][0-9]/', $_POST['jumptopage']) || preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}/', $_POST['jumptopage'])) {
-            $_SESSION['showpage'] = htmlspecialchars($_POST['jumptopage']);
         }
     }
 }
@@ -408,20 +411,20 @@ if (!isset($empty_iplist)) {
         $_SESSION['pagecount'] = 1;
     }
 
-    // Set the selected page and counting where we are
+    // Set the selected page and counting where we are for specified time or day
     if (!is_numeric($_SESSION['showpage'])) {
-        if (preg_match('/^[0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
+        if (date('H:i', strtotime($_SESSION['showpage'])) == $_SESSION['showpage']) {
             $query = "SELECT COUNT(*) AS `cnt`
-                    FROM `$tablename`
-                   WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
+                        FROM `$tablename`
+                       WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
             if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
                 $query .= " AND LVL IN (" . $lvl_filter . ") ";
             }
             $query .= "AND TIME <= '" . $_SESSION['showpage'] . "'";
-        } elseif (preg_match('/20[0-1][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]/', $_POST['jumptopage'])) {
+        } elseif (date('Y-m-d H:i', strtotime($_SESSION['showpage'])) == $_SESSION['showpage']) {
             $query = "SELECT COUNT(*) AS `cnt`
-                    FROM `$tablename`
-                   WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
+                        FROM `$tablename`
+                       WHERE (`MSG` LIKE ? OR `PROG` LIKE ?)";
             if ((isset($_SESSION['filter_LVL'])) && ($_SESSION['filter_LVL'] != "none")) {
                 $query .= " AND LVL IN (" . $lvl_filter . ") ";
             }
@@ -443,9 +446,13 @@ if (!isset($empty_iplist)) {
             $timelinecount = 0;
         }
         try {
+            if ($timelinecount == 0) {
+                // Somehow a date mismatched for the viewed host?
+                throw new ValueError();
+            }
             $timepagecount = round($timelinecount / $_SESSION['showlines']);
             $_SESSION['showpage'] = $_SESSION['pagecount'] - $timepagecount;
-        } catch (DivisionByZeroError $e) {
+        } catch (DivisionByZeroError|ValueError $e) {
             $_SESSION['showpage'] = 1;
         }
     }
@@ -529,7 +536,7 @@ if (!isset($empty_iplist)) {
                                         type="submit" <?php if ($_SESSION['showpage'] < 2) echo "disabled"; ?>>-1
                                 </button>
                             </td>
-                            <td><b><input title="Give a number of a page in range" type="text" size="6"
+                            <td><b><input title="Give a number of a page in range, 'hh:mm' or 'yyyy-mm-dd hh:mm'" type="text" size="6"
                                           name="jumptopage"
                                           value="<?php echo $_SESSION['showpage']; ?>"
                                           onChange="this.form.submit()"></b>
