@@ -65,12 +65,12 @@ if (isset($_GET['action'])) {
 
 if (isset($_POST['type'])) {
     // Set or stop refresh
-    $_SESSION['refresh'] = isset($_POST['stoprefresh']) ? 'off' : $_POST['refresh'];
+    $_SESSION['refresh'] = isset($_POST['stoprefresh']) ? 'off' : htmlspecialchars($_POST['refresh']);
 
     // Compare type
     if (isset($_SESSION['type'])) {
         if ($_SESSION['type'] != $_POST['type']) {
-            $_SESSION['type'] = $_POST['type'];
+            $_SESSION['type'] = htmlspecialchars($_POST['type']);
             unset($_SESSION['showip'], $_SESSION['day'], $_SESSION['search'], $_SESSION['refresh'], $_SESSION['showpage'], $_SESSION['filter_LVL']);
             $_SESSION['clearsearch'] = "clear";
         }
@@ -81,7 +81,7 @@ if (isset($_POST['type'])) {
     // Compare ip
     if (isset($_SESSION['showip'])) {
         if ($_SESSION['showip'] != $_POST['showip']) {
-            $_SESSION['showip'] = $_POST['showip'];
+            $_SESSION['showip'] = htmlspecialchars($_POST['showip']);
             unset($_SESSION['day'], $_SESSION['search'], $_SESSION['refresh'], $_SESSION['showpage'], $_SESSION['filter_LVL']);
             $_SESSION['clearsearch'] = "clear";
 
@@ -91,7 +91,7 @@ if (isset($_POST['type'])) {
     // Compare date
     if (isset($_SESSION['day'])) {
         if ($_SESSION['day'] != $_POST['day']) {
-            $_SESSION['day'] = $_POST['day'];
+            $_SESSION['day'] = htmlspecialchars($_POST['day']);
             unset($_SESSION['refresh'], $_SESSION['showpage']);
         }
     }
@@ -106,7 +106,7 @@ if (isset($_POST['type'])) {
 
     // Set level filter
     if (isset($_SESSION['filter_LVL'])) {
-        $_SESSION['filter_LVL'] = $_POST['filter_LVL'];
+        $_SESSION['filter_LVL'] = htmlspecialchars($_POST['filter_LVL']);
     }
 
     // Compare search
@@ -116,11 +116,11 @@ if (isset($_POST['type'])) {
     } else {
         if (isset($_SESSION['search'])) {
             if ($_SESSION['search'] != $_POST['search']) {
-                $_SESSION['search'] = $_POST['search'];
+                $_SESSION['search'] = htmlspecialchars($_POST['search']);
                 unset($_SESSION['refresh'], $_SESSION['showpage']);
             }
         } elseif ($_POST['search'] != "") {
-            $_SESSION['search'] = $_POST['search'];
+            $_SESSION['search'] = htmlspecialchars($_POST['search']);
             unset($_SESSION['showpage']);
         }
     }
@@ -167,7 +167,7 @@ if (isset($_POST['type'])) {
                 }
             }
         } elseif (preg_match('/[0-9][0-9]:[0-9][0-9]/', $_POST['jumptopage']) || preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}/', $_POST['jumptopage'])) {
-            $_SESSION['showpage'] = $_POST['jumptopage'];
+            $_SESSION['showpage'] = htmlspecialchars($_POST['jumptopage']);
         }
     }
 }

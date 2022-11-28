@@ -108,7 +108,9 @@ if (isset($_POST)) {
     // Update existing or insert new items below
     // This could be improved! See GitHub issue #30
     try {
-        foreach ($_POST as $key => $value) {
+        foreach ($_POST as $_key => $_value) {
+            $key = htmlspecialchars($_key);
+            $value = htmlspecialchars($_value);
             // Revert what PHP is doing to POST (replace '.' with '_')
             $seskey = str_replace('_', '.', $key);  // so it matches possible $_SESSION keys
             $readkey = explode('-', $key);
@@ -119,7 +121,7 @@ if (isset($_POST)) {
 
             if (isset($_SESSION['names_config'][$seskey])) {
                 // Existing host
-                if ($_POST[$key] != $_SESSION['names_config'][$seskey]) {
+                if ($value != $_SESSION['names_config'][$seskey]) {
                     $column = $readseskey[0];
                     $hostip = $readseskey[1];
 
@@ -135,7 +137,7 @@ if (isset($_POST)) {
                                      SET $column = ?
                                    WHERE hostip = ?";
                         $updatequery = $db_link->prepare($query);
-                        $updatequery->bind_param('ss', $_POST[$key], $hostip);
+                        $updatequery->bind_param('ss', $value, $hostip);
                     } elseif ($column == "lograte") {
                         $query = "UPDATE `{$database['DB_CONF']}`.`hostnames`
                                      SET lograte = ?
@@ -155,7 +157,7 @@ if (isset($_POST)) {
                     // A new hostname
                     $hostip = str_replace('_', '.', $readkey[1]);
                     $hosttypekey = 'hosttype-' . $readkey[1];
-                    $hosttype = $_SESSION['typelist'][$_POST[$hosttypekey]];
+                    $hosttype = $_SESSION['typelist'][htmlspecialchars($_POST[$hosttypekey])];
 
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`hostnames` (`hostip`, `hostname`, `hosttype`)
                                    VALUES (?, ?, ?)";
@@ -180,7 +182,7 @@ if (isset($_POST)) {
                 }
             } elseif (isset($_SESSION['types_config'][$key])) {
                 // Existing host type
-                if ($_POST[$key] != $_SESSION['types_config'][$key]) {
+                if ($value != $_SESSION['types_config'][$key]) {
                     // Change detected
                     $id = $readkey[1];
                     $query = "UPDATE `{$database['DB_CONF']}`.`hosttype`
@@ -217,7 +219,7 @@ if (isset($_POST)) {
                 }
             } elseif (isset($_SESSION['scav_config'][$key])) {
                 // Existing scavenger keyword
-                if ($_POST[$key] != $_SESSION['scav_config'][$key]) {
+                if ($value != $_SESSION['scav_config'][$key]) {
                     // Change detected;
                     $kwid = $readkey[1];
                     $column = str_replace('scav', '', $readkey[0]);
