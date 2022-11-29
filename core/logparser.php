@@ -54,7 +54,7 @@ function parse_log(array $logitems): void
 
     // Insert the syslog message into the database
     $query = "INSERT INTO `{$database['DB']}`.`$tablename` (`HOST`, `FAC`, `PRIO`, `LVL`, `TAG`, `DAY`, `TIME`, `PROG`, `MSG`)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     try {
         if (!$db_link->prepare($query)) {
             throw new mysqli_sql_exception();

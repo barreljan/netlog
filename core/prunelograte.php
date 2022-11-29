@@ -15,7 +15,8 @@ openlog('prunelograte', LOG_PID, LOG_USER);
 $days = $config['global']['lograte_days'];
 
 // Delete lograte samples older than is set
-$query = "DELETE FROM `{$database['DB_CONF']}`.`lograte`
+$query = "DELETE 
+            FROM `{$database['DB_CONF']}`.`lograte`
            WHERE `sample_timestamp` < (NOW()-INTERVAL $days DAY)";
 try {
     $prunequery = $db_link->prepare($query);

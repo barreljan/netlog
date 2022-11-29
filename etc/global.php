@@ -238,7 +238,7 @@ $log_fifo = $config['global']['log_fifo'];
 try {
     $query = "SELECT `setting`, `hosttype`.`name` AS `value`
                 FROM `{$database['DB_CONF']}`.`global`
-               INNER JOIN `{$database['DB_CONF']}`.`hosttype`
+                     INNER JOIN `{$database['DB_CONF']}`.`hosttype`
                      ON (`{$database['DB_CONF']}`.`global`.`value`=`{$database['DB_CONF']}`.`hosttype`.`id`)
                WHERE `setting` = 'default_view'";
     $default_viewquery = $db_link->prepare($query);

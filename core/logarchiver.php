@@ -23,8 +23,8 @@ try {
     $query = "SELECT `TABLE_NAME`
                 FROM `information_schema`.`TABLES`
                WHERE `TABLE_SCHEMA` = 'syslog' 
-                     AND `TABLE_NAME` NOT IN ('template') 
-                     AND `CREATE_TIME` <= '$archinterval'
+                 AND `TABLE_NAME` NOT IN ('template') 
+                 AND `CREATE_TIME` <= '$archinterval'
             ORDER BY `CREATE_TIME`";
     $tablequery = $db_link->prepare($query);
     $tablequery->execute();
@@ -63,7 +63,7 @@ while ($tables = $tableresult->fetch_assoc()) {
 
         // Copy all records from day-tble into month-table
         $query = "INSERT INTO `{$database['DB']}`.`$dsttable` (HOST, FAC, PRIO, LVL, TAG, DAY, TIME, PROG, MSG)
-                       SELECT HOST, FAC, PRIO, LVL, TAG, DAY, TIME, PROG, MSG 
+                  SELECT HOST, FAC, PRIO, LVL, TAG, DAY, TIME, PROG, MSG 
                          FROM `$table_name`";
         try {
             $archive_query = $db_link->prepare($query);

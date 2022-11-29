@@ -330,9 +330,10 @@ foreach ($iplist as $ip) {
 
 // Get list of hosttypes
 try {
-    $typequery = $db_link->prepare("SELECT `id`, `name`
-                                      FROM `{$database['DB_CONF']}`.`hosttype`
-                                     ORDER BY `name`");
+    $query = "SELECT `id`, `name`
+                FROM `{$database['DB_CONF']}`.`hosttype`
+               ORDER BY `name`";
+    $typequery = $db_link->prepare($query);
     $typequery->execute();
     $typeresult = $typequery->get_result();
     if (!$typeresult->num_rows >= 1) {

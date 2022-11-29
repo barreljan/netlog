@@ -43,14 +43,14 @@ foreach ($hosts as $host) {
     // Select the 1,5 and 10 min rate and insert into lograte table
     try {
         $query = "SELECT COUNT(*) AS 1min,
-                     (SELECT COUNT(*)
-                        FROM `{$database['DB']}`.`$tablename`
-                       WHERE TIME > SUBTIME(CURTIME(), '00:05:00')) AS 5min,
-                     (SELECT COUNT(*)
-                        FROM `{$database['DB']}`.`$tablename`
-                       WHERE TIME > SUBTIME(CURTIME(), '00:10:00')) as 10min
-                FROM `{$database['DB']}`.`$tablename`
-               WHERE TIME > SUBTIME(CURTIME(), '00:01:00')";
+                         (SELECT COUNT(*)
+                            FROM `{$database['DB']}`.`$tablename`
+                           WHERE TIME > SUBTIME(CURTIME(), '00:05:00')) AS 5min,
+                         (SELECT COUNT(*)
+                            FROM `{$database['DB']}`.`$tablename`
+                           WHERE TIME > SUBTIME(CURTIME(), '00:10:00')) as 10min
+                    FROM `{$database['DB']}`.`$tablename`
+                   WHERE TIME > SUBTIME(CURTIME(), '00:01:00')";
         if (!$db_link->prepare($query)) {
             throw new mysqli_sql_exception();
         }
@@ -68,7 +68,7 @@ foreach ($hosts as $host) {
     // Insert the rates into the database
     while ($rates = $rateresult->fetch_assoc()) {
         $query = "INSERT INTO `{$database['DB_CONF']}`.`lograte` (hostnameid, 1min, 5min, 10min)
-                       VALUES (?, ?, ?, ?)";
+                  VALUES (?, ?, ?, ?)";
         try {
             if (!$db_link->prepare($query)) {
                 throw new mysqli_sql_exception();

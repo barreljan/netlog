@@ -160,7 +160,7 @@ if (isset($_POST)) {
                     $hosttype = $_SESSION['typelist'][htmlspecialchars($_POST[$hosttypekey])];
 
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`hostnames` (`hostip`, `hostname`, `hosttype`)
-                                   VALUES (?, ?, ?)";
+                              VALUES (?, ?, ?)";
                     $insertquery = $db_link->prepare($query);
                     $insertquery->bind_param('sss', $hostip, $value, $hosttype);
                     $insertquery->execute();
@@ -198,7 +198,7 @@ if (isset($_POST)) {
                 // Host type
                 if ($value != "") {
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`hosttype` (name)
-                                   VALUES (?)";
+                              VALUES (?)";
                     $insertquery = $db_link->prepare($query);
                     $insertquery->bind_param('s', $value);
                     $insertquery->execute();
@@ -209,7 +209,8 @@ if (isset($_POST)) {
                 // Deletion of configured host type
                 if ($checkbox == 1) {
                     $id = $readkey[1];
-                    $query = "DELETE FROM `{$database['DB_CONF']}`.`hosttype`
+                    $query = "DELETE
+                                FROM `{$database['DB_CONF']}`.`hosttype`
                                WHERE `id` = ?";
                     $deletequery = $db_link->prepare($query);
                     $deletequery->bind_param('i', $id);
@@ -239,7 +240,7 @@ if (isset($_POST)) {
                 if ($value != "") {
                     // Add a new keyword
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`logscavenger` (keyword, active, emailgroupid)
-                                   VALUES (?, 1, 1)";
+                              VALUES (?, 1, 1)";
                     $insertquery = $db_link->prepare($query);
                     $insertquery->bind_param('s', $value);
                     $insertquery->execute();
@@ -355,7 +356,7 @@ $unnamed_hosts = array();
 try {
     $query = "SELECT `hostip`, `hostname`, `name`, `lograte`
                 FROM `{$database['DB_CONF']}`.`hostnames`
-                LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
+                     LEFT JOIN `{$database['DB_CONF']}`.`hosttype`
                      ON (`{$database['DB_CONF']}`.`hostnames`.`hosttype`=`{$database['DB_CONF']}`.`hosttype`.`id`)
                ORDER BY `hostip`, `hosttype` DESC";
     $hostnamequery = $db_link->prepare($query);
@@ -450,7 +451,7 @@ $typeresult->free_result();
 try {
     $query = "SELECT `logscavenger`.`id`, `keyword`, `logscavenger`.`active`, `emailgroupid`, `groupname`
                 FROM `{$database['DB_CONF']}`.`logscavenger`
-                LEFT JOIN `{$database['DB_CONF']}`.`emailgroup`
+                     LEFT JOIN `{$database['DB_CONF']}`.`emailgroup`
                      ON (`{$database['DB_CONF']}`.`logscavenger`.`emailgroupid`=`{$database['DB_CONF']}`.`emailgroup`.`id`)
                ORDER BY `{$database['DB_CONF']}`.`logscavenger`.`id`";
     $kwquery = $db_link->prepare($query);

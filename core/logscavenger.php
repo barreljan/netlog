@@ -85,8 +85,9 @@ $time = date('H:i:s', $adjusted_datetime);
 
 // Clean cache
 try {
-    $query = "DELETE FROM `{$database['DB_CONF']}`.`logcache`
-                   WHERE `timestamp` < DATE_ADD(NOW(), INTERVAL - " . ($config['global']['scavenger_history'] * 2) . " SECOND)";
+    $query = "DELETE 
+                FROM `{$database['DB_CONF']}`.`logcache`
+               WHERE `timestamp` < DATE_ADD(NOW(), INTERVAL - " . ($config['global']['scavenger_history'] * 2) . " SECOND)";
     $cleancachequery = $db_link->prepare($query);
     $cleancachequery->execute();
 } catch (Exception|Error $e) {
@@ -98,8 +99,8 @@ try {
     $query = "SELECT `TABLE_NAME` AS `name`
                 FROM `information_schema`.`COLUMNS`
                WHERE `COLUMN_NAME` = 'MSG'
-                     AND `TABLE_NAME` RLIKE 'HST_[0-9].*$today'
-                     AND `TABLE_NAME` NOT RLIKE 'HST_127_0_0_.*'";
+                 AND `TABLE_NAME` RLIKE 'HST_[0-9].*$today'
+                 AND `TABLE_NAME` NOT RLIKE 'HST_127_0_0_.*'";
     $hostquery = $db_link->prepare($query);
     $hostquery->execute();
     $hostresult = $hostquery->get_result();
@@ -141,7 +142,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
         $query = "SELECT * 
                     FROM `{$database['DB']}`.`$host`
                    WHERE `TIME` >= '$time'
-                         AND ($querykw1)
+                     AND ($querykw1)
                    ORDER BY `TIME` DESC";
         $msgsquery = $db_link->prepare($query);
         $msgsquery->execute();
@@ -211,7 +212,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 // Fill the cache with new entry
                 try {
                     $query = "INSERT INTO `{$database['DB_CONF']}`.`logcache` (`HOST`, `MSG`)
-                                   VALUES (\"$hostip\", ?)";
+                              VALUES (\"$hostip\", ?)";
                     $logcachequery = $db_link->prepare($query);
                     $logcachequery->bind_param('s', $MSG);
                     $logcachequery->execute();
@@ -234,7 +235,7 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
                 $program = '%LOGSCAVENGER%';
 
                 $query = "INSERT INTO `$tablename` (`HOST`,`FAC`,`PRIO`,`LVL`,`TAG`,`DAY`,`TIME`,`PROG`,`MSG`)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 try {
                     if (!$db_link->prepare($query)) {
                         throw new mysqli_sql_exception();

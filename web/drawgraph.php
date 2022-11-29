@@ -39,9 +39,9 @@ if (!isset($_GET['height']) || $_GET['height'] == '' || !is_numeric($_GET['heigh
 // Get the samplerates of the given hostid
 try {
     $query = "SELECT `sample_timestamp`, 
-                        ROUND(1min/60,2) as min1ps,
-                        ROUND(5min/300,2) as min5ps,
-                        ROUND(10min/600,2) as min10ps
+                     ROUND(1min/60,2) as min1ps,
+                     ROUND(5min/300,2) as min5ps,
+                     ROUND(10min/600,2) as min10ps
                 FROM `{$database['DB_CONF']}`.`lograte`
                WHERE `hostnameid` = ? 
                ORDER BY `sample_timestamp` DESC

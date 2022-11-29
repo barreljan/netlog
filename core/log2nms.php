@@ -73,7 +73,7 @@ function remote_syslog(string $hostname, string $hostip, array $message_row): vo
         // Insert message
         try {
             $query = "INSERT INTO `{$nms_database['DB']}`.`syslog` (device_id, facility, priority, level, tag, timestamp, program, msg)
-                            VALUES ($dev_id, ?, ?, ?, ?, ?, ?, ?)";
+                      VALUES ($dev_id, ?, ?, ?, ?, ?, ?, ?)";
             $insertquery = $nms_db_link->prepare($query);
             $insertquery->bind_param('sssssss', $facilty, $priority, $level, $tag, $timestamp, $program, $msg);
             $insertquery->execute();
