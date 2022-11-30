@@ -5,9 +5,9 @@ Its goal is to provide a simple, effective and quick navigation through the
 hosts that send syslog messages over the network. It has some features that 
 can enrich your monitoring and logging.
 
-The original source code previous to the 'v2.01' release, was not created by
+The original source code previous to the 'v0.2.1' release, was not created by
 me. Its source is yet to be verified though a good guess is there who stood
-at the base of this project.
+at the base of this project. 
 
 ## Table of contents
 

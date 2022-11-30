@@ -58,9 +58,10 @@ Or your prefered way (phpMyAdmin, etc).
 
 ### Issues with background jobs
 
-In certain circumstances a background job will fail. These are uncommon and can happen
+In certain circumstances a background job will fail (most unlikely). These are uncommon and can happen
 when you are doing some custom work. The most core modules do log a small amount of errors
-to the system log. So you will see them in '/var/log/messages' or you Netlog system itself.
+to the system log. So you will see them in '/var/log/messages' or you Netlog system itself. It logs 
+with the core module name (without the file extension) as PROG name.
 
 ### Lograte graph issues
 
@@ -77,3 +78,6 @@ And look for the line (mostly around line #39)
 ```define(\'TTF_DIR\', <somelocation>)```
 
 Make sure this points to the correct location where the 'arial.ttf' file is located.
+
+Other issues with or within JPGraph should be taken with the owners https://jpgraph.net/ or
+on their community forum https://groups.google.com/g/jpgraph.

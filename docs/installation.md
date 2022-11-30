@@ -13,7 +13,7 @@ depending on the number of hosts logging and sheer number of lines logged.
   It was originaly written for Syslog-NG 2.x, so as long as it can send
   formatted lines to the FiFo file, you're good.
 
-- PHP 7.4 or newer
+- PHP 7.4 or newer, prefered 8.0/8.1
 
   It is possible that it could work on earlier PHP versions. No guarantee.
 
@@ -40,12 +40,12 @@ storage.
 For starters (<100 hosts, <50M lines logged per day):
 - 2 vCPU's (sockets) - 2.2Ghz or more
 - 4GB Memory
-- 60GB storage for MySQL data
+- 100GB storage for MySQL data
 
 For heavy logging (200+ hosts, >100M lines logged per day):
 - 4 vCPU's (sockets) - 2.2Ghz or more
 - 8GB Memory or more
-- 600GB storage for MySQL data or more
+- 900GB storage for MySQL data or more
 
 ## General installation instructions
 
@@ -92,9 +92,4 @@ Based on your distribution or setup, this is what you need to do:
   - adjust if needed the first 2 lines if needed
   - copy install/netlog.conf.example to /usr/share/netlog/etc and adjust
 - eh, what am I missing?
-
-
-
-
-
 

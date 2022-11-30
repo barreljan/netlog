@@ -86,14 +86,14 @@ _show_lines_.
 
 ###### cron_mail_from | cron_mail_rcpt
 
-Seems obvious, ain't they? To be used for cron/systemd alerting/notices.
+Seems obvious, ain't they? To be used for cron/systemd alerting/notices. Not yet implemented.
 
 ###### default_view
 
 - **Value**: string
 - **Default**: 'Server'
 
-This is default host type to be used in viewing the logging. Can be any type
+This is default host type to be used in viewing the logging for a new session. Can be any type
 you have added to the host types.
 
 ###### logarchive_interval
@@ -190,6 +190,9 @@ the lines are not colored anymore.
 - **Default**: 0
 
 Enables or disables the Log2nms module that events are pushed directly to the LibreNMS database.
+This requires the LibreNMS database to be reachable for Netlog and credentials provided in the
+netlog.conf file with the `$nms_database` array. See the _install/netlog.conf.example_ for what
+is needed.
 
 ###### refresh
 

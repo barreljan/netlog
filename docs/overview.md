@@ -94,12 +94,18 @@ The page can be customized (e.g.: fields can be selected) and the number of
 lines to be displayed as well as the time to 'normalize' the coloring. 
 See the [global](configuration.md#global) section for more on this.
 
+The optional module log2nms can be activated to send all these events to 
+your LibreNMS instance if needed. It can be very usefull to collect all 
+syslog events in Netlog as opposed to LibreNMS that puts all syslog 
+events in 1 table and is far from speedy/optimized. So rule of thumb:
+collect all with Netlog, send specifics/selections to LibreNMS. You can 
+arrange your alerting easily and just **focus** on what really matters.
 
 ### Retention
 
 There is currently a relative decent retention. This however depends on the
-volume your hosts are logging to the Netlog system. The default value is to
-keep 3 months.
+volume your hosts are logging to the Netlog system and your available disk 
+space. The default value is to keep 3 months.
 
 Depending on that you can estimate how quickly your disk is growing in
 usage and set a retention policy accordingly. The setting is in the Global
