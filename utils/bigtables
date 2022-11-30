@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Make sure this path is set correctly if this is not working:
+DATADIR="$(mysqld --verbose --help | grep ^datadir | awk '{print $2}')/syslog"
+ESCAPED=$(printf '%s' "$DATADIR" | sed 's/\//\\\//g')
+
+function show_help() {
+  printf "bigtables: Show the biggest tables\n\nUsage: bigtables <int>\t\tWhere int represents the top 'x' of the list\n"
+  exit 1
+}
+
+# Checks
+[[ ! -d "$DATADIR" ]] && printf "Datadir not found, edit me\n" && exit 1
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  show_help
+fi
+if [[ -z "$1" ]]; then
+  top=10
+else
+  top="$1"
+fi
+if ! [[ "$top" =~ ^[0-9]+$ ]]; then
+  printf "Sorry, not a valid number\n"
+  show_help
+fi
+
+# Run it
+printf "Shows a top %s of big tables\n\n" "$top"
+ls -hl "$DATADIR"/*.MYD | sort -hr -k5 | awk '{print $5"\t"$9}' | sed "s/$ESCAPED\///;s/.MYD//" | head -n "$top"

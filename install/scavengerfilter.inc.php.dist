@@ -1,0 +1,16 @@
+<?php
+// Only to be included from logscavenger.php!
+// Use '%any_host%' as key in the array to match all hosts
+
+
+// All hosts
+$filter['%any_host%'] = [
+    'foobar',
+];
+
+// For specific hosts
+$filter['coresw01'] = ['foobaz'];
+$filter['webserver'] = [
+    'bar',
+    'baz',
+];

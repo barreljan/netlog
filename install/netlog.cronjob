@@ -1,0 +1,7 @@
+#Netlog components
+* * * * *       root    /usr/bin/php /usr/share/netlog/core/logscavenger.php >/dev/null 2>&1
+* * * * *       root    /usr/bin/php /usr/share/netlog/core/lograte.php >/dev/null 2>&1
+0 1 * * *       root    /usr/bin/php /usr/share/netlog/core/logarchiver.php >/dev/null 2>&1
+0 1 * * *       root    /usr/bin/php /usr/share/netlog/core/prunelograte.php >/dev/null 2>&1
+0 2 2 * *       root    /usr/bin/php /usr/share/netlog/core/prunesyslog.php >/dev/null 2>&1
+*/5 * * * *     root    [ ! "$(systemctl is-active logparser)" == "active" ] && systemctl restart logparser

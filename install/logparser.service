@@ -1,0 +1,11 @@
+[Unit]
+Description=System Logger Parser Daemon
+After=mysqld.service
+
+[Service]
+ExecStart=/usr/bin/php /usr/share/netlog/core/logparser.php
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=logparser.service

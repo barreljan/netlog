@@ -1,0 +1,8 @@
+core/scavengerfilter.inc.php
+etc/netlog.conf
+/web/web
+.git
+.idea
+.tmp
+.log
+.swp

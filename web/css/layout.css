@@ -1,0 +1,125 @@
+/*
+ * Layout and base styling of Netlog
+ *
+ */
+
+.container {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 115px calc(100% - 115px);
+    gap: 0 0;
+    grid-auto-flow: row;
+    grid-template-areas:
+    "header"
+    "results";
+    /*"footer";*/
+    border-width: 0 0 0 0;
+    border-spacing: 0;
+    border-style: solid;
+    border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
+    border-collapse: collapse;
+    font-weight: 200;
+    position: absolute;
+    overflow: hidden;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 3fr 1fr 1fr;
+    grid-template-rows: 20px 1fr 1fr 1fr;
+    grid-auto-columns: 1fr;
+    gap: 0 0;
+    grid-auto-flow: row;
+    grid-area: header;
+    border-width: 0 0 1px 0;
+    border-style: solid;
+    border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
+    padding: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.results {
+    grid-area: results;
+    border-width: 0 0 1px 0;
+    border-color: rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187) rgb(187, 187, 187);
+    position: relative;
+    overflow-y: auto;
+}
+
+/*.footer {*/
+/*    grid-area: footer;*/
+/*    text-align: right;*/
+/*    position: relative;*/
+/*}*/
+
+.header_title {
+    grid-area: 1 / 1 / 2 / 2;
+    font-weight: 400;
+}
+
+.header_nav {
+    grid-area: 1 / 2 / 2 / 4;
+    font-weight: 400;
+    text-align: right;
+}
+
+.header_select {
+    grid-area: 2 / 2 / 2 / 2;
+}
+
+.header_paging {
+    grid-area: 3 / 2 / 4 / 3;
+    height: 100%;
+}
+
+.header_refresh {
+    grid-area: 3 / 3 / 3 / 4;
+    text-align: right;
+}
+
+.header_pagenr {
+    grid-area: 4 / 3 / 4 / 4;
+    margin: 6px 0 0 0;
+    text-align: right;
+}
+
+.header_device {
+    grid-area: 3 / 1 / 3 / 2;
+    justify-self: left;
+}
+
+.header_settings {
+    grid-area: 3 / 1 / 3 / 2;
+    min-width: 600px;
+}
+
+.header_search {
+    grid-area: 3 / 1 / 4 / 2;
+    justify-self: right;
+    width: 200px;
+    text-align: center;
+}
+
+.header_toggle {
+    grid-area: 3 / 1 / 4 / 2;
+    justify-self: end;
+    text-align: center;
+}
+
+.header_lines {
+    grid-area: 4 / 1 / 4 / 1;
+    margin: 6px 0 0 0;
+}
+
+.header_filter {
+    grid-area: 1 / 2 / 2 / 3;
+}
+
+.header_blank {
+    grid-area: 1 / 3 / 2 / 4;
+}
