@@ -3,7 +3,7 @@
 #
 # This installation script provides a decent checked out setup for Netlog.
 #
-# Currently working (and tested) for: Centos 7
+# Currently working (and tested) for: CentOS 7, Ubuntu (22.04)
 #
 # However:
 # You running this script/function means you will not blame the author(s)
@@ -58,6 +58,8 @@ FONTS_DIR=/usr/share/fonts
 PHP_SHARED_DIR=/usr/share/php
 SYSLOGNG_DIR=/etc/syslog-ng/conf.d
 HTTPD_CONFD_DIR=/etc/httpd/conf.d
+APACHE2_CONF_ADIR=/etc/apache2/conf-available
+APACHE2_CONF_EDIR=/etc/apache2/conf-enabled
 CROND_DIR=/etc/cron.d
 NETLOG_PASS="$(random_pass)"
 JPGRAPH_VER="4.4.1"
@@ -67,6 +69,10 @@ CNFFILE="/root/.my.cnf"
 
 # For cleanup, or not if something in between fails
 TEMP_CLEAN=true
+
+## Directives
+HTTPD=0
+APACHE2=0
 
 ## Start
 printf "Starting installation of Netlog\\n"
@@ -103,11 +109,15 @@ else
   exit 1
 fi
 # Check if Apache httpd is there
-printf "  Check for Httpd...\\t\\t\\t"
+printf "  Check for httpd...\\t\\t\\t"
 if [[ "$(command -v httpd)" ]]; then
-  printf "%b Httpd found (%s)\\n" "${TICK}" "$(httpd -v | grep -oP '(?<=version: )[^ ]*')"
+  printf "%b httpd found (%s)\\n" "${TICK}" "$(httpd -v | grep -oP '(?<=version: )[^ ]*')"
+  HTTPD=1
+elif [[ "$(command -v apache2)" ]]; then
+  printf "%b Apache2 found (%s)\\n" "${TICK}" "$(apache2 -v | grep -oP '(?<=version: )[^ ]*')"
+  APACHE2=1
 else
-  printf "%b No Httpd found. Can not proceed\\n" "${CROSS}"
+  printf "%b No httpd/apache2 found. Can not proceed\\n" "${CROSS}"
   exit 1
 fi
 # Check if PHP is there
@@ -132,7 +142,7 @@ if [[ "$(command -v syslog-ng)" ]]; then
   printf "%b Syslog-NG found %s\\n" "${TICK}" "$(syslog-ng --version | grep -oP '\(.*\)')"
 else
   printf "%b No Syslog-NG found. Can not proceed\\n" "${CROSS}"
-  printf "  %b Install Syslog-NG manually, see https://github.com/syslog-ng/syslog-ng\\n" "${INFO}"
+  printf "  %b Install Syslog-NG via Yum/Apt or manually, see https://github.com/syslog-ng/syslog-ng\\n" "${INFO}"
   exit 1
 fi
 # Check if accompanying directory is there
@@ -186,6 +196,13 @@ fi
 ## Non-blocking checks
 
 printf "  Check for available font...\\t\\t"
+if ! [[ "$(command -v fc-list)" ]]; then
+  if ! [[ "$(command -v yum)" ]]; then
+    apt install fontconfig 1>/dev/null 2>&1
+  else
+    yum install -y fontconfig 1>/dev/null 2>&1
+  fi
+fi
 if grep -q 'arial.ttf' <<<"$(fc-list)"; then
   printf "%b Required font found\\n" "${TICK}"
 else
@@ -199,13 +216,23 @@ else
   fi
 fi
 # Check httpd conf.d dir
-printf "  Check Httpd conf.d directory...\\t"
-if [[ -d "$HTTPD_CONFD_DIR" ]]; then
-  printf "%b Httpd conf.d found\\n" "${TICK}"
+
+printf "  Check httpd/apache2 directory...\\t"
+if [[ "$APACHE2" -eq 1 ]]; then
+  HTTP_CONF_DIR="$APACHE2_CONF_ADIR"
+  if [[ -d "$HTTP_CONF_DIR" ]]; then
+    printf "%b Apache conf-available found\\n" "${TICK}"
+  fi
 else
-  printf "%b No conf.d '%s' found\\n" "${CROSS}" "$HTTPD_CONFD_DIR"
+  HTTP_CONF_DIR="$HTTPD_CONFD_DIR"
+  if [[ -d "$HTTP_CONF_DIR" ]]; then
+    printf "%b httpd conf.d found\\n" "${TICK}"
+  fi
+fi
+if ! [[ -d "$HTTP_CONF_DIR" ]]; then
+  printf "%b No conf-available/conf.d '%s' found\\n" "${CROSS}" "$HTTP_CONF_DIR"
   printf "  %b Copy config in %s/httpd.conf to the designated\\n" "${INFO}" "$SCRIPTPATH"
-  printf "      directory of your Httpd daemon\\n"
+  printf "      directory of your httpd/apache2 daemon\\n"
 fi
 # Check cron.d dir
 printf "  Check cron.d directory...\\t\\t"
@@ -218,8 +245,8 @@ fi
 
 ## Prompt for proceeding the installation and setup
 while true; do
-  printf "\\nDo you wish proceed with installing? (y/n default=y): " && read -r yn
-  yn=${yn:-y}
+  printf "\\nDo you wish proceed with installing? (y/n default=n): " && read -r yn
+  yn=${yn:-n}
   case $yn in
   [Yy]*) break ;;
   [Nn]*) rm -rf "$TEMPDIR"; exit 0 ;;
@@ -315,15 +342,18 @@ else
   TEMP_CLEAN=false
 fi
 
-# Copy the Httpd conf file to its location
-printf "  Copying the Httpd config\\t\\t"
-if [[ ! -f "$HTTPD_CONFD_DIR/netlog.conf" ]]; then
-  cp "$SCRIPTPATH/httpd.conf" "$HTTPD_CONFD_DIR/netlog.conf"
-  printf "%b Httpd config successfuly copied\\n" "${TICK}"
+# Copy the httpd conf file to its location
+printf "  Copying the httpd/apache2 config\\t"
+if [[ ! -f "$HTTP_CONF_DIR/netlog.conf" ]]; then
+  cp "$SCRIPTPATH/httpd.conf" "$HTTP_CONF_DIR/netlog.conf"
+  printf "%b httpd/apache2 config successfuly copied\\n" "${TICK}"
+  if [[ "$APACHE2" -eq 1 ]]; then
+    ln -s "$APACHE2_CONF_ADIR/netlog.conf" "$APACHE2_CONF_EDIR/netlog.conf"
+  fi
 else
   printf "%b Config already exists\\n" "${CROSS}"
   printf "  %b Verify existence of %s and compare\\n" "${INFO}" "$INSTALL_DIR/httpd.conf"
-  printf "      with %s\\n" "$HTTPD_CONFD_DIR/netlog.conf"
+  printf "      with %s\\n" "$HTTP_CONF_DIR/netlog.conf"
 fi
 
 # Copy the Syslog-NG conf file to its location
@@ -340,11 +370,16 @@ fi
 if [[ "$(command -v getenforce)" ]]; then
   # Selinux is there, reset labels
   restorecon -rF "$PHP_SHARED_DIR"/jpgraph "$FONTS_DIR"/truetype/msttcorefonts
-  restorecon -rF "$SYSLOGNG_DIR"/netlog.conf "$HTTPD_CONFD_DIR"/netlog.conf
+  restorecon -rF "$SYSLOGNG_DIR"/netlog.conf "$HTTP_CONF_DIR"/netlog.conf
 fi
 
 printf "  Restarting daemons:\\n"
-systemctl restart syslog-ng httpd logparser
+systemctl restart syslog-ng logparser
+if [[ "$APACHE2" -eq 1 ]]; then
+  systemctl restart apache2
+else
+  systemctl restart httpd
+fi
 # Give it some time..
 sleep 2
 if [[ "$(systemctl is-active logparser)" == "active" ]]; then
@@ -352,10 +387,18 @@ if [[ "$(systemctl is-active logparser)" == "active" ]]; then
 else
   printf "  %b Logparser failed. Check your system logs\\n" "${CROSS}"
 fi
-if [[ "$(systemctl is-active httpd)" == "active" ]]; then
-  printf "  %b Httpd running\\n" "${TICK}"
+if [[ "$APACHE2" ]]; then
+  if [[ "$(systemctl is-active apache2)" == "active" ]]; then
+    printf "  %b apache2 running\\n" "${TICK}"
+  else
+    printf "  %b apache2 failed. Check your system logs\\n" "${CROSS}"
+  fi
 else
-  printf "  %b Httpd failed. Check your system logs\\n" "${CROSS}"
+  if [[ "$(systemctl is-active httpd)" == "active" ]]; then
+    printf "  %b httpd running\\n" "${TICK}"
+  else
+    printf "  %b httpd failed. Check your system logs\\n" "${CROSS}"
+  fi
 fi
 if [[ "$(systemctl is-active syslog-ng)" == "active" ]]; then
   printf "  %b Syslog-NG running\\n" "${TICK}"
