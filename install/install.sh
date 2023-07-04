@@ -343,12 +343,13 @@ else
 fi
 
 # Copy the httpd conf file to its location
-printf "  Copying the httpd/apache2 config\\t\\t"
+printf "  Copying the httpd/apache2 config\\t"
 if [[ ! -f "$HTTP_CONF_DIR/netlog.conf" ]]; then
   cp "$SCRIPTPATH/httpd.conf" "$HTTP_CONF_DIR/netlog.conf"
   printf "%b httpd/apache2 config successfuly copied\\n" "${TICK}"
   if [[ "$APACHE2" -eq 1 ]]; then
-    ln -s "$APACHE_CONF_ADIR/netlog.conf" "$APACHE_CONF_EDIR/netlog.conf"
+    ln -s "$APACHE2_CONF_ADIR/netlog.conf" "$APACHE2_CONF_EDIR/netlog.conf"
+  fi
 else
   printf "%b Config already exists\\n" "${CROSS}"
   printf "  %b Verify existence of %s and compare\\n" "${INFO}" "$INSTALL_DIR/httpd.conf"
