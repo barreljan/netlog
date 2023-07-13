@@ -33,13 +33,12 @@ The hostname table can be modified with ease to keep it in sync with your NMS (e
 
 ### Install
 
-See [Installation](docs/installation.md) for more details. 
-Or, if in a hurry:
+See [Installation](docs/installation.md) for more details about installation on different distributions. 
+Or, if in a real hurry (with a LAMP-stack):
 
 ```shell
-git clone ..
-cd netlog/install
-bash install.sh 
+sudo git clone https://github.com/barreljan/netlog/ /usr/local/src/netlog
+sudo bash /usr/local/src/netlog/install/install.sh
 ```
 
 ### The gui
