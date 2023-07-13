@@ -124,10 +124,10 @@ password="whatyouentered"
 cd /usr/local/src
 sudo git clone https://github.com/barreljan/netlog
 cd netlog/install
-bash install.sh
+sudo bash install.sh
 ```
 
-**Ubuntu 20.xx**
+**Ubuntu 22.xx**
 
 ```sudo apt remove rsyslog
 sudo apt install syslog-ng
@@ -144,7 +144,7 @@ password="whatyouentered"
 cd /usr/local/src
 sudo git clone https://github.com/barreljan/netlog
 cd netlog/install
-bash install.sh
+sudo bash install.sh
 
 ```
 
