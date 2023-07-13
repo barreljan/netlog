@@ -67,11 +67,11 @@ Start the installation: ```bash install.sh```
 
 And there you have it. 
 
-The installation script is made for CentOS 7 and is compatible with Ubuntu
-(22.04 to be precise), the so-called LAMP stack. Anyone with a little
-knowledge of Bash/Shell could make it work for your distribution. The
-script does several checks if software or locations are available, not in
-use, made or can be made. No rocket science.
+The installation script is made for CentOS 7 and is compatible with 
+AlmaLinux 9.x and Ubuntu (22.04 to be precise), the so-called LAMP stack.
+Anyone with a little knowledge of Bash/Shell could make it work for your
+distribution. The script does several checks if software or locations are 
+available, not in use, made or can be made. No rocket science.
 
 ### In a nutshell
 
@@ -99,4 +99,52 @@ Based on your distribution or setup, this is what you need to do:
   - adjust if needed the first 2 lines if needed
   - copy install/netlog.conf.example to /usr/share/netlog/etc and adjust
 - eh, what am I missing?
+
+
+### Clean install
+
+Perhaps you want the full help on a clean install. This should work out of 
+the box with a normal new installation. Given that your enabled repo's provide 
+PHP 7.4 or newer.
+
+**CentOS 7 / AlmaLinux / RHEL-like**
+
+
+```sudo yum remove -y rsyslog
+sudo yum install -y syslog-ng
+sudo yum install -y git php php-cli php-common php-gd php-pear php-memcache php-xml php-mysqlnd httpd
+sudo yum install -y mariadb-server mariadb-server-utils mariadb
+sudo mysql_secure_installation
+sudo vi /root/.my.cnf
+[client]
+user=root
+password="whatyouentered"
+
+
+cd /usr/local/src
+sudo git clone https://github.com/barreljan/netlog
+cd netlog/install
+bash install.sh
+```
+
+**Ubuntu 20.xx**
+
+```sudo apt remove rsyslog
+sudo apt install syslog-ng
+sudo apt install php php-cli php-common php-gd php-pear php-memcache php-xml php-mysql
+sudo apt install mariadb-server mariadb-client
+sudo mysql_secure_installation
+
+sudo vi /root/.my.cnf
+[client]
+user=root
+password="whatyouentered"
+
+
+cd /usr/local/src
+sudo git clone https://github.com/barreljan/netlog
+cd netlog/install
+bash install.sh
+
+```
 
