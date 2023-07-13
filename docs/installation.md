@@ -116,6 +116,7 @@ sudo yum install -y syslog-ng
 sudo yum install -y git php php-cli php-common php-gd php-pear php-memcache php-xml php-mysqlnd httpd
 sudo yum install -y mariadb-server mariadb-server-utils mariadb
 sudo mysql_secure_installation
+
 sudo vi /root/.my.cnf
 [client]
 user=root
