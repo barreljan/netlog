@@ -73,34 +73,6 @@ Anyone with a little knowledge of Bash/Shell could make it work for your
 distribution. The script does several checks if software or locations are 
 available, not in use, made or can be made. No rocket science.
 
-### In a nutshell
-
-Based on your distribution or setup, this is what you need to do:
-- remove rsyslog
-- install syslog-ng
-- install httpd/apache2
-- install php and req. modules
-- make sure PHP has JPgraph installed
-  - `php -r "require_once('jpgraph/jpgraph.php');"`
-- make a symlink: `ln -s /usr/local/src/netlog /usr/share/netlog`
-- adjust your http daemon, so /netlog is an alias to /usr/share/netlog
-  - or use the install/httpd.conf as guide
-- copy install/syslog.conf to your syslog-ng conf.d dir
-- copy the install/cronjob to your desired cron location
-- make sure `/var/log/syslog.fifo` is an available location
-  - adjust core/logparser.php and etc/config.php if changed
-- systemd systems: copy the logparser.service to designated location
-  - adjust any location in it for your setup
-- check if 'arial' is in your font list. Usually check: `fc-list | grep arial`
-  - unpack install/ext/msttcorefonts.tar.gz and move file to appropiate
-    location
-  - adjust font dir in jpgraph
-- upload the install/*.sql files to your database server
-  - adjust if needed the first 2 lines if needed
-  - copy install/netlog.conf.example to /usr/share/netlog/etc and adjust
-- eh, what am I missing?
-
-
 ### Clean install
 
 Perhaps you want the full help on a clean install. This should work out of 
@@ -150,4 +122,33 @@ cd netlog/install
 sudo bash install.sh
 
 ```
+
+### In a nutshell
+
+Based on your distribution or setup, this is what you need to do when not using the
+provided install.sh:
+- remove rsyslog
+- install syslog-ng
+- install httpd/apache2
+- install php and req. modules
+- make sure PHP has JPgraph installed
+  - `php -r "require_once('jpgraph/jpgraph.php');"`
+- make a symlink: `ln -s /usr/local/src/netlog /usr/share/netlog`
+- adjust your http daemon, so /netlog is an alias to /usr/share/netlog
+  - or use the install/httpd.conf as guide
+- copy install/syslog.conf to your syslog-ng conf.d dir
+- copy the install/cronjob to your desired cron location
+- make sure `/var/log/syslog.fifo` is an available location
+  - adjust core/logparser.php and etc/config.php if changed
+- systemd systems: copy the logparser.service to designated location
+  - adjust any location in it for your setup
+- check if 'arial' is in your font list. Usually check: `fc-list | grep arial`
+  - unpack install/ext/msttcorefonts.tar.gz and move file to appropiate
+    location
+  - adjust font dir in jpgraph
+- upload the install/*.sql files to your database server
+  - adjust if needed the first 2 lines if needed
+  - copy install/netlog.conf.example to /usr/share/netlog/etc and adjust
+- eh, what am I missing?
+
 
