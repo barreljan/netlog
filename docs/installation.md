@@ -110,7 +110,8 @@ PHP 7.4 or newer.
 **CentOS 7 / AlmaLinux / RHEL-like**
 
 
-```sudo yum remove -y rsyslog
+```
+sudo yum remove -y rsyslog
 sudo yum install -y syslog-ng
 sudo yum install -y git php php-cli php-common php-gd php-pear php-memcache php-xml php-mysqlnd httpd
 sudo yum install -y mariadb-server mariadb-server-utils mariadb
@@ -129,7 +130,8 @@ sudo bash install.sh
 
 **Ubuntu 22.xx**
 
-```sudo apt remove rsyslog
+```
+sudo apt remove rsyslog
 sudo apt install syslog-ng
 sudo apt install php php-cli php-common php-gd php-pear php-memcache php-xml php-mysql
 sudo apt install mariadb-server mariadb-client
