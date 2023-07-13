@@ -3,7 +3,7 @@
 // Project: https://github.com/barreljan/netlog
 
 // Versioning etc
-const VERSION = 'v3.0.2';
+const VERSION = 'v3.0.3';
 const NAME = 'Syslog-ng to MySQL parser';
 const AUTHOR = 'bartjan@pc-mania.nl';
 

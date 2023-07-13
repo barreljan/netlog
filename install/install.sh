@@ -387,7 +387,7 @@ if [[ "$(systemctl is-active logparser)" == "active" ]]; then
 else
   printf "  %b Logparser failed. Check your system logs\\n" "${CROSS}"
 fi
-if [[ "$APACHE2" ]]; then
+if [[ "$APACHE2" -eq 1 ]]; then
   if [[ "$(systemctl is-active apache2)" == "active" ]]; then
     printf "  %b apache2 running\\n" "${TICK}"
   else
