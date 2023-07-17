@@ -61,7 +61,7 @@ function filter_msg(string $msg, string $host): bool
     foreach ($filter as $k => $v) {
         if ($host == $k) {
             foreach ($v as $m) {
-                if (strpos($msg, $m) !== false) {
+                if (stripos($msg, $m) !== false) {
                     // the host and needle found in haystack
                     return true;
                 }
@@ -69,7 +69,7 @@ function filter_msg(string $msg, string $host): bool
         }
         if ($k == '%any_host%') {
             foreach ($v as $m) {
-                if (strpos($msg, $m) !== false) {
+                if (stripos($msg, $m) !== false) {
                     // any host and needle found in haystack
                     return true;
                 }
