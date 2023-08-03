@@ -583,7 +583,7 @@ $global_view = ($_SESSION['view'] == 'global') ? ' id="button_active"' : '';
                         foreach ($keywords as $kwid => $keyword) { ?>
                             <tr>
                                 <td>
-                                    <?php echo $keyword; ?>
+                                    <?php echo htmlspecialchars($keyword); ?>
                                 </td>
                                 <td id="settings_checkbox">
                                     <input type="hidden" value="off" name="scavactive-<?php echo $kwid; ?>">

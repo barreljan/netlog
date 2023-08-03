@@ -744,9 +744,9 @@ if (!isset($empty_iplist)) {
                                     }
                                     echo $logline[$column] . "</td>";
                                 } elseif ($linetag == "0") {
-                                    echo "<td>" . $logline[$column] . "</td>";
+                                    echo "<td>" . htmlspecialchars($logline[$column]) . "</td>";
                                 } else {
-                                    echo "<td class=\"grey\">" . $logline["$column"] . "</td>";
+                                    echo "<td class=\"grey\">" . htmlspecialchars($logline[$column]) . "</td>";
                                 }
                             }
                             echo "\n                </tr>\n                ";
