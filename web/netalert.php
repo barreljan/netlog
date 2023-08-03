@@ -148,7 +148,7 @@ try {
                                             } else {
                                                 echo "<td class=\"white\">";
                                             }
-                                            echo $loglines["$column"] . "</td>";
+                                            echo htmlspecialchars($loglines[$column]) . "</td>";
                                         } elseif ($linetag == "0") {
                                             echo "<tr><td class=\"white\">" . $loglines[$column] . "</td>";
                                         } else {
