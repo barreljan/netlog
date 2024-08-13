@@ -128,7 +128,8 @@ try {
 $i = 0;
 $querykw1 = "";
 while ($keywords = $kwresult->fetch_assoc()) {
-    $querykw1 .= "`MSG` LIKE '%{$keywords['keyword']}%'";
+    $keyword = addcslashes($keywords['keyword'], '%_');
+    $querykw1 .= "`MSG` LIKE '%{$keyword}%'";
     if ($kwrows > 1 && $i != ($kwrows - 1)) {
         $querykw1 .= " OR ";
     }
