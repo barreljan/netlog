@@ -3,7 +3,7 @@
 #
 # This installation script provides a decent checked out setup for Netlog.
 #
-# Currently working (and tested) for: CentOS 7, Ubuntu (22.04)
+# Currently working (and tested) for: CentOS 7, AlmaLinux 9, Ubuntu (22.04)
 #
 # However:
 # You running this script/function means you will not blame the author(s)
@@ -62,7 +62,7 @@ APACHE2_CONF_ADIR=/etc/apache2/conf-available
 APACHE2_CONF_EDIR=/etc/apache2/conf-enabled
 CROND_DIR=/etc/cron.d
 NETLOG_PASS="$(random_pass)"
-JPGRAPH_VER="4.4.1"
+JPGRAPH_VER="4.4.2"
 # MySQL setup
 TEMPDIR=$(mktemp -d)
 CNFFILE="/root/.my.cnf"

@@ -13,13 +13,13 @@ depending on the number of hosts logging and sheer number of lines logged.
   It was originaly written for Syslog-NG 2.x, so as long as it can send
   formatted lines to the FiFo file, you're good.
 
-- PHP 7.4 or newer, prefered 8.0/8.1
+- PHP 8.1/8.2
 
   It is possible that it could work on earlier PHP versions. No guarantee.
-  Required modules: php php-cli php-common php-gd php-pear php-memcache
-  php-xml php-mysql(nd)
+  Required modules: php-common php-memcache php-process php-mbstring
+  php-xml php-mysql(nd). It should be compatible with 7.4 and 8.0.
 
-- MySQL 8.0 or equivalent (like MariaDB 10.x)
+- MariaDB 10.x, MySQL 8.0 or equivalent
 
   It could work on earlier versions as there are no MySQL >8.0 specific
   database or table settings. No guarantee.
@@ -67,7 +67,7 @@ Start the installation: ```bash install.sh```
 
 And there you have it. 
 
-The installation script is made for CentOS 7 and is compatible with 
+The installation script is made for RHEL8/9 and is compatible with 
 AlmaLinux 9.x and Ubuntu (22.04 to be precise), the so-called LAMP stack.
 Anyone with a little knowledge of Bash/Shell could make it work for your
 distribution. The script does several checks if software or locations are 
@@ -77,16 +77,16 @@ available, not in use, made or can be made. No rocket science.
 
 Perhaps you want the full help on a clean install. This should work out of 
 the box with a normal new installation. Given that your enabled repo's provide 
-PHP 7.4 or newer.
+PHP 8.1/8.2 or newer.
 
-**CentOS 7 / AlmaLinux / RHEL-like**
-
+**RHEL 8/9 / AlmaLinux 8/9**
 
 ```
-sudo yum remove -y rsyslog
-sudo yum install -y syslog-ng
-sudo yum install -y git php php-cli php-common php-gd php-pear php-memcache php-xml php-mysqlnd httpd
-sudo yum install -y mariadb-server mariadb-server-utils mariadb
+sudo dnf remove -y rsyslog
+sudo dnf install -y syslog-ng
+sudo dnf install -y git php php-cli php-common php-memcache php-mbstring php-mysqlnd php-process httpd
+sudo dnf install -y mariadb-server mariadb-server-utils mariadb
+sudo systemctl enable --now php-fpm httpd mariadb syslog-ng
 sudo mysql_secure_installation
 
 sudo vi /root/.my.cnf
@@ -98,7 +98,7 @@ password="whatyouentered"
 cd /usr/local/src
 sudo git clone https://github.com/barreljan/netlog
 cd netlog/install
-sudo bash install.sh
+sudo bash install.sh```
 ```
 
 **Ubuntu 22.xx**
@@ -106,8 +106,9 @@ sudo bash install.sh
 ```
 sudo apt remove rsyslog
 sudo apt install syslog-ng
-sudo apt install php php-cli php-common php-gd php-pear php-memcache php-xml php-mysql
+sudo apt install php php-cli php-common php-memcache php-process php-mbstring php-mysql httpd
 sudo apt install mariadb-server mariadb-client
+sudo systemctl enable --now php-fpm httpd mariadb syslog-ng
 sudo mysql_secure_installation
 
 sudo vi /root/.my.cnf
