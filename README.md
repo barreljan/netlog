@@ -5,17 +5,18 @@ A Syslog-NG to MySQL parser with no-nonsense frontend
 
 ### Requirements
 
+- Apache httpd 2.4
 - Syslog-NG 3.3 or newer
-- PHP 7.4 or newer, prefered 8.0/8.1
-- MySQL 8.0 or equivalent (like MariaDB 10.x)
+- PHP 8.1/8.2
+- MariaDB 10.x, MySQL 8.0 or equivalent
 
-_Build, developped and tested on Centos7.9, Syslog-NG 3.36, Apache 2.4 PHP 7.4 and 8.0/8.1, MariaDB 10.6_
+_Build, developped and tested on Centos7.9, Ubuntu20/22, AlmaLinux 8/9, Syslog-NG 3.3x, Apache 2.4, PHP 7.4 and 8.0/8.1/8.2, MariaDB 10.6_
 
 ### External software
 Provided within this repository
 
 - TrueType (msttcore) fonts
-- JpGraph 4.4.1 (https://jpgraph.net/)
+- JpGraph 4.4.2 (https://jpgraph.net/)
 
 ### Features
 

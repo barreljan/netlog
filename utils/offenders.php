@@ -142,6 +142,10 @@ while ($row = $linesresult->fetch_assoc()) {
             $ip_address = explode($options['delimiter'], $field);
             if (sizeof($ip_address) == 2) {
                 $ip = $ip_address[1];
+                // Fix for ASA; -s outside -D : -m "Deny tcp src"
+                if (str_contains($ip, "/")) {
+                    $ip = explode("/", $ip)[0];
+                }
                 if (key_exists($ip, $offenders)) {
                     // already accounted for
                     $offenders[$ip] += 1;
@@ -153,6 +157,7 @@ while ($row = $linesresult->fetch_assoc()) {
         }
     }
 }
+
 
 // print out data, if there is any
 if (sizeof($offenders) >= 1) {

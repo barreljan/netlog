@@ -96,7 +96,7 @@ try {
                                     $timestamp = strtotime($loglines["TIME"]);
                                     $timediff = $currenttime - $timestamp;
                                     foreach ($alert_fields as $column) {
-                                        if ($column == "TIME") {
+                                        if ($column == "TIME" || $column == "DAY") {
                                             switch ($timediff) {
                                                 case ($timediff < 400):
                                                     echo "<td class=\"panic\"><b>" . $loglines[$column] . "</b></td>";
