@@ -16,7 +16,7 @@ depending on the number of hosts logging and sheer number of lines logged.
 - PHP 8.1/8.2
 
   It is possible that it could work on earlier PHP versions. No guarantee.
-  Required modules: php-common php-memcache php-process php-mbstring
+  Required modules: php-common php-memcache php-process php-mbstring php-gd
   php-xml php-mysql(nd). It should be compatible with 7.4 and 8.0.
 
 - MariaDB 10.x, MySQL 8.0 or equivalent
@@ -84,7 +84,7 @@ PHP 8.1/8.2 or newer.
 ```
 sudo dnf remove -y rsyslog
 sudo dnf install -y syslog-ng
-sudo dnf install -y git php php-cli php-common php-memcache php-mbstring php-mysqlnd php-process httpd
+sudo dnf install -y git php php-cli php-common php-memcache php-mbstring php-mysqlnd php-process php-gd httpd
 sudo dnf install -y mariadb-server mariadb-server-utils mariadb
 sudo systemctl enable --now php-fpm httpd mariadb syslog-ng
 sudo mysql_secure_installation
@@ -106,7 +106,7 @@ sudo bash install.sh```
 ```
 sudo apt remove rsyslog
 sudo apt install syslog-ng
-sudo apt install php php-cli php-common php-memcache php-process php-mbstring php-mysql httpd
+sudo apt install php php-cli php-common php-memcache php-process php-mbstring php-mysql php-gd httpd
 sudo apt install mariadb-server mariadb-client
 sudo systemctl enable --now php-fpm httpd mariadb syslog-ng
 sudo mysql_secure_installation
