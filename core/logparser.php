@@ -99,6 +99,9 @@ if (!file_exists($log_fifo)) {
     posix_mkfifo($log_fifo, $mode);
     syslog(LOG_NOTICE, "Fifo $log_fifo created");
 }
+
+$db_link->autocommit(TRUE);
+
 // Process the incomming entries
 read_fifo();
 
