@@ -1,0 +1,14 @@
+# Version 3.0.7 to 3.0.8 includes the move to InnoDB instead of
+# MyISAM. The rules below alter the required tables. 
+# 
+# Historical tables from hosts are left alone. This could be 
+# changes but the size is what gives a huge performance impact.
+# New tables will be in InnoDB the next day anyway.
+#
+# Your choice.
+
+ALTER TABLE `syslog`.`template` ENGINE=InnoDB;
+ALTER TABLE `netlogconfig`.`logcache` ENGINE=InnoDB;
+ALTER TABLE `netlogconfig`.`lograte` ENGINE=InnoDB;
+ALTER TABLE `netlogconfig`.`lograteconf` ENGINE=InnoDB;
+

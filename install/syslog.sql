@@ -24,5 +24,5 @@ CREATE TABLE `template`
     KEY `DAY` (`DAY`),
     KEY `TIME` (`TIME`),
     KEY `LVL` (`LVL`)
-) ENGINE = MyISAM
+) ENGINE = InnoDB
   DEFAULT CHARSET = latin1;

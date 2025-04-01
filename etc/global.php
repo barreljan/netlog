@@ -3,7 +3,7 @@
 // Project: https://github.com/barreljan/netlog
 
 // Versioning etc
-const VERSION = 'v3.0.7';
+const VERSION = 'v3.0.8';
 const NAME = 'Syslog-ng to MySQL parser';
 const AUTHOR = 'bartjan@pc-mania.nl';
 
@@ -206,6 +206,7 @@ $database = $database ?? die("Database settings not found! Please copy the netlo
 if (!isset($db_link)) {
     try {
         $db_link = new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
+        $db_link->autocommit(TRUE);
     } catch (Exception|Error $e) {
         die("Connect to the database failed!" . err($e));
     }

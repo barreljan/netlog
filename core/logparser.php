@@ -99,6 +99,7 @@ if (!file_exists($log_fifo)) {
     posix_mkfifo($log_fifo, $mode);
     syslog(LOG_NOTICE, "Fifo $log_fifo created");
 }
+
 // Process the incomming entries
 read_fifo();
 

@@ -191,29 +191,29 @@ if (isset($_SESSION['filter_LVL']) && $_SESSION['filter_LVL'] != "none") {
             $lvl_filter = "'debug'";
             break;
         case "info":
-            $lvl_filter = "'info', 'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'info', 'notice', 'warning', 'err', 'crit', 'alert', 'emerg', 'panic'";
             break;
         case "warning":
-            $lvl_filter = "'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'warning', 'err', 'crit', 'alert', 'emerg', 'panic'";
             break;
         case "error":
-            $lvl_filter = "'err', 'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'err', 'crit', 'alert', 'emerg', 'panic'";
             break;
         case "critical":
-            $lvl_filter = "'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'crit', 'alert', 'emerg', 'panic'";
             break;
         case "alert":
-            $lvl_filter = "'alert', 'emergency', 'panic'";
+            $lvl_filter = "'alert', 'emerg', 'panic'";
             break;
         case "emergency":
-            $lvl_filter = "'emergency', 'panic'";
+            $lvl_filter = "'emerg', 'panic'";
             break;
         case "panic":
             $lvl_filter = "'panic'";
             break;
         default:
             // also 'notice'
-            $lvl_filter = "'notice', 'warning', 'err', 'crit', 'alert', 'emergency', 'panic'";
+            $lvl_filter = "'notice', 'warning', 'err', 'crit', 'alert', 'emerg', 'panic'";
     }
 }
 // Set meta if refresh is enabled
@@ -471,7 +471,7 @@ if (!isset($empty_iplist)) {
         if (isset ($lvl_filter)) {
             $query .= " AND `LVL` IN (" . $lvl_filter . ") ";
         }
-        $query .= "ORDER BY `id` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
+        $query .= "ORDER BY `TIME` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
         $linesquery = $db_link->prepare($query);
         $linesquery->bind_param('ss', $searchstring, $searchstring);  // $searchstring is already given the % tags
         $linesquery->execute();
@@ -733,7 +733,7 @@ if (!isset($empty_iplist)) {
                                         case "alert":
                                             echo "class=\"alert\">";
                                             break;
-                                        case "emergency":
+                                        case "emerg":
                                             echo "class=\"emergency\">";
                                             break;
                                         case "panic":

@@ -7,10 +7,10 @@ A Syslog-NG to MySQL parser with no-nonsense frontend
 
 - Apache httpd 2.4
 - Syslog-NG 3.3 or newer
-- PHP 8.1/8.2
+- PHP 8.1/8.2/8.3
 - MariaDB 10.x, MySQL 8.0 or equivalent
 
-_Build, developped and tested on Centos7.9, Ubuntu20/22, AlmaLinux 8/9, Syslog-NG 3.3x, Apache 2.4, PHP 7.4 and 8.0/8.1/8.2, MariaDB 10.6_
+_Build, developped and tested on Centos7.9, Ubuntu20/22/24, AlmaLinux 8/9, Syslog-NG 3.3x, Apache 2.4, PHP 7.4 and 8.0/8.1/8.2/8.3, MariaDB 10.6_
 
 ### External software
 Provided within this repository
