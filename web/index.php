@@ -733,7 +733,7 @@ if (!isset($empty_iplist)) {
                                         case "alert":
                                             echo "class=\"alert\">";
                                             break;
-                                        case "emergency":
+                                        case "emerg":
                                             echo "class=\"emergency\">";
                                             break;
                                         case "panic":
