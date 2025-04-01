@@ -206,6 +206,7 @@ $database = $database ?? die("Database settings not found! Please copy the netlo
 if (!isset($db_link)) {
     try {
         $db_link = new mysqli($database['HOST'], $database['USER'], $database['PASS'], $database['DB']);
+        $db_link->autocommit(TRUE)
     } catch (Exception|Error $e) {
         die("Connect to the database failed!" . err($e));
     }
