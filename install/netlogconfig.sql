@@ -97,7 +97,7 @@ CREATE TABLE `logcache`
     PRIMARY KEY (`id`),
     KEY `host` (`host`),
     KEY `timestamp` (`timestamp`)
-) ENGINE = MyISAM
+) ENGINE = InnoDB
   DEFAULT CHARSET = latin1;
 
 --
@@ -114,7 +114,7 @@ CREATE TABLE `lograte`
     `5min`             float              DEFAULT NULL,
     `10min`            float              DEFAULT NULL,
     PRIMARY KEY (`id`)
-) ENGINE = MyISAM
+) ENGINE = InnoDB
   DEFAULT CHARSET = latin1;
 
 --
@@ -127,7 +127,7 @@ CREATE TABLE `lograteconf`
     `hostnameid` int(10) NOT NULL,
     `samplerate` int(10) DEFAULT NULL,
     UNIQUE KEY `id` (`hostnameid`)
-) ENGINE = MyISAM
+) ENGINE = InnoDB
   DEFAULT CHARSET = latin1;
 
 --
