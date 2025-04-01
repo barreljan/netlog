@@ -471,7 +471,7 @@ if (!isset($empty_iplist)) {
         if (isset ($lvl_filter)) {
             $query .= " AND `LVL` IN (" . $lvl_filter . ") ";
         }
-        $query .= "ORDER BY `id` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
+        $query .= "ORDER BY `TIME` DESC LIMIT " . $_SESSION['showlines'] . " OFFSET " . $offset;
         $linesquery = $db_link->prepare($query);
         $linesquery->bind_param('ss', $searchstring, $searchstring);  // $searchstring is already given the % tags
         $linesquery->execute();
