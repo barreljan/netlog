@@ -13,7 +13,7 @@ depending on the number of hosts logging and sheer number of lines logged.
   It was originaly written for Syslog-NG 2.x, so as long as it can send
   formatted lines to the FiFo file, you're good.
 
-- PHP 8.1/8.2
+- PHP 8.1/8.2/8.3
 
   It is possible that it could work on earlier PHP versions. No guarantee.
   Required modules: php-common php-memcache php-process php-mbstring php-gd
@@ -77,7 +77,7 @@ available, not in use, made or can be made. No rocket science.
 
 Perhaps you want the full help on a clean install. This should work out of 
 the box with a normal new installation. Given that your enabled repo's provide 
-PHP 8.1/8.2 or newer.
+PHP 8.1/8.2/8.3 or newer.
 
 **RHEL 8/9 / AlmaLinux 8/9**
 
@@ -101,7 +101,7 @@ cd netlog/install
 sudo bash install.sh```
 ```
 
-**Ubuntu 22.xx**
+**Ubuntu 22.xx/24.xx**
 
 ```
 sudo apt remove rsyslog
