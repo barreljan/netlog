@@ -98,7 +98,7 @@ function parse_log(array $logitems): void
             throw new mysqli_sql_exception();
         }
     } catch (Exception|Error $e) {
-        syslog(LOG_WARNING, "Failed to insert syslog rule for $HOST" . err($e));
+        syslog(LOG_WARNING, "Failed to insert syslog rule for $HOST" . $e);
     }
 }
 
