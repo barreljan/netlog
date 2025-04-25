@@ -1,0 +1,36 @@
+# A upgrade from 3.0.8 to 3.0.9 can be done but 2 things need to be fixed before upgrading.
+
+1.) Add 2 values in the global config table in MySQL
+
+USE netlogconfig;
+INSERT INTO global (setting, value) VALUES ('batch_max_age', '1');
+INSERT INTO global (setting, value) VALUES ('batch_size', '1000');
+
+
+2.) Replace the template table in MySQL
+
+USE syslog;
+DROP TABLE `template`;
+CREATE TABLE `template` (
+    `id` int(15) unsigned NOT NULL AUTO_INCREMENT,
+    `HOST` varchar(39) NOT NULL,
+    `FAC` varchar(32) NOT NULL,
+    `PRIO` varchar(32) NOT NULL,
+    `LVL` varchar(16) NOT NULL,
+    `TAG` varchar(64) NOT NULL,
+    `DAY` date NOT NULL,
+    `TIME` time NOT NULL,
+    `PROG` varchar(128) NOT NULL,
+    `MSG` text NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `TIME` (`TIME`),
+    KEY `LVL` (`LVL`),
+    KEY `PROG` (`PROG`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=latin1;
+
+Current table wil use the old settings but will be as above after 0.00h. 
+
+
+After these 2 steps you can restart your logparser.
+
