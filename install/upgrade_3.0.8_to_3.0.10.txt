@@ -1,4 +1,4 @@
-# A upgrade from 3.0.8 to 3.0.9 can be done but 2 things need to be fixed before upgrading.
+# A upgrade from 3.0.8 to 3.0.10 can be done but 2 things need to be fixed before upgrading.
 
 1.) Add 2 values in the global config table in MySQL
 
