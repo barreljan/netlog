@@ -3,7 +3,7 @@
 // Project: https://github.com/barreljan/netlog
 
 // Versioning etc
-const VERSION = 'v3.0.8';
+const VERSION = 'v3.0.10';
 const NAME = 'Syslog-ng to MySQL parser';
 const AUTHOR = 'bartjan@pc-mania.nl';
 
@@ -264,6 +264,10 @@ if ($debug) {
     error_reporting(-1);
     ini_set('display_errors', 'On');
 }
+
+// Logparser batch parameters
+$batch_size = $config['global']['batch_size'];
+$batch_max_age = $config['global']['batch_max_age'];
 
 // Displayed fields
 $log_fields = explode(',', $config['global']['log_fields']);

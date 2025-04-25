@@ -16,6 +16,32 @@ $lock = aquire_lock();
 // Start a logging session with the appropriate PROG-name
 openlog("logparser", 0, LOG_LOCAL0);
 
+// Set handlers
+pcntl_async_signals(true);
+pcntl_signal(SIGTERM, "sig_handler");
+pcntl_signal(SIGHUP,  "sig_handler");
+
+/**
+ * Handler function. Commit before exiting, nothing more
+ * @param int $signo
+ * @return void
+ */
+function sig_handler($signo) {
+    global $db_link;
+
+    syslog(LOG_NOTICE, "Exiting...(" . $signo . ")");
+    $db_link->commit();
+
+    switch ($signo) {
+        case SIGTERM:
+            exit;
+            break;
+        case SIGHUP:
+            exit;
+            break;
+    }
+}
+
 /**
  * Parses the lines from the fifo to the database.
  *
@@ -82,13 +108,31 @@ function parse_log(array $logitems): void
  */
 function read_fifo(): void
 {
-    global $log_fifo;
+    global $db_link, $log_fifo, $batch_size, $batch_max_age;
+
+    /* Turn autocommit off */
+    $db_link->autocommit(false);
+
+    // Seting batch time
+    $last_commit = time();
 
     syslog(LOG_INFO, "Opening the fifo and processing syslog messages");
-    while ($fifo = fopen($log_fifo, 'r')) {
-        $buffer = fgets($fifo);
-        $logitems = explode(' _,_ ', $buffer);
-        parse_log($logitems);
+    $fifo = fopen($log_fifo, 'r');
+
+    $i = 0;
+    while (true) {
+        $buffer = fgets($fifo); // Blocking read
+        if ($buffer !== false) {
+            $logitems = explode(' _,_ ', trim($buffer));
+            parse_log($logitems);
+            $i++;
+        }
+        // Batched commit routine
+        if ($i >= $batch_size || (time() - $last_commit) >= $batch_max_age) {
+            $db_link->commit();
+            $last_commit = time();
+            $i = 0;
+        }
     }
 }
 

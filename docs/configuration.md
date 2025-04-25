@@ -21,20 +21,20 @@ There are 3 views available:
 The first is self explainatory.
 
 The _unnamed_ are hosts that are actively logging but do not have an entry and
-a host type set. 
+a host type set.
 
 The _unused_ view gives hostnames in the
-system of those that are not logging actively anymore. These only appear when (older) 
+system of those that are not logging actively anymore. These only appear when (older)
 tables are removed, for instance due to renention threshold and thus a cleanup,
 or when you manually remove all the tables of a host yourself.
 
-Deletion can only be done with _unused_ hosts. 
+Deletion can only be done with _unused_ hosts.
 
 ### Host types
 
 You can set a host type for easy grouping of your hosts. Any name will do.
 
-Deletion can only be done if there are no hosts related so the host type is 
+Deletion can only be done if there are no hosts related so the host type is
 empty.
 
 ### Scavenger
@@ -49,40 +49,42 @@ Be carefull with the options, as it may have some unwanted results.
 
 #### Summary
 
-- **[cron_mail_from | cron_mail_rcpt](configuration.md#cron_mail_from--cron_mail_rcpt)** - These options are the _from_ and 
+- **[cron_mail_from | cron_mail_rcpt](configuration.md#cron_mail_from--cron_mail_rcpt)** - These options are the _from_ and
 _recepient_ you can use for background notifications.
-- **[default_view](configuration.md#default_view)** - This is default host type to be used in viewing the 
+- **[default_view](configuration.md#default_view)** - This is default host type to be used in viewing the
 logging.
-- **[logarchive_interval](configuration.md#logarchive_interval)** - Set after how many days the separate day-tables 
+- **[logarchive_interval](configuration.md#logarchive_interval)** - Set after how many days the separate day-tables
 will be combined into a single month-table.
-- **[lograte_days](configuration.md#lograte_days)** - Set how long the lograte statistics are kept in the 
+- **[lograte_days](configuration.md#lograte_days)** - Set how long the lograte statistics are kept in the
 database. Work in conjunction with _lograte_history_.
-- **[lograte_graph_height | lograte_graph_width](configuration.md#lograte_graph_height--lograte_graph_width)** - Set the default graph 
+- **[lograte_graph_height | lograte_graph_width](configuration.md#lograte_graph_height--lograte_graph_width)** - Set the default graph
 size for the lograte page.
 - **[lograte_history](configuration.md#lograte_history)** - Sets the option-list on the lograte page. Use integer
   comma separated values.
 - **[lograte_history_default](configuration.md#lograte_history_default)** - Sets the default 'selected' as a value set
 in the _lograte_history_.
-- **[log_fields](configuration.md#log_fields)** - Sets the available field. For internal use in logparser 
+- **[log_fields](configuration.md#log_fields)** - Sets the available field. For internal use in logparser
 module. Use with care!
 - **[log_fifo](configuration.md#log_fifo)** - Set the FiFo filename
 - **[log_levels](configuration.md#log_levels)** - Set the available log levels. Sets which field to be shown.
-- **[netalert_fields](configuration.md#netalert_fields)** - Set the available fields for the Netalert page. 
+- **[netalert_fields](configuration.md#netalert_fields)** - Set the available fields for the Netalert page.
 Normally a brief set of field is used.
 - **[netalert_show_lines](configuration.md#netalert_show_lines)** - Sets the amount of lines shown on the Netalert
 page.
-- **[netalert_time_threshold](configuration.md#netalert_time_threshold)** - Sets the threshold in which time messages are 
+- **[netalert_time_threshold](configuration.md#netalert_time_threshold)** - Sets the threshold in which time messages are
 normalized.
 - **[netalert_to_nms](configuration.md#netalert_to_nms)** - Set the NMS module to active/disable
-- **[refresh](configuration.md#refresh)** - Set the option-list to your need to be used in viewing the 
+- **[refresh](configuration.md#refresh)** - Set the option-list to your need to be used in viewing the
 logging. Use integer comma separated values.
 - **[retention](configuration.md#retention)** - Set the number of months to keep and older to drop.
-- **[scavenger_history](configuration.md#scavenger_history)** - Set the time threshold of syslog messages to be 
+- **[scavenger_history](configuration.md#scavenger_history)** - Set the time threshold of syslog messages to be
 found in the logscavenger module
-- **[show_lines](configuration.md#show_lines)** - Sets the option-list of the number of lines per page to be 
+- **[show_lines](configuration.md#show_lines)** - Sets the option-list of the number of lines per page to be
 shown. Use comma separated values.
-- **[show_lines_default](configuration.md#show_lines_default)** - Sets the default 'selected' as a value set in 
+- **[show_lines_default](configuration.md#show_lines_default)** - Sets the default 'selected' as a value set in
 _show_lines_.
+- **[batch_max_age](configuration.md#batch_max_age)** - Set the logparser batching mechanism maximum age of buffering, in seconds.
+- **[batch_size](configuration.md#batch_size)** - Set the batch size in number of lines.
 
 ###### cron_mail_from | cron_mail_rcpt
 
@@ -101,7 +103,7 @@ you have added to the host types.
 - **Value**: single integer
 - **Default**: 14
 
-Set after how many days the separate day-tables will be combined into a 
+Set after how many days the separate day-tables will be combined into a
 single month-table. This is used in the logarchiver module
 
 ###### lograte_days
@@ -109,8 +111,8 @@ single month-table. This is used in the logarchiver module
 - **Value**: single integer
 - **Default**: 14
 
-Set how long the lograte statistics are kept in the  database. Work in 
-conjunction with _lograte_history_. The more statistics per days you have, 
+Set how long the lograte statistics are kept in the  database. Work in
+conjunction with _lograte_history_. The more statistics per days you have,
 the greater the value can be in _lograte_history_.
 
 ###### lograte_graph_height | lograte_graph_width
@@ -120,7 +122,7 @@ the greater the value can be in _lograte_history_.
 
 Set the default graph size for the lograte page.
 
-###### lograte_history 
+###### lograte_history
 
 - **Value**: strings, comma separated
 - **Default**: '30,60,120,240,480,1440,2880,4320,10080'
@@ -142,7 +144,7 @@ Sets the default 'selected' as a value set in the _lograte_history_.
 
 Set the available fields for Netlog. This includes the main page but also the
 logparser module. The field names must comply with the [syslog fields](configuration.md#syslog-fields)
-Best practice is to leave it at the default. 
+Best practice is to leave it at the default.
 
 The order can be changed without issues.
 
@@ -166,8 +168,8 @@ Set the available log levels. Sets which field to be shown.
 - **Value**: strings, comma separated
 - **Default**: 'DAY,TIME,LVL,MSG,PROG'
 
-Set the available fields for the Netalert page. Normally a brief set of 
-field is used. The field names must comply with the [syslog fields](configuration.md#syslog-fields)  
+Set the available fields for the Netalert page. Normally a brief set of
+field is used. The field names must comply with the [syslog fields](configuration.md#syslog-fields)
 
 ###### netalert_show_lines
 
@@ -214,13 +216,13 @@ from Feb.
 
 - **Value**: single integer
 - **Default**: 300 (seconds)
- 
-Set the time threshold of syslog messages to be found in the logscavenger 
+
+Set the time threshold of syslog messages to be found in the logscavenger
 module. Basically it tells how much to look back in time to search over the
 syslog messages you want to find any of the keywords.
-Longer times can impact your system performance. It is only necessary to set 
+Longer times can impact your system performance. It is only necessary to set
 this to a long period if your logscavenger module has not run for a while. In
-this way you can catch up. Do not forget to put the setting back to a low 
+this way you can catch up. Do not forget to put the setting back to a low
 number.
 
 ###### show_lines
@@ -228,14 +230,38 @@ number.
 - **Value**: integers, comma separated
 - **Default**: '50,100,250,500,1000'
 
-Sets the option-list of the number of lines per page to be shown. 
+Sets the option-list of the number of lines per page to be shown.
 
 ###### show_lines_default
 
-- **Value**: single integer 
+- **Value**: single integer
 - **Default**: 50
 
 Sets the default 'selected' as a value set in show_lines.
+
+##### batch_max_age
+
+- **Value**: integer
+- **Default**: 1 (second)
+
+Set the maximum wait till lines are committed into the database. This setting
+works together with [batch_size](configuration.md#batch_size). Warning: setting
+this or the 'batch_size' to very low setting can result in poor performance.
+This depends on your system (CPU vs storage and how MySQL is configured). The
+setting will commit lines when either the maximum age is met OR the number of
+lines is met, so **what comes first** will be deciding when inserts are committed.
+Keep in mind that this is very dependent on how many lines are logged per
+second that results in a very I/O heavy system.
+
+A change in one of these settings **requires** a restart of the logparser daemon
+
+##### batch_size
+
+- **Value**: integer
+- **Default**: 1000
+
+See [batch_max_age](configuration.md#batch_max_age).
+
 
 ### Syslog fields
 

@@ -207,7 +207,7 @@ VALUES ('cron_mail_from', 'no-reply@domain.tld'),
        ('netalert_to_nms', '0'),
        ('refresh', 'off,1,2,5,10'),
        ('retention', '3'),
-       ('scavenger_history', '300'),
-       ('show_lines', '50,100,250,500,1000'),
-       ('show_lines_default', '50');
+       ('show_lines_default', '50'),
+       ('batch_max_age', '1'),
+       ('batch_size', '1000');
 UNLOCK TABLES;
