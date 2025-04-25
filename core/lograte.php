@@ -25,7 +25,7 @@ try {
     $hostquery->execute();
     $hostresult = $hostquery->get_result();
 } catch (Exception|Error $e) {
-    syslog(LOG_CRIT, "Failed to fetch lograte enabled hosts" . err($e));
+    syslog(LOG_CRIT, "Failed to fetch lograte enabled hosts");
     die();
 }
 
@@ -36,6 +36,8 @@ while ($row = $hostresult->fetch_assoc()) {
 
 // Loop through the hosts and run the counts
 foreach ($hosts as $host) {
+    // Clear array for each iteration
+    unset($counted_rates);
     // Assemble table name
     $convertedhost = str_replace('.', '_', $host['hostip']);
     $tablename = "HST_" . $convertedhost . "_DATE_" . $today;
@@ -57,16 +59,24 @@ foreach ($hosts as $host) {
         $ratequery = $db_link->prepare($query);
         $ratequery->execute();
         $rateresult = $ratequery->get_result();
+
+        while ($row = $rateresult->fetch_assoc()) {
+            $counted_rates[] = $row;
+        }
     } catch (Exception|Error|mysqli_sql_exception $e) {
         // No logging today for current host as the tablename fails
-        syslog(LOG_WARNING, "Failed to get rates for $tablename" . err($e));
-
-        // Stop processing and continue in the hosts array
-        continue;
+        syslog(LOG_WARNING, "Failed to get rates for " . $host['hostip']);
+        // So host is probably not logging, defaulting to 0
+        $a = array(
+            '1min' => 0,
+            '5min' => 0,
+            '10min' => 0
+        );
+        $counted_rates[] = $a;
     }
 
     // Insert the rates into the database
-    while ($rates = $rateresult->fetch_assoc()) {
+    foreach ($counted_rates as $rates) {
         $query = "INSERT INTO `{$database['DB_CONF']}`.`lograte` (hostnameid, 1min, 5min, 10min)
                   VALUES (?, ?, ?, ?)";
         try {
@@ -77,7 +87,7 @@ foreach ($hosts as $host) {
             $logratequery->bind_param('iiii', $host['id'], $rates['1min'], $rates['5min'], $rates['10min']);
             $result = $logratequery->execute();
         } catch (Exception|Error $e) {
-            syslog(LOG_WARNING, "Failed to insert rates" . err($e));
+            syslog(LOG_WARNING, "Failed to insert rates");
         }
     }
 }
@@ -86,3 +96,4 @@ closelog();
 $db_link->close();
 
 unlock($lock);
+
