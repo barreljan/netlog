@@ -7,15 +7,34 @@
 // Including Netlog config and variables
 require(dirname(__DIR__) . "/etc/global.php");
 
-$today = date('Y_m_d');
+if (count($argv) > 1) {
+    foreach ($argv as $arg) {
+        switch($arg) {
+            case '-?':
+            case '-h':
+            case '--help':
+                echo "stats: Show the number of logged lines\n\nUsage: stats <date>\t\t";
+                echo "Where date represents YYYY-MM-DD or YYYY_MM_DD\n";
+                exit;
+        }
+        if (preg_match('/[0-9]{4}_[0-9]{2}_[0-9]{2}/', $arg, $matches)) {
+            $today = $matches[0];
+            break;
+        } elseif (preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}/', $arg, $matches)) {
+            $today = str_replace('-', '_', $matches[0]);
+            break;
+        }
+    }
+}
+// If no input or date format is wrong, defaulting to today itself
+$today = $today ?? date('Y_m_d');
 
 // Get all today's active hosts (but not Netalert nor localhost). Localhost could be included in the future
 try {
     $query = "SELECT `TABLE_NAME` AS `name`
                 FROM `information_schema`.`COLUMNS`
                WHERE `COLUMN_NAME` = 'MSG'
-                 AND `TABLE_NAME` RLIKE 'HST_[0-9].*$today'
-                 AND `TABLE_NAME` NOT RLIKE 'HST_127_0_0_.*'";
+                 AND `TABLE_NAME` RLIKE 'HST_[0-9].*$today'";
     $hostquery = $db_link->prepare($query);
     $hostquery->execute();
     $hostresult = $hostquery->get_result();
@@ -46,5 +65,6 @@ while ($hosts_table = $hostresult->fetch_assoc()) {
     }
 }
 
-echo "Today's total of lines logged: $nr_of_lines\n";
+$dfmt = str_replace('_', '-', $today);
+echo "Total of lines logged per $dfmt: $nr_of_lines\n";
 
