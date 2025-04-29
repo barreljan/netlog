@@ -16,8 +16,8 @@ depending on the number of hosts logging and sheer number of lines logged.
 - PHP 8.1/8.2/8.3
 
   It is possible that it could work on earlier PHP versions. No guarantee.
-  Required modules: php-common php-memcache php-process php-mbstring php-gd
-  php-xml php-mysql(nd). It should be compatible with 7.4 and 8.0.
+  Required modules: php-cli php-common php-memcache php-mbstring php-gd
+  php-mysql.
 
 - MariaDB 10.x, MySQL 8.0 or equivalent
 
@@ -39,15 +39,17 @@ storage.
 
 #### Suggested specs
 
-For starters (<100 hosts, <50M lines logged per day):
+For starters (<100 hosts, <5M lines logged per day):
 - 2 vCPU's (sockets) - 2.2Ghz or more
-- 4GB Memory
+- 8GB Memory
 - 100GB storage for MySQL data
 
-For heavy logging (200+ hosts, >100M lines logged per day):
+For heavy logging (200+ hosts, >20M lines logged per day):
 - 4 vCPU's (sockets) - 2.2Ghz or more
-- 8GB Memory or more
+- 16GB Memory or more
 - 900GB storage for MySQL data or more
+
+Storage also depends on the retention you have set.
 
 ## General installation instructions
 
@@ -68,7 +70,7 @@ Start the installation: ```bash install.sh```
 And there you have it. 
 
 The installation script is made for RHEL8/9 and is compatible with 
-AlmaLinux 9.x and Ubuntu (22.04 to be precise), the so-called LAMP stack.
+AlmaLinux 9.x and Ubuntu (>22.04), the so-called LAMP stack.
 Anyone with a little knowledge of Bash/Shell could make it work for your
 distribution. The script does several checks if software or locations are 
 available, not in use, made or can be made. No rocket science.
@@ -106,10 +108,13 @@ sudo bash install.sh```
 ```
 sudo apt remove rsyslog
 sudo apt install syslog-ng
-sudo apt install php php-cli php-common php-memcache php-process php-mbstring php-mysql php-gd httpd
+sudo apt install apache2
+sudo apt install php8.3 php8.3-cli php8.3-fpm php8.3-common php8.3-memcache php8.3-mbstring php8.3-mysql php8.3-gd
 sudo apt install mariadb-server mariadb-client
-sudo systemctl enable --now php-fpm httpd mariadb syslog-ng
+sudo systemctl enable --now php8.3-fpm apache2 mariadb syslog-ng
 sudo mysql_secure_installation
+or
+sudo mariadb-secure-installation
 
 sudo vi /root/.my.cnf
 [client]
@@ -117,10 +122,8 @@ user=root
 password="whatyouentered"
 
 
-cd /usr/local/src
-sudo git clone https://github.com/barreljan/netlog
-cd netlog/install
-sudo bash install.sh
+sudo git clone https://github.com/barreljan/netlog /usr/local/src
+sudo bash /usr/local/src/netlog/install.sh
 
 ```
 
@@ -128,19 +131,19 @@ sudo bash install.sh
 
 Based on your distribution or setup, this is what you need to do when not using the
 provided install.sh:
-- remove rsyslog
+- remove rsyslog, if installed
 - install syslog-ng
-- install httpd/apache2
-- install php and req. modules
+- install httpd/apache2 or nginx
+- install php and required modules
 - make sure PHP has JPgraph installed
   - `php -r "require_once('jpgraph/jpgraph.php');"`
 - make a symlink: `ln -s /usr/local/src/netlog /usr/share/netlog`
 - adjust your http daemon, so /netlog is an alias to /usr/share/netlog
   - or use the install/httpd.conf as guide
-- copy install/syslog.conf to your syslog-ng conf.d dir
+- copy install/syslog.conf to your syslog-ng conf.d dir as netlog.conf
 - copy the install/cronjob to your desired cron location
 - make sure `/var/log/syslog.fifo` is an available location
-  - adjust core/logparser.php and etc/config.php if changed
+  - adjust location in database (see steps below)
 - systemd systems: copy the logparser.service to designated location
   - adjust any location in it for your setup
 - check if 'arial' is in your font list. Usually check: `fc-list | grep arial`
@@ -149,6 +152,7 @@ provided install.sh:
   - adjust font dir in jpgraph
 - upload the install/*.sql files to your database server
   - adjust if needed the first 2 lines if needed
+  - adjust fifo location if changed in above step
   - copy install/netlog.conf.example to /usr/share/netlog/etc and adjust
 - eh, what am I missing?
 
