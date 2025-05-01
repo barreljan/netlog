@@ -27,4 +27,4 @@ fi
 
 # Run it
 printf "Shows a top %s of big tables\n\n" "$top"
-ls -hl "$DATADIR"/*.MYD | sort -hr -k5 | awk '{print $5"\t"$9}' | sed "s/$ESCAPED\///;s/.MYD//" | head -n "$top"
+ls -hl "$DATADIR"/ | sort -hr -k5 | awk '{print $5"\t"$9}' | sed "s/$ESCAPED\///;s/.MYD//;s/.ibd//" | head -n "$top"
